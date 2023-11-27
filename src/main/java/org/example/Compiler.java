@@ -1,11 +1,9 @@
 package org.example;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Hello world!
- */
 public class Compiler {
     private static final String DOT_CLASS = ".class";
 
@@ -13,8 +11,8 @@ public class Compiler {
         System.out.println("Hello World!");
     }
 
-    public void compile(InputStream stream, File outFile) {
-        new BytecodeGenerator().generateBytecode(getBasename(outFile), outFile);
+    public void compile(InputStream stream, File outFile) throws IOException {
+        new BytecodeGenerator().generateBytecode(stream, getBasename(outFile), outFile);
     }
 
     private static String getBasename(File file) {
