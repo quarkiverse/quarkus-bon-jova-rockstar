@@ -1,0 +1,92 @@
+package org.example;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * Unit test for simple Compiler.
+ */
+public class CompilerTest {
+
+    public static final String DOT_CLASS = ".class";
+    public static final String JAVA_HOME = "java.home";
+    public static final String ROCK_EXTENSION = "rock";
+
+    @Test
+    public void shouldCreateAFile() throws IOException, InterruptedException {
+        InputStream stream = this.getClass()
+                                 .getResourceAsStream("hello-world.rock");
+        Compiler compiler = new Compiler();
+        File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
+        compiler.compile(stream, outFile);
+        assertTrue(Files.exists(outFile.toPath()));
+    }
+
+    @Test
+    public void hello() throws IOException, InterruptedException {
+        String output = compileAndLaunch("hello-world.rock");
+
+        assertEquals("Hello World", output);
+    }
+
+    private String compileAndLaunch(String filename) throws IOException, InterruptedException {
+        InputStream stream = this.getClass()
+                                 .getResourceAsStream(filename);
+        Compiler compiler = new Compiler();
+        File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
+        compiler.compile(stream, outFile);
+        String output = launch(outFile);
+        return output;
+    }
+
+    public static File getJreExecutable() throws FileNotFoundException {
+        String jreDirectory = System.getProperty(JAVA_HOME);
+        if (jreDirectory == null) {
+            throw new IllegalStateException(JAVA_HOME);
+        }
+        File executable;
+
+        executable = new File(jreDirectory, "bin/java");
+        if (!executable.isFile()) {
+            throw new FileNotFoundException(executable.toString());
+        }
+        return executable;
+    }
+
+    public static String launch(File file) throws IOException,
+            InterruptedException {
+        List<String> arguments = new ArrayList<>();
+        arguments.add(getJreExecutable().toString());
+        arguments.add(getBasename(file));
+
+        ProcessBuilder processBuilder = new ProcessBuilder(arguments);
+        File workingDir = file.getParentFile();
+        processBuilder.directory(workingDir);
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        InputStream in = process.getInputStream();
+        int code = process.waitFor();
+        String output = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, code, "Execution did not complete successfully. Output was:\n" + output);
+
+        return output;
+    }
+
+    private static String getBasename(File file) {
+        return file.getName()
+                   .replace(DOT_CLASS, "");
+    }
+
+}
