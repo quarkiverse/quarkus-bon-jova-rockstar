@@ -30,7 +30,7 @@ public class CompilerTest {
     @Test
     public void shouldCreateAFile() throws IOException {
         InputStream stream = this.getClass()
-                                 .getResourceAsStream("hello-world.rock");
+                                 .getResourceAsStream("/hello-world.rock");
         Compiler compiler = new Compiler();
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
         compiler.compile(stream, outFile);
@@ -40,7 +40,7 @@ public class CompilerTest {
     @Test
     public void shouldCreateARecognizedJavaClassFile() throws IOException {
         InputStream stream = this.getClass()
-                                 .getResourceAsStream("hello-world.rock");
+                                 .getResourceAsStream("/hello-world.rock");
         Compiler compiler = new Compiler();
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
         compiler.compile(stream, outFile);
@@ -58,14 +58,14 @@ public class CompilerTest {
      */
     @Test
     public void shouldCreateAValidJavaFile() throws IOException {
-        String output = compileAndLaunch("hello-world.rock");
+        String output = compileAndLaunch("/hello-world.rock");
         // If we got this far, we're happy!
         assertNotNull(output);
     }
 
     @Test
     public void shouldCompileHelloWorld() throws IOException {
-        String output = compileAndLaunch("hello-world.rock");
+        String output = compileAndLaunch("/hello-world.rock");
 
         assertEquals("Hello World\n", output);
     }
