@@ -18,9 +18,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>9.6</version>
+      <groupId>io.quarkus.gizmo</groupId>
+      <artifactId>gizmo</artifactId>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

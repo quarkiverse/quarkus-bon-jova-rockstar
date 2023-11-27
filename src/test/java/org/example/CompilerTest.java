@@ -57,20 +57,20 @@ public class CompilerTest {
      * Test that what the compiler generates can execute without error (even if it doesn't do anything)
      */
     @Test
-    public void shouldCreateAValidJavaFile() throws IOException, InterruptedException {
+    public void shouldCreateAValidJavaFile() throws IOException {
         String output = compileAndLaunch("hello-world.rock");
         // If we got this far, we're happy!
         assertNotNull(output);
     }
 
     @Test
-    public void shouldCompileHelloWorld() throws IOException, InterruptedException {
+    public void shouldCompileHelloWorld() throws IOException {
         String output = compileAndLaunch("hello-world.rock");
 
         assertEquals("Hello World\n", output);
     }
 
-    private String compileAndLaunch(String filename) throws IOException, InterruptedException {
+    private String compileAndLaunch(String filename) throws IOException {
         InputStream stream = this.getClass()
                                  .getResourceAsStream(filename);
         Compiler compiler = new Compiler();
