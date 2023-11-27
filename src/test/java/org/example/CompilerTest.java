@@ -14,16 +14,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit test for simple Compiler.
  */
 public class CompilerTest {
 
-    public static final String DOT_CLASS = ".class";
-    public static final String JAVA_HOME = "java.home";
-    public static final String ROCK_EXTENSION = "rock";
+    private static final String DOT_CLASS = ".class";
+    private static final String JAVA_HOME = "java.home";
+    private static final String ROCK_EXTENSION = "rock";
 
     @Test
     public void shouldCreateAFile() throws IOException {
@@ -51,11 +53,21 @@ public class CompilerTest {
         assertArrayEquals(new byte[]{(byte) 0xca, (byte) 0xfe, (byte) 0xba, (byte) 0xbe}, magicNumber);
     }
 
+    /**
+     * Test that what the compiler generates can execute without error (even if it doesn't do anything)
+     */
+    @Test
+    public void shouldCreateAValidJavaFile() throws IOException, InterruptedException {
+        String output = compileAndLaunch("hello-world.rock");
+        // If we got this far, we're happy!
+        assertNotNull(output);
+    }
+
     @Test
     public void shouldCompileHelloWorld() throws IOException, InterruptedException {
         String output = compileAndLaunch("hello-world.rock");
 
-        assertEquals("Hello World", output);
+        assertEquals("Hello World\n", output);
     }
 
     private String compileAndLaunch(String filename) throws IOException, InterruptedException {
@@ -63,9 +75,14 @@ public class CompilerTest {
                                  .getResourceAsStream(filename);
         Compiler compiler = new Compiler();
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
-        compiler.compile(stream, outFile);
-        String output = launch(outFile);
-        return output;
+        try {
+            compiler.compile(stream, outFile);
+            String output = launch(outFile);
+            return output;
+        } catch (Throwable e) {
+            fail("Problem with file " + outFile + ": " + e);
+            return null;
+        }
     }
 
     public static File getJreExecutable() throws FileNotFoundException {
