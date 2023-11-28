@@ -70,6 +70,18 @@ public class CompilerTest {
         assertEquals("Hello World\n", output);
     }
 
+    /*
+     * This is the starting example on https://codewithrockstar.com/online
+     * It exercises variables, poetic number literals, and console output
+     */
+    @Test
+    public void shouldCompileTommyIsABigBadMonster() throws IOException {
+        String output = compileAndLaunch("/leet-tommy.rock");
+        String leet = "1337\n";
+
+        assertEquals(leet, output);
+    }
+
     private String compileAndLaunch(String filename) throws IOException {
         InputStream stream = this.getClass()
                                  .getResourceAsStream(filename);
@@ -77,8 +89,7 @@ public class CompilerTest {
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
         try {
             compiler.compile(stream, outFile);
-            String output = launch(outFile);
-            return output;
+            return launch(outFile);
         } catch (Throwable e) {
             fail("Problem with file " + outFile + ": " + e);
             return null;
