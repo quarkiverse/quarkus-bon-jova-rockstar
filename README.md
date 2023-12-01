@@ -17,3 +17,96 @@ Andreas Scheja as a starting point.
 After cloning the repo, you will need to run `mvn compile` to generate the Antlr Java classes. These will appear
 in `target/generated-sources`, so you may also need to configure your IDE to treat that folder as a generated sources
 folder.
+
+## What's implemented
+
+See [the spec](https://github.com/RockstarLang/rockstar/blob/main/spec.md) for details and the definitive list of
+capabilites.
+Some of these may work but have not been validated with tests.
+
+## General
+
+- [ ] Enforcement of the file extension and encoding
+- [ ] Comments
+- [ ] The `with` keyword for parameters
+
+## Variables and constants
+
+- [ ] Simple variables
+- [ ] Common variables
+- [ ] Proper variables
+- [ ] Dynamic typing of variables
+- [ ] Case insensitivity of variable names
+- [ ] Pronoun variable references
+- [ ] Number literals
+- [X] Poetic number literals (integer)
+- [ ] Poetic number literals (floating point)
+- [ ] Hyphen support in poetic number literals
+- [X] String literals
+
+## Types
+
+- [ ] Mysterious
+- [ ] Null equality to 0 and false
+- [ ] Null aliases `nothing`, `nowhere`, `nobody`, `gone`
+- [ ] True aliases `right`, `yes`, `ok`
+- [ ] False aliases `wrong`, `no`, `lies`
+
+## Arrays
+
+- [ ] Array declaration using indexes
+- [ ] Non-numeric array keys
+
+## Queue operations
+
+- [ ] Pushing
+- [ ] Popping
+- [ ] Special `roll x into y` syntax for removing the first element from an array and assigning it to a variable
+
+## Splitting and joining strings
+
+- [ ] Split a string in Rockstar, use the `cut` mutation (aliases `split` and `shatter`)
+- [ ] Delimiters
+- [ ] The `join` support
+
+## Casting
+
+- [ ] Conversion between types
+
+## Single quotes
+
+- [ ] Equivalency to `is'
+- [ ] Ignoring in other cases
+
+## Number operations
+
+- [ ] Incrementing and decrementing
+- [ ] Arithmetic operators
+- [ ] Aliases for arithmetic operators
+- [ ] Compound assignment using `let`
+- [ ] Rounding
+- [ ] Rounding with pronouns
+- [ ] List operations
+- [ ] Operator precedence
+
+## Comparison and logical operations
+
+- [ ] Assignment using comparison
+- [ ] Equality tests
+- [ ] Conjunction
+- [ ] Disjunction
+- [ ] Joint denial
+- [ ] Negation
+
+## Input and output
+
+- [ ] Input from stdin
+- [X] Output to stdout
+
+## Flow control
+
+- [ ] Conditionals
+- [ ] Loops
+- [ ] Blocks
+- [ ] Functions
+
