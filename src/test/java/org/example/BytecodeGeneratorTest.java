@@ -32,13 +32,21 @@ public class BytecodeGeneratorTest {
         }
     }
 
+    @Test
+    public void shouldHandleSimpleStringLiterals() throws IOException {
+        String program = """
+                Shout "Hello San Francisco"
+                                            """;
+        String output = compileAndLaunch(program);
+        assertEquals("Hello San Francisco\n", output);
+    }
 
     /*
      * This is the starting example on https://codewithrockstar.com/online
      * It exercises variables, poetic number literals, and console output
      */
     @Test
-    public void shouldCompileTommyIsABigBadMonster() throws IOException {
+    public void shouldHandleIntegerPoeticNumberLiterals() throws IOException {
         String program = """
                 Rockstar is a big bad monster
                 Shout Rockstar
@@ -48,6 +56,7 @@ public class BytecodeGeneratorTest {
 
         assertEquals(leet, output);
     }
+
 
     private String compileAndLaunch(String program) {
         // Save the current System.out for later restoration

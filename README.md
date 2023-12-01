@@ -62,6 +62,7 @@ Some of these may work but have not been validated with tests.
 - [ ] Pushing
 - [ ] Popping
 - [ ] Special `roll x into y` syntax for removing the first element from an array and assigning it to a variable
+- [ ] Special syntax for pushing poetic literals onto a queue
 
 ## Splitting and joining strings
 
