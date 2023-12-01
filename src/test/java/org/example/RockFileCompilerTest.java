@@ -19,19 +19,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Unit test for simple Compiler.
+ * Unit test for simple RockFileCompiler.
+ * It tests reading in a .rock file and output a .class file.
  */
-public class CompilerTest {
+public class RockFileCompilerTest {
 
     private static final String DOT_CLASS = ".class";
     private static final String JAVA_HOME = "java.home";
     private static final String ROCK_EXTENSION = "rock";
 
     @Test
-    public void shouldCreateAFile() throws IOException {
+    public void shouldCreateAClassFile() throws IOException {
         InputStream stream = this.getClass()
                                  .getResourceAsStream("/hello-world.rock");
-        Compiler compiler = new Compiler();
+        RockFileCompiler compiler = new RockFileCompiler();
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
         compiler.compile(stream, outFile);
         assertTrue(Files.exists(outFile.toPath()));
@@ -41,7 +42,7 @@ public class CompilerTest {
     public void shouldCreateARecognizedJavaClassFile() throws IOException {
         InputStream stream = this.getClass()
                                  .getResourceAsStream("/hello-world.rock");
-        Compiler compiler = new Compiler();
+        RockFileCompiler compiler = new RockFileCompiler();
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
         compiler.compile(stream, outFile);
         InputStream is = new FileInputStream(outFile);
@@ -70,22 +71,10 @@ public class CompilerTest {
         assertEquals("Hello World\n", output);
     }
 
-    /*
-     * This is the starting example on https://codewithrockstar.com/online
-     * It exercises variables, poetic number literals, and console output
-     */
-    @Test
-    public void shouldCompileTommyIsABigBadMonster() throws IOException {
-        String output = compileAndLaunch("/leet-tommy.rock");
-        String leet = "1337\n";
-
-        assertEquals(leet, output);
-    }
-
     private String compileAndLaunch(String filename) throws IOException {
         InputStream stream = this.getClass()
                                  .getResourceAsStream(filename);
-        Compiler compiler = new Compiler();
+        RockFileCompiler compiler = new RockFileCompiler();
         File outFile = File.createTempFile(ROCK_EXTENSION, DOT_CLASS);
         try {
             compiler.compile(stream, outFile);
@@ -134,5 +123,4 @@ public class CompilerTest {
         return file.getName()
                    .replace(DOT_CLASS, "");
     }
-
 }

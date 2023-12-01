@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Compiler {
+public class RockFileCompiler {
     private static final String DOT_CLASS = ".class";
 
     public static void main(String[] args) {
@@ -12,7 +12,8 @@ public class Compiler {
     }
 
     public void compile(InputStream stream, File outFile) throws IOException {
-        new BytecodeGenerator().generateBytecode(stream, getBasename(outFile), outFile);
+        ClassFileWriter cl = new ClassFileWriter(outFile);
+        new BytecodeGenerator().generateBytecode(stream, getBasename(outFile), cl);
     }
 
     private static String getBasename(File file) {

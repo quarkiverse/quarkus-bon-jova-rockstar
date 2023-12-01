@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class ClassWriter implements ClassOutput {
+public class ClassFileWriter implements ClassOutput {
     private final File outFile;
 
-    public ClassWriter(File outFile) {
+    public ClassFileWriter(File outFile) {
         this.outFile = outFile;
     }
 

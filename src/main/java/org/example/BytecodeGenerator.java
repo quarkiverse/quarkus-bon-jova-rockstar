@@ -1,6 +1,7 @@
 package org.example;
 
 import io.quarkus.gizmo.ClassCreator;
+import io.quarkus.gizmo.ClassOutput;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -9,16 +10,14 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import rock.Rockstar;
 import rock.RockstarLexer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class BytecodeGenerator {
 
-    public void generateBytecode(InputStream stream, String name, File outFile) throws IOException {
-        ClassWriter cl = new ClassWriter(outFile);
+    public void generateBytecode(InputStream stream, String name, ClassOutput classOutput) throws IOException {
         try (ClassCreator creator = ClassCreator.builder()
-                                                .classOutput(cl)
+                                                .classOutput(classOutput)
                                                 .className(name)
                                                 .build()) {
 
