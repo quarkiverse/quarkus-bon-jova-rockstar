@@ -11,7 +11,6 @@ import rock.RockstarBaseListener;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -40,44 +39,23 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext ctx) {
 
-        String originalName = ctx.variable()
-                                 .getText();
-        String variableName = originalName
-                .replace(" ", "_")
-                .toLowerCase();
+        Assignment assignment = new Assignment(ctx);
 
-        if (ctx.poeticNumberLiteral() != null) {
-            int value = Integer.parseInt(ctx.poeticNumberLiteral()
-                                            .poeticNumberLiteralWord()
-                                            .stream()
-                                            .map(word -> String.valueOf(word.getText()
-                                                                            .length()))
-                                            .collect(Collectors.joining()));
+        String originalName = assignment.getVariableName();
 
-            // We will worry about floats later
-            // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-            FieldDescriptor field = creator.getFieldCreator(variableName, int.class)
-                                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
-                                           .getFieldDescriptor();
+        String variableName = assignment.getNormalisedVariableName();
+        // TODO this breaks soon!
+        int value = (int) assignment.getValue();
 
-            main.writeStaticField(field, main.load(value));
-            variables.put(originalName.toLowerCase(), field);
 
-        } else if (ctx.literal() != null) {
-            // TODO this could be a string or an int
-            int value = Integer.parseInt(ctx.literal()
-                                            .NUMERIC_LITERAL()
-                                            .getText());
+        // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
+        FieldDescriptor field = creator.getFieldCreator(variableName, int.class)
+                                       .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
+                                       .getFieldDescriptor();
 
-            // We will worry about floats later
-            // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-            FieldDescriptor field = creator.getFieldCreator(variableName, int.class)
-                                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
-                                           .getFieldDescriptor();
+        main.writeStaticField(field, main.load(value));
+        variables.put(originalName, field);
 
-            main.writeStaticField(field, main.load(value));
-            variables.put(originalName.toLowerCase(), field);
-        }
     }
 
 
