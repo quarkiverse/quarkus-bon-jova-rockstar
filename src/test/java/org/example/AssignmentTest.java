@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AssignmentTest {
 
@@ -37,6 +38,11 @@ public class AssignmentTest {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is a big bad monster");
         Assignment a = new Assignment(ctx);
         assertEquals(1337, a.getValue());
+    }
+
+    @Test
+    public void deliberateFailure() {
+        fail("Sense check of CI actions");
     }
 
 }
