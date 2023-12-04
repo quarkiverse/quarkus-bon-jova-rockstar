@@ -42,13 +42,19 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         Assignment assignment = new Assignment(ctx);
 
         String originalName = assignment.getVariableName();
+        FieldDescriptor field;
+        if (!variables.containsKey(originalName)) {
 
-        String variableName = assignment.getNormalisedVariableName();
+            String variableName = assignment.getNormalisedVariableName();
 
-        // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-        FieldDescriptor field = creator.getFieldCreator(variableName, assignment.getVariableClass())
-                                       .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
-                                       .getFieldDescriptor();
+            // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
+            field = creator.getFieldCreator(variableName, assignment.getVariableClass())
+                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
+                           .getFieldDescriptor();
+            variables.put(originalName, field);
+        } else {
+            field = variables.get(originalName);
+        }
 
         Object value = assignment.getValue();
         if (String.class.equals(assignment.getVariableClass())) {
@@ -61,7 +67,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             main.writeStaticField(field, main.load((boolean) value));
         }
 
-        variables.put(originalName, field);
+
     }
 
 

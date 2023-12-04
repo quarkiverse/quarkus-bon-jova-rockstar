@@ -178,4 +178,25 @@ public class BytecodeGeneratorTest {
         }
     }
 
+    @Test
+    public void shouldHandleVariableReassignment() {
+        String program = """
+                My thing is 5
+                My thing is 8
+                Shout my thing
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("8\n", output);
+
+        program = """
+                My thing is "hello"
+                My thing is "goodbye"
+                Shout my thing
+                                            """;
+        output = compileAndLaunch(program);
+
+        assertEquals("goodbye\n", output);
+    }
+
 }
