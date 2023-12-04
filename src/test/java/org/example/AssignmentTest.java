@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class AssignmentTest {
 
@@ -165,7 +166,7 @@ public class AssignmentTest {
     public void shouldParseUndefinedConstants() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is mysterious");
         Assignment a = new Assignment(ctx);
-        assertEquals(null, a.getValue());
+        assertNull(a.getValue());
         // Not great, but the best we can do
     }
 
@@ -173,19 +174,19 @@ public class AssignmentTest {
     public void shouldParseNullConstants() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is nothing");
         Assignment a = new Assignment(ctx);
-        assertEquals(null, a.getValue());
+        assertNull(a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is nobody");
         a = new Assignment(ctx);
-        assertEquals(null, a.getValue());
+        assertNull(a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is nowhere");
         a = new Assignment(ctx);
-        assertEquals(null, a.getValue());
+        assertNull(a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is gone");
         a = new Assignment(ctx);
-        assertEquals(null, a.getValue());
+        assertNull(a.getValue());
     }
 
 }
