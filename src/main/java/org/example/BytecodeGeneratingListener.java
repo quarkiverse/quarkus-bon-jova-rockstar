@@ -61,7 +61,22 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                                            .getFieldDescriptor();
 
             main.writeStaticField(field, main.load(value));
-            variables.put(originalName, field);
+            variables.put(originalName.toLowerCase(), field);
+
+        } else if (ctx.literal() != null) {
+            // TODO this could be a string or an int
+            int value = Integer.parseInt(ctx.literal()
+                                            .NUMERIC_LITERAL()
+                                            .getText());
+
+            // We will worry about floats later
+            // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
+            FieldDescriptor field = creator.getFieldCreator(variableName, int.class)
+                                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
+                                           .getFieldDescriptor();
+
+            main.writeStaticField(field, main.load(value));
+            variables.put(originalName.toLowerCase(), field);
         }
     }
 
@@ -71,8 +86,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         String text = ctx.expression()
                          .getText();
-        if (variables.containsKey(text)) {
-            ResultHandle value = main.readStaticField(variables.get(text));
+        if (variables.containsKey(text.toLowerCase())) {
+            ResultHandle value = main.readStaticField(variables.get(text.toLowerCase()));
             Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
         } else {
             // This is a literal

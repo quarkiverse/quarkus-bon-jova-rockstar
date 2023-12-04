@@ -42,11 +42,27 @@ public class BytecodeGeneratorTest {
     }
 
     /*
+        Common variables consist of one of the keywords a , an , the , my , your or our followed by whitespace and a unique variable name,
+        which must contain only lowercase ASCII letters a-z. The keyword is part of the variable name, so a boy is a different variable from
+        the boy . Common variables are case-insensitive.
+    */
+    @Test
+    public void shouldHandleVariableAssignmentToNumber() throws IOException {
+        String program = """
+                My thing is 5
+                Shout my thing
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("5\n", output);
+    }
+
+    /*
      * This is the starting example on https://codewithrockstar.com/online
      * It exercises variables, poetic number literals, and console output
      */
     @Test
-    public void shouldHandleIntegerPoeticNumberLiterals() throws IOException {
+    public void shouldHandleVariableAssignmentToPoeticNumberLiterals() throws IOException {
         String program = """
                 Rockstar is a big bad monster
                 Shout Rockstar
