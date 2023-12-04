@@ -16,12 +16,18 @@ public class Assignment {
                           .getText()
                           .toLowerCase();
 
-        if (ctx.literal() != null) {
-            if (ctx.literal()
-                   .NUMERIC_LITERAL() != null) {
 
-                TerminalNode num = ctx.literal()
-                                      .NUMERIC_LITERAL();
+        Rockstar.LiteralContext literal = ctx.expression() != null ? ctx.expression()
+                                                                        .literal() : ctx.literal();
+        Rockstar.ConstantContext constant = ctx.expression() != null ? ctx.expression()
+                                                                          .constant() : ctx.constant();
+
+        if (literal != null) {
+            if (literal
+                    .NUMERIC_LITERAL() != null) {
+
+                TerminalNode num = literal
+                        .NUMERIC_LITERAL();
                 double parsed = Double.parseDouble(num.getText());
                 if (Math.round(parsed) == parsed) {
                     value = Integer.parseInt(num
@@ -31,48 +37,50 @@ public class Assignment {
                     value = parsed;
                     variableClass = double.class;
                 }
-            } else if (ctx.literal()
-                          .STRING_LITERAL() != null) {
-                value = ctx.literal()
-                           .STRING_LITERAL()
-                           .getText()
-                           .replaceAll("\"", "");
+            } else if (literal
+                    .STRING_LITERAL() != null) {
+                value = literal
+                        .STRING_LITERAL()
+                        .getText()
+                        .replaceAll("\"", "");
                 // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
                 // idiomatic-ish)
                 variableClass = String.class;
             }
 
-        } else if (ctx.constant() != null) {
-            if (ctx.constant()
-                   .CONSTANT_TRUE() != null) {
-                value = true;
-                variableClass = boolean.class;
-            } else if (ctx.constant()
-                          .CONSTANT_FALSE() != null) {
-                value = false;
-                variableClass = boolean.class;
-            } else if (ctx.constant()
-                          .CONSTANT_EMPTY() != null) {
-                value = "";
-                variableClass = String.class;
-            }
-
-        } else if (ctx.poeticStringLiteral() != null) {
-            value = ctx.poeticStringLiteral()
-                       .getText();
-            variableClass = String.class;
-
-        } else if (ctx.poeticNumberLiteral() != null) {
-            value = Integer.parseInt(ctx.poeticNumberLiteral()
-                                        .poeticNumberLiteralWord()
-                                        .stream()
-                                        .map(word -> String.valueOf(word.getText()
-                                                                        .length()))
-                                        .collect(Collectors.joining()));
-
-            variableClass = int.class;
         } else {
-            variableClass = Object.class;
+            if (constant != null) {
+                if (constant
+                        .CONSTANT_TRUE() != null) {
+                    value = true;
+                    variableClass = boolean.class;
+                } else if (constant
+                        .CONSTANT_FALSE() != null) {
+                    value = false;
+                    variableClass = boolean.class;
+                } else if (constant
+                        .CONSTANT_EMPTY() != null) {
+                    value = "";
+                    variableClass = String.class;
+                }
+
+            } else if (ctx.poeticStringLiteral() != null) {
+                value = ctx.poeticStringLiteral()
+                           .getText();
+                variableClass = String.class;
+
+            } else if (ctx.poeticNumberLiteral() != null) {
+                value = Integer.parseInt(ctx.poeticNumberLiteral()
+                                            .poeticNumberLiteralWord()
+                                            .stream()
+                                            .map(word -> String.valueOf(word.getText()
+                                                                            .length()))
+                                            .collect(Collectors.joining()));
+
+                variableClass = int.class;
+            } else {
+                variableClass = Object.class;
+            }
         }
     }
 

@@ -147,6 +147,46 @@ public class BytecodeGeneratorTest {
         assertEquals(leet, output);
     }
 
+    /*
+     * Put 123 into X will assign the value 123 to the variable X
+     */
+    @Test
+    public void shouldHandlePutIntoVariableAssignment() {
+        String program = """
+                X is 60
+                Put 123 into X
+                Shout X
+                """;
+        String output = compileAndLaunch(program);
+        assertEquals("123\n", output);
+    }
+
+    /*
+     * Put "Hello San Francisco" into the message will assign the value "Hello San Francisco" to the variable the message Let my balance
+     */
+    @Test
+    public void shouldHandlePutVariableAssignmentForStrings() {
+        String program = """
+                The message is empty
+                Put "Hello San Francisco" into the message
+                Shout the message
+                """;
+        String output = compileAndLaunch(program);
+        assertEquals("Hello San Francisco\n", output);
+    }
+
+    /*
+     *  Let my balance be 1000000 will store the value 1000000 in the variable my balance
+     */
+    @Test
+    public void shouldHandleLetVariableAssignment() {
+        String program = """
+                Let my balance be 1000000
+                Shout my balance
+                """;
+        String output = compileAndLaunch(program);
+        assertEquals("1000000\n", output);
+    }
 
     private String compileAndLaunch(String program) {
         // Save the current System.out for later restoration

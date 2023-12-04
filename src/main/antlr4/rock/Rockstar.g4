@@ -31,6 +31,7 @@ comparisionOp: KW_IS
 ;
 
 assignmentStmt: variable (APOSTROPHE_S | WS (KW_IS|KW_WAS_WERE)) WS (poeticNumberLiteral|constant|literal)
+              | KW_LET WS variable WS KW_BE WS expression
               | KW_PUT WS expression WS KW_INTO WS variable
               | variable WS KW_SAYS WS poeticStringLiteral
 ;

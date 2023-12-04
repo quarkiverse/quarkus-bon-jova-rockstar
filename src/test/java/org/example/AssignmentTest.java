@@ -189,4 +189,18 @@ public class AssignmentTest {
         assertNull(a.getValue());
     }
 
+    @Test
+    public void shouldHandleAssignmentUsingPut() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put 123 into X");
+        Assignment a = new Assignment(ctx);
+        assertEquals(123, a.getValue());
+    }
+
+    @Test
+    public void shouldHandleAssignmentOfConstantsUsingPut() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put lies into X");
+        Assignment a = new Assignment(ctx);
+        assertEquals(false, a.getValue());
+    }
+
 }
