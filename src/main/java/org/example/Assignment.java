@@ -1,12 +1,15 @@
 package org.example;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
 
 import java.util.stream.Collectors;
 
 public class Assignment {
-    final String originalName;
-    Object value = null;
+    private final String originalName;
+    private Object value = null;
+    private Class<?> variableClass;
+
 
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
         originalName = ctx.variable()
@@ -14,12 +17,50 @@ public class Assignment {
                           .toLowerCase();
 
         if (ctx.literal() != null) {
-            // TODO this could be a string or an int
-            // We will worry about floats later
+            if (ctx.literal()
+                   .NUMERIC_LITERAL() != null) {
 
-            value = Integer.parseInt(ctx.literal()
-                                        .NUMERIC_LITERAL()
-                                        .getText());
+                TerminalNode num = ctx.literal()
+                                      .NUMERIC_LITERAL();
+                double parsed = Double.parseDouble(num.getText());
+                if (Math.round(parsed) == parsed) {
+                    value = Integer.parseInt(num
+                            .getText());
+                    variableClass = int.class;
+                } else {
+                    value = parsed;
+                    variableClass = double.class;
+                }
+            } else if (ctx.literal()
+                          .STRING_LITERAL() != null) {
+                value = ctx.literal()
+                           .STRING_LITERAL()
+                           .getText()
+                           .replaceAll("\"", "");
+                // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
+                // idiomatic-ish)
+                variableClass = String.class;
+            }
+
+        } else if (ctx.constant() != null) {
+            if (ctx.constant()
+                   .CONSTANT_TRUE() != null) {
+                value = true;
+                variableClass = boolean.class;
+            } else if (ctx.constant()
+                          .CONSTANT_FALSE() != null) {
+                value = false;
+                variableClass = boolean.class;
+            } else if (ctx.constant()
+                          .CONSTANT_EMPTY() != null) {
+                value = "";
+                variableClass = String.class;
+            }
+
+        } else if (ctx.poeticStringLiteral() != null) {
+            value = ctx.poeticStringLiteral()
+                       .getText();
+            variableClass = String.class;
 
         } else if (ctx.poeticNumberLiteral() != null) {
             value = Integer.parseInt(ctx.poeticNumberLiteral()
@@ -29,7 +70,9 @@ public class Assignment {
                                                                         .length()))
                                         .collect(Collectors.joining()));
 
-
+            variableClass = int.class;
+        } else {
+            variableClass = Object.class;
         }
     }
 
@@ -45,5 +88,9 @@ public class Assignment {
 
     public Object getValue() {
         return value;
+    }
+
+    public Class<?> getVariableClass() {
+        return variableClass;
     }
 }

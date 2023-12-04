@@ -54,7 +54,6 @@ COMMON_VARIABLE_PREFIXES: A
 CONSTANT_UNDEFINED: M Y S T E R I O U S;
 CONSTANT_NULL: N U L L
        | G O N E
-       | E M P T Y
        | N O B O D Y
        | N O W H E R E
        | N O T H I N G
@@ -68,6 +67,10 @@ CONSTANT_FALSE: F A L S E
         | W R O N G
         | N O
         | L I E S
+;
+CONSTANT_EMPTY: E M P T Y
+        | S I L E N T
+        | S I L E N C E
 ;
 
 KW_PUT: P U T;

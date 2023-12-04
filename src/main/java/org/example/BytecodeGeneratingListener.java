@@ -44,18 +44,24 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         String originalName = assignment.getVariableName();
 
         String variableName = assignment.getNormalisedVariableName();
-        // TODO this breaks soon!
-        int value = (int) assignment.getValue();
-
 
         // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-        FieldDescriptor field = creator.getFieldCreator(variableName, int.class)
+        FieldDescriptor field = creator.getFieldCreator(variableName, assignment.getVariableClass())
                                        .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                                        .getFieldDescriptor();
 
-        main.writeStaticField(field, main.load(value));
-        variables.put(originalName, field);
+        Object value = assignment.getValue();
+        if (String.class.equals(assignment.getVariableClass())) {
+            main.writeStaticField(field, main.load((String) value));
+        } else if (int.class.equals(assignment.getVariableClass())) {
+            main.writeStaticField(field, main.load((int) value));
+        } else if (double.class.equals(assignment.getVariableClass())) {
+            main.writeStaticField(field, main.load((double) value));
+        } else if (boolean.class.equals(assignment.getVariableClass())) {
+            main.writeStaticField(field, main.load((boolean) value));
+        }
 
+        variables.put(originalName, field);
     }
 
 
@@ -69,7 +75,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
         } else {
             // This is a literal
-
             // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
             // idiomatic-ish)
             text = text.replaceAll("\"", "");

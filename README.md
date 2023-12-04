@@ -32,25 +32,26 @@ Some of these may work but have not been validated with tests.
 
 ## Variables and constants
 
-- [ ] Simple variables
-- [ ] Common variables
-- [ ] Proper variables
-- [ ] Dynamic typing of variables
+- [X] Simple variables
+- [X] Common variables
+- [X] Proper variables
+- [X] Dynamic typing of variables
 - [ ] Case insensitivity of variable names
 - [ ] Pronoun variable references
-- [ ] Number literals
+- [X] Number literals
 - [X] Poetic number literals (integer)
 - [ ] Poetic number literals (floating point)
 - [ ] Hyphen support in poetic number literals
 - [X] String literals
+- [ ] Poetic string literals
 
 ## Types
 
 - [ ] Mysterious
 - [ ] Null equality to 0 and false
-- [ ] Null aliases `nothing`, `nowhere`, `nobody`, `gone`
-- [ ] True aliases `right`, `yes`, `ok`
-- [ ] False aliases `wrong`, `no`, `lies`
+- [X] Null aliases `nothing`, `nowhere`, `nobody`, `gone`
+- [X] True aliases `right`, `yes`, `ok`
+- [X] False aliases `wrong`, `no`, `lies`
 
 ## Arrays
 

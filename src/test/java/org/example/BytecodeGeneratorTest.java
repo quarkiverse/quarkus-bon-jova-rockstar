@@ -1,6 +1,7 @@
 package org.example;
 
 import io.quarkus.gizmo.ClassOutput;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -33,12 +34,74 @@ public class BytecodeGeneratorTest {
     }
 
     @Test
-    public void shouldHandleSimpleStringLiterals() throws IOException {
+    public void shouldHandleSimpleStringLiterals() {
         String program = """
                 Shout "Hello San Francisco"
                                             """;
         String output = compileAndLaunch(program);
         assertEquals("Hello San Francisco\n", output);
+    }
+
+
+    /*
+    Simple variables are valid identifiers that are not language keywords. A simple variable name must contain only letters, and cannot
+    contain spaces.
+     */
+    @Test
+    public void shouldHandleSimpleVariableNames() {
+        String program = """
+                Variable is "Hello San Francisco"
+                Shout Variable
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("Hello San Francisco\n", output);
+    }
+
+    /*
+     Common variables consist of one of the keywords a , an , the , my , your or our followed by whitespace and a unique variable name,
+     which must contain only lowercase ASCII letters a-z. The keyword is part of the variable name, so a boy is a different variable from
+      the boy . Common variables are case-insensitive.
+     */
+    @Test
+    public void shouldHandleCommonVariableNames() {
+        String program = """
+                My thing is true
+                Shout my thing
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("true\n", output);
+    }
+
+    @Test
+    @Disabled
+    public void shouldTreatVariableNamesAsCaseInsensitive() {
+        String program = """
+                TIME is an illusion
+                Shout time
+                Shout tIMe
+                Shout TIMe
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("an illusion\nan illusion\nan illusion\n", output);
+    }
+
+    /*
+ Common variables consist of one of the keywords a , an , the , my , your or our followed by whitespace and a unique variable name,
+ which must contain only lowercase ASCII letters a-z. The keyword is part of the variable name, so a boy is a different variable from
+  the boy . Common variables are case-insensitive.
+ */
+    @Test
+    public void shouldHandleVariableAssignmentToBoolean() {
+        String program = """
+                My thing is true
+                Shout my thing
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("true\n", output);
     }
 
     /*
@@ -47,7 +110,7 @@ public class BytecodeGeneratorTest {
         the boy . Common variables are case-insensitive.
     */
     @Test
-    public void shouldHandleVariableAssignmentToNumber() throws IOException {
+    public void shouldHandleVariableAssignmentToInteger() {
         String program = """
                 My thing is 5
                 Shout my thing
@@ -57,12 +120,23 @@ public class BytecodeGeneratorTest {
         assertEquals("5\n", output);
     }
 
+    @Test
+    public void shouldHandleVariableAssignmentToFloatingPoint() {
+        String program = """
+                My thing is 4.89
+                Shout my thing
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("4.89\n", output);
+    }
+
     /*
      * This is the starting example on https://codewithrockstar.com/online
      * It exercises variables, poetic number literals, and console output
      */
     @Test
-    public void shouldHandleVariableAssignmentToPoeticNumberLiterals() throws IOException {
+    public void shouldHandleVariableAssignmentToPoeticNumberLiterals() {
         String program = """
                 Rockstar is a big bad monster
                 Shout Rockstar
@@ -83,7 +157,7 @@ public class BytecodeGeneratorTest {
         try {
             new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), "whatever",
                     loader);
-            Class clazz = loader.findClass("whatever");
+            Class<?> clazz = loader.findClass("whatever");
             Method main = clazz.getMethod("main", String[].class);
 
             // Capture stdout since that's what the test will validate
