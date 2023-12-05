@@ -68,7 +68,8 @@ constant: CONSTANT_UNDEFINED
 literal: NUMERIC_LITERAL | STRING_LITERAL;
 
 variable: COMMON_VARIABLE_PREFIXES WS WORD
-        | NOUN (WS NOUN)*
+        | WORD
+        | PROPER_NOUN (WS PROPER_NOUN)*
         | PRONOUNS
 ;
 
@@ -78,7 +79,7 @@ poeticNumberLiteralWord: COMMON_VARIABLE_PREFIXES
                        | allKeywords
                        | PRONOUNS
                        | WORD
-                       | NOUN
+                       | PROPER_NOUN
 ;
 
 poeticNumberLiteralDecimalSeparator: DOT;
@@ -100,7 +101,7 @@ poeticStringLiteralWord: COMMON_VARIABLE_PREFIXES
                        | CONSTANT_FALSE
                        | allKeywords
                        | WORD
-                       | NOUN
+                       | PROPER_NOUN
 ;
 
 allKeywords: KW_PUT

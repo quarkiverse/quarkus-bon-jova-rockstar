@@ -36,7 +36,7 @@ Some of these may work but have not been validated with tests.
 - [X] Common variables
 - [X] Proper variables
 - [X] Dynamic typing of variables
-- [ ] Case insensitivity of variable names
+- [X] Case insensitivity of variable names
 - [ ] Pronoun variable references
 - [X] Number literals
 - [X] Poetic number literals (integer)

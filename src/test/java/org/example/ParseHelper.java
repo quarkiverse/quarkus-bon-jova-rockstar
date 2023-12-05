@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 class ParseHelper {
 
     public static Rockstar.AssignmentStmtContext getAssignment(String program) {
@@ -38,7 +40,11 @@ drive a parse to extract the thing we want.
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(listener, tree);
 
-            return listener.getAssignmentStatement();
+            Rockstar.AssignmentStmtContext answer = listener.getAssignmentStatement();
+            if (answer == null) {
+                fail("There were no assignment statements. Did the program parse correctly?");
+            }
+            return answer;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

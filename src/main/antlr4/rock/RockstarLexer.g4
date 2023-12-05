@@ -125,8 +125,8 @@ KW_AND: A N D;
 KW_OR: O R;
 KW_NOR: N O R;
 
-WORD: [a-z]+;
-NOUN: [A-Z][a-z]*;
+PROPER_NOUN: [A-Z][A-Z|a-z]*;
+WORD: [a-z|A-Z]+;
 
 NUMERIC_LITERAL: [0-9]+ ('.' [0-9]+)?;
 STRING_LITERAL: '"' .*? '"';

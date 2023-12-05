@@ -39,3 +39,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
+/src/main/antlr4/rock/RockstarLexer.tokens

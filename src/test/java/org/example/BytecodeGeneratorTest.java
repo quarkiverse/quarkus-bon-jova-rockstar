@@ -1,7 +1,6 @@
 package org.example;
 
 import io.quarkus.gizmo.ClassOutput;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -74,9 +73,41 @@ public class BytecodeGeneratorTest {
         assertEquals("true\n", output);
     }
 
+    /*
+    Proper variables are multi-word proper nouns - words that aren't language keywords, each starting with an uppercase letter, separated
+     by spaces. (Single-word variables are always simple variables.) Whilst some developers may use this feature to create variables with
+      names like Customer ID , Tax Rate or Distance In KM , we recommend you favour idiomatic variable names such as
+Doctor Feelgood , Mister Crowley , Tom Sawyer , and Billie Jean .
+(Although not strictly idiomatic, Eleanor Rigby , Peggy Sue , Black Betty , and Johnny B Goode would also all be valid variable
+names in Rockstar.)
+     */
     @Test
-    @Disabled
+    public void shouldHandleProperVariableNames() {
+        String program = """
+                Doctor Feelgood is a good fellow
+                Shout Doctor Feelgood
+                Shout Doctor FeelGOOD
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("146\n146\n", output);
+    }
+
+    @Test
     public void shouldTreatVariableNamesAsCaseInsensitive() {
+        String program = """
+                time is an illusion
+                Shout time
+                Shout tIMe
+                Shout TIMe
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("28\n28\n28\n", output);
+    }
+
+    @Test
+    public void shouldAllowAllUpperCaseVariableNames() {
         String program = """
                 TIME is an illusion
                 Shout time
@@ -85,7 +116,7 @@ public class BytecodeGeneratorTest {
                                             """;
         String output = compileAndLaunch(program);
 
-        assertEquals("an illusion\nan illusion\nan illusion\n", output);
+        assertEquals("28\n28\n28\n", output);
     }
 
     /*
