@@ -43,7 +43,7 @@ Some of these may work but have not been validated with tests.
 - [ ] Poetic number literals (floating point)
 - [ ] Hyphen support in poetic number literals
 - [X] String literals
-- [ ] Poetic string literals
+- [X] Poetic string literals
 
 ## Types
 

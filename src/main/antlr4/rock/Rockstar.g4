@@ -33,12 +33,12 @@ comparisionOp: KW_IS
 assignmentStmt: variable (APOSTROPHE_S | WS (KW_IS|KW_WAS_WERE)) WS (poeticNumberLiteral|constant|literal)
               | KW_LET WS variable WS KW_BE WS expression
               | KW_PUT WS expression WS KW_INTO WS variable
-              | variable WS KW_SAYS WS poeticStringLiteral
+              | variable WS (KW_SAYS | KW_SAY) WS poeticStringLiteral
 ;
 
 inputStmt: KW_LISTEN WS KW_TO WS variable;
 
-outputStmt: KW_SAY WS expression;
+outputStmt: (KW_SHOUT | KW_SAY) WS expression;
 
 ifStmt: KW_IF WS expr=expression NL statementList (KW_ELSE NL statementList)?;
 
@@ -112,6 +112,7 @@ allKeywords: KW_PUT
            | KW_LISTEN
            | KW_TO
            | KW_SAY
+           | KW_SHOUT
            | KW_LOOP
            | KW_IF
            | KW_ELSE

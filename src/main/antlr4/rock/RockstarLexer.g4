@@ -73,18 +73,20 @@ CONSTANT_EMPTY: E M P T Y
         | S I L E N C E
 ;
 
+KW_SAY: S A Y;
+
 KW_PUT: P U T;
 KW_LET: L E T;
 KW_INTO: I N T O;
 KW_BE: B E;
-KW_SAYS: S A Y S;
+KW_SAYS: S A Y S | S A I D;
 
 KW_TAKING: T A K I N G;
 KW_TAKES: T A K E S;
 
 KW_LISTEN: L I S T E N;
 KW_TO: T O ;
-KW_SAY: S A Y | S H O U T | W H I S P E R | S C R E A M;
+KW_SHOUT:  S H O U T | W H I S P E R | S C R E A M;
 
 KW_LOOP: W H I L E | U N T I L;
 KW_IF: I F;

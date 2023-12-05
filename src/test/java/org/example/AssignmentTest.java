@@ -1,6 +1,5 @@
 package org.example;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
@@ -102,7 +101,6 @@ public class AssignmentTest {
     single space. The rest of the line up to the \n terminator is treated as an unquoted string literal.
      */
     @Test
-    @Disabled
     public void shouldParsePoeticStringLiterals() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing says cannot buy love");
         Assignment a = new Assignment(ctx);
