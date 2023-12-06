@@ -1,9 +1,8 @@
 package org.example;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.example.grammar.PoeticNumberLiteral;
 import rock.Rockstar;
-
-import java.util.stream.Collectors;
 
 public class Assignment {
     private final String originalName;
@@ -70,19 +69,9 @@ public class Assignment {
                 variableClass = String.class;
 
             } else if (ctx.poeticNumberLiteral() != null) {
-                // A poetic number literal begins with a variable name, followed by the keyword is , or the aliases are , was or were .
-                // As long as the next symbol is not a Literal Word, the rest of the line is treated as a decimal number in which the
-                // values of consecutive digits are given by the lengths of the subsequent barewords, up until the end of the line.
-                // To allow the digit zero, and to compensate for a lack of suitably rock'n'roll 1- and 2-letter words, word lengths are
-                // parsed modulo 10.
-                value = Integer.parseInt(ctx.poeticNumberLiteral()
-                                            .poeticNumberLiteralWord()
-                                            .stream()
-                                            .map(word -> String.valueOf(Math.floorMod(word.getText()
-                                                                                          .length(), 10)))
-                                            .collect(Collectors.joining()));
-
-                variableClass = int.class;
+                PoeticNumberLiteral lit = new PoeticNumberLiteral(ctx.poeticNumberLiteral());
+                value = lit.getValue();
+                variableClass = lit.getVariableClass();
             } else {
                 variableClass = Object.class;
             }

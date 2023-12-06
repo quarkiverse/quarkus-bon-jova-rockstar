@@ -3,6 +3,7 @@ package org.example;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import rock.Rockstar;
@@ -12,12 +13,22 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-class ParseHelper {
+public class ParseHelper {
 
     public static Rockstar.AssignmentStmtContext getAssignment(String program) {
+        return (Rockstar.AssignmentStmtContext) getGrammarElement(program, (CapturingListener l) -> l.getAssignmentStatement());
+    }
+
+    public static Rockstar.PoeticNumberLiteralContext getPoeticNumberLiteral(String program) {
+        return (Rockstar.PoeticNumberLiteralContext) getGrammarElement(program, (CapturingListener l) -> l.getPoeticNumberLiteral());
+    }
+
+    private static RuleContext getGrammarElement(String program, Function<CapturingListener,
+            RuleContext> getter) {
 /*
 Rather than mocking the syntax tree, which will be hard work and not necessarily reliable,
 drive a parse to extract the thing we want.
@@ -40,7 +51,7 @@ drive a parse to extract the thing we want.
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(listener, tree);
 
-            Rockstar.AssignmentStmtContext answer = listener.getAssignmentStatement();
+            RuleContext answer = getter.apply(listener);
             if (answer == null) {
                 fail("There were no assignment statements. Did the program parse correctly?");
             }
