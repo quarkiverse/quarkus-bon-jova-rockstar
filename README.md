@@ -39,8 +39,7 @@ Some of these may work but have not been validated with tests.
 - [X] Case insensitivity of variable names
 - [ ] Pronoun variable references
 - [X] Number literals
-- [X] Poetic number literals (integer)
-- [ ] Poetic number literals (floating point)
+- [X] Poetic number literals
 - [ ] Hyphen support in poetic number literals
 - [X] String literals
 - [X] Poetic string literals

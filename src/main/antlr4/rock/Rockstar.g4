@@ -73,7 +73,10 @@ variable: COMMON_VARIABLE_PREFIXES WS WORD
         | PRONOUNS
 ;
 
-poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralWord poeticNumberLiteralDecimalSeparator?)*;
+poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralGarbage* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
+
+poeticNumberLiteralGarbage: COMMA
+;
 
 poeticNumberLiteralWord: COMMON_VARIABLE_PREFIXES
                        | allKeywords
