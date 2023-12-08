@@ -68,4 +68,27 @@ public class PoeticNumberLiteralTest {
         assertEquals(314159.26535, a.getValue());
     }
 
+    @Test
+    public void shouldParseFloatingPointPoeticNumberLiteralsWithHyphens() {
+        Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral(
+                "life is all-consuming");
+        PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
+        assertEquals(3, a.getValue());
+        assertEquals(int.class, a.getVariableClass());
+
+        ctx = ParseHelper.getPoeticNumberLiteral(
+                "life is all-consuming. death is a sweet rest.");
+        a = new PoeticNumberLiteral(ctx);
+        assertEquals(3.52154, a.getValue());
+    }
+
+    @Test
+    public void shouldParseFloatingPointPoeticNumberLiteralsWithIgnoredElements() {
+        Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral(
+                "life is all ! yeah , so what. just hang!");
+        PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
+        assertEquals(3424.44, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
+    }
+
 }

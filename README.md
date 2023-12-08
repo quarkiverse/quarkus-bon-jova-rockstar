@@ -40,7 +40,6 @@ Some of these may work but have not been validated with tests.
 - [ ] Pronoun variable references
 - [X] Number literals
 - [X] Poetic number literals
-- [ ] Hyphen support in poetic number literals
 - [X] String literals
 - [X] Poetic string literals
 

@@ -73,12 +73,13 @@ variable: COMMON_VARIABLE_PREFIXES WS WORD
         | PRONOUNS
 ;
 
-poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralGarbage* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
+poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralGarbage* WS* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
 
-poeticNumberLiteralGarbage: COMMA
+poeticNumberLiteralGarbage: WS* (COMMA | EXCLAMATION_MARK | QUESTION_MARK) WS*
 ;
 
-poeticNumberLiteralWord: COMMON_VARIABLE_PREFIXES
+poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
+                       | COMMON_VARIABLE_PREFIXES
                        | allKeywords
                        | PRONOUNS
                        | WORD

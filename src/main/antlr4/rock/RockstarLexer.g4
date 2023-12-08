@@ -139,6 +139,7 @@ COMMA: ',';
 QUESTION_MARK: '?';
 EXCLAMATION_MARK: '!';
 AMPERSAND: '&';
+HYPHEN: '-';
 APOSTROPHE_S: '\'s';
 APOSTROPHED_N: '\'n\'';
 SINGLE_QUOTE: '\'' -> skip;

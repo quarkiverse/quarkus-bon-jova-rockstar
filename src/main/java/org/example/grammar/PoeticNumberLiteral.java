@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class PoeticNumberLiteral {
     private final Class<?> variableClass;
-    
+
     final Number value;
 
     public PoeticNumberLiteral(Rockstar.PoeticNumberLiteralContext ctx) {
@@ -25,14 +25,23 @@ public class PoeticNumberLiteral {
         // This is a complex way of handling the decimal point; the antlr listener mechanism may be simpler
         if (ctx.poeticNumberLiteralDecimalSeparator() != null && ctx.poeticNumberLiteralDecimalSeparator()
                                                                     .size() > 0) {
-            // The spec says to only look at the first decimal, which makes things easier
+
             Rockstar.PoeticNumberLiteralDecimalSeparatorContext dot = ctx.poeticNumberLiteralDecimalSeparator(0);
-            int baseIndex = ctx.getStart()
-                               .getTokenIndex();
-            int numberOfTokensIncludingWhitespaceTokens = dot.getStart()
-                                                             .getTokenIndex() - baseIndex;
-            // Fragile code alert! Assume every token is whitespace or a word-digit
-            int index = (int) (Math.ceil(numberOfTokensIncludingWhitespaceTokens / 2.0));
+
+            // The spec says to only look at the first decimal, which makes things easier
+
+            // We want to find the position of the dot among the children (not the tokens)
+            // Do it by brute force
+            int index = 0;
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                var child = ctx.getChild(i);
+                if (child == dot) {
+                    break;
+                } else if (child instanceof Rockstar.PoeticNumberLiteralWordContext) {
+                    // Only count words, not garbage or whitespace
+                    index++;
+                }
+            }
 
             // Insert the dot at the right point
             string = string.substring(0, index) + "." + string.substring(index);
