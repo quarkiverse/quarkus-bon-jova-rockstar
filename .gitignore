@@ -2,7 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-gen
+bon-jova-quarkus-extension/gen
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -39,4 +39,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-/src/main/antlr4/rock/RockstarLexer.tokens
+/bon-jova-quarkus-extension/src/main/antlr4/rock/RockstarLexer.tokens
