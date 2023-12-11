@@ -2,7 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-bon-jova-quarkus-extension/gen
+**/gen
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
