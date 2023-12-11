@@ -14,3 +14,5 @@ Let’s run it on Quarkus
 	- extra steps to invoke .rock programs
        - then, as a bonus, live reload works
       - then, as a bonus, can have other dev ui stuff like rockometer
+
+      Idea: Paste in real songs, see how far they go - then, if it fails, comment out the line with parentheses (which will work, because live reload)
