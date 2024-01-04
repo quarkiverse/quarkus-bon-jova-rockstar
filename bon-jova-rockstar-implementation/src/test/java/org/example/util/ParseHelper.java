@@ -1,4 +1,4 @@
-package org.example;
+package org.example.util;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;

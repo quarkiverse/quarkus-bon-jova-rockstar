@@ -1,6 +1,6 @@
 package org.example;
 
-import io.quarkus.gizmo.ClassOutput;
+import org.example.util.DynamicClassLoader;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -15,23 +15,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytecodeGeneratorTest {
-    static class DynamicClassloader extends ClassLoader implements ClassOutput {
 
-        byte[] classDef = null;
-
-        @Override
-        public void write(String s, byte[] bytes) {
-            this.classDef = bytes;
-        }
-
-        @Override
-        protected Class<?> findClass(final String name) throws ClassNotFoundException {
-            if (classDef != null) {
-                return defineClass(name, classDef, 0, classDef.length);
-            }
-            return super.findClass(name);
-        }
-    }
 
     @Test
     public void shouldHandleSimpleStringLiterals() {
@@ -220,35 +204,6 @@ names in Rockstar.)
         assertEquals("1000000\n", output);
     }
 
-    private String compileAndLaunch(String program) {
-        // Save the current System.out for later restoration
-        PrintStream originalOut = System.out;
-
-        DynamicClassloader loader = new DynamicClassloader();
-
-        try {
-            new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), "whatever",
-                    loader);
-            Class<?> clazz = loader.findClass("whatever");
-            Method main = clazz.getMethod("main", String[].class);
-
-            // Capture stdout since that's what the test will validate
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            PrintStream printStream = new PrintStream(outputStream);
-            System.setOut(printStream);
-
-            main.invoke(null, (Object) null);
-
-            // Get the captured output as a string
-            return outputStream.toString();
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            // Restore the original System.out
-            System.setOut(originalOut);
-        }
-    }
-
     @Test
     public void shouldHandleVariableReassignment() {
         String program = """
@@ -309,5 +264,33 @@ names in Rockstar.)
                 "pass!", output);
 
     }
+    
+    private String compileAndLaunch(String program) {
+        // Save the current System.out for later restoration
+        PrintStream originalOut = System.out;
 
+        DynamicClassLoader loader = new DynamicClassLoader();
+
+        try {
+            new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), "whatever",
+                    loader);
+            Class<?> clazz = loader.findClass("whatever");
+            Method main = clazz.getMethod("main", String[].class);
+
+            // Capture stdout since that's what the test will validate
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PrintStream printStream = new PrintStream(outputStream);
+            System.setOut(printStream);
+
+            main.invoke(null, (Object) null);
+
+            // Get the captured output as a string
+            return outputStream.toString();
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            // Restore the original System.out
+            System.setOut(originalOut);
+        }
+    }
 }

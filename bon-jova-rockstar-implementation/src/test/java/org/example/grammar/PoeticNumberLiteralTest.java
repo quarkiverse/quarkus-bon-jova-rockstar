@@ -1,6 +1,6 @@
 package org.example.grammar;
 
-import org.example.ParseHelper;
+import org.example.util.ParseHelper;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 

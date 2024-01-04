@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.util.ParseHelper;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
@@ -95,7 +96,7 @@ public class AssignmentTest {
         assertEquals(1337, a.getValue());
         assertEquals(int.class, a.getVariableClass());
     }
-    
+
     /*
     A poetic string literal assignment starts with a variable name, followed by one of the keywords say , says or said followed by a
     single space. The rest of the line up to the \n terminator is treated as an unquoted string literal.

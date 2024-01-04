@@ -1,4 +1,4 @@
-package org.example;
+package org.example.util;
 
 import org.antlr.v4.runtime.RuleContext;
 import rock.Rockstar;
