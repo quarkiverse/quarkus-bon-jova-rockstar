@@ -45,14 +45,14 @@ Some of these may work but have not been validated with tests.
 - [ ] Comments
 - [ ] The `with` keyword for parameters
 
-## Variables and constants
+## ✓ Variables and constants
 
 - [X] Simple variables
 - [X] Common variables
 - [X] Proper variables
 - [X] Dynamic typing of variables
 - [X] Case insensitivity of variable names
-- [ ] Pronoun variable references
+- [X] Pronoun variable references
 - [X] Number literals
 - [X] Poetic number literals
 - [X] String literals

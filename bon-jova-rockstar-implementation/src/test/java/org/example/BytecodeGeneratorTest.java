@@ -1,6 +1,7 @@
 package org.example;
 
 import io.quarkus.gizmo.ClassOutput;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -239,8 +240,7 @@ names in Rockstar.)
             main.invoke(null, (Object) null);
 
             // Get the captured output as a string
-            String capturedOutput = outputStream.toString();
-            return capturedOutput;
+            return outputStream.toString();
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -268,6 +268,46 @@ names in Rockstar.)
         output = compileAndLaunch(program);
 
         assertEquals("goodbye\n", output);
+    }
+
+    @Test
+    public void shouldHandleStringLiteralPronounReferences() {
+        String program = """
+                The message is "pass"
+                say it
+                """;
+
+        String output = compileAndLaunch(program);
+        assertEquals("pass\n", output);
+    }
+
+    @Test
+    public void shouldHandleNumericLiteralPronounReferences() {
+        String program = """
+                Gina is 25
+                say it
+                Shout it
+                Whisper it
+                Scream it
+                                """;
+
+        String output = compileAndLaunch(program);
+        assertEquals("25\n25\n25\n25\n", output);
+    }
+
+    @Disabled("Needs support for plus")
+    @Test
+    public void shouldHandleOperationsOnPronounReferences() {
+        String program = """
+                The message is "pass"
+                say it
+                say it plus "!"
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("pass\n" +
+                "pass!", output);
+
     }
 
 }

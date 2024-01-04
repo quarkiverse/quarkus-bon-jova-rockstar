@@ -5,6 +5,7 @@ import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
 import rock.RockstarBaseListener;
@@ -21,6 +22,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     private final ClassCreator creator;
 
     private final Map<String, FieldDescriptor> variables = new HashMap<>();
+    private String mostRecentVariableName = null;
 
     public BytecodeGeneratingListener(ClassCreator creator) {
         super();
@@ -40,6 +42,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext ctx) {
 
         Assignment assignment = new Assignment(ctx);
+        trackVariable(ctx.variable());
 
         String originalName = assignment.getVariableName();
         FieldDescriptor field;
@@ -67,24 +70,51 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             main.writeStaticField(field, main.load((boolean) value));
         }
 
-
     }
-
 
     @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
-
+        Rockstar.VariableContext variable = ctx.expression()
+                                               .variable();
         String text = ctx.expression()
                          .getText();
-        if (variables.containsKey(text.toLowerCase())) {
-            ResultHandle value = main.readStaticField(variables.get(text.toLowerCase()));
-            Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
+        if (variable != null) {
+            String variableName;
+            TerminalNode pronouns = variable.PRONOUNS();
+            if (pronouns != null) {
+                if (mostRecentVariableName == null) {
+                    // This could be an internal error or a program one
+                    throw new RuntimeException("No good: Unassociated pronoun");
+                }
+                variableName = mostRecentVariableName;
+
+            } else {
+                variableName = text.toLowerCase();
+            }
+            if (variables.containsKey(variableName)) {
+                ResultHandle value = main.readStaticField(variables.get(variableName));
+                Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
+
+            } else {
+                // This is an internal error, not a program one
+                throw new RuntimeException("Moral panic: Could not find variable called " + variableName);
+            }
         } else {
             // This is a literal
             // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
             // idiomatic-ish)
             text = text.replaceAll("\"", "");
             Gizmo.systemOutPrintln(main, main.load(text));
+        }
+    }
+
+    /*
+       Pronouns refer to the last named variable determined by parsing order.
+     */
+    private void trackVariable(Rockstar.VariableContext variable) {
+        if (variable != null) {
+            mostRecentVariableName = variable.getText()
+                                             .toLowerCase();
         }
     }
 }
