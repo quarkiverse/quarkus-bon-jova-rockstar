@@ -77,48 +77,59 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterIncrementStmt(Rockstar.IncrementStmtContext ctx) {
         Rockstar.VariableContext variable = ctx.variable();
 
-        // TODO this is assuming integers, also need to handle strings and doubles
-        ResultHandle value = getVariable(variable);
-        ResultHandle incremented;
-        try {
-            // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
-            // (or to track it ourselves)
-            // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
-            //  that's not what's implemented now
-            incremented = main.increment(value);
-        } catch (RuntimeException e) {
-            try {
-                incremented = main.add(value, main.load((double) 1));
-            } catch (RuntimeException ee) {
-                // This must be a string
-                ResultHandle constant = main.load("1");
-                incremented = main.invokeVirtualMethod(
-                        MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
-                        constant);
-            }
-        }
+        int count = ctx.ups()
+                       .KW_UP()
+                       .size();
 
-        writeVariable(variable, incremented);
+        for (int i = 0; i < count; i++) {
+
+            ResultHandle value = getVariable(variable);
+            ResultHandle incremented;
+            try {
+                // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
+                // (or to track it ourselves)
+                // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
+                //  that's not what's implemented now
+                incremented = main.increment(value);
+            } catch (RuntimeException e) {
+                try {
+                    incremented = main.add(value, main.load((double) 1));
+                } catch (RuntimeException ee) {
+                    // This must be a string
+                    ResultHandle constant = main.load("1");
+                    incremented = main.invokeVirtualMethod(
+                            MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
+                            constant);
+                }
+            }
+
+            writeVariable(variable, incremented);
+        }
     }
 
     @Override
     public void enterDecrementStmt(Rockstar.DecrementStmtContext ctx) {
         Rockstar.VariableContext variable = ctx.variable();
 
-        // TODO this is assuming integers, also need to handle strings and doubles
-        ResultHandle value = getVariable(variable);
-        ResultHandle incremented;
-        try {
-            // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
-            // (or to track it ourselves)
-            // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
-            //  that's not what's implemented now
-            incremented = main.add(value, main.load(-1));
-        } catch (RuntimeException e) {
-            incremented = main.add(value, main.load((double) -1));
-        }
+        int count = ctx.downs()
+                       .KW_DOWN()
+                       .size();
 
-        writeVariable(variable, incremented);
+        for (int i = 0; i < count; i++) {
+            ResultHandle value = getVariable(variable);
+            ResultHandle incremented;
+            try {
+                // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
+                // (or to track it ourselves)
+                // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
+                //  that's not what's implemented now
+                incremented = main.add(value, main.load(-1));
+            } catch (RuntimeException e) {
+                incremented = main.add(value, main.load((double) -1));
+            }
+
+            writeVariable(variable, incremented);
+        }
     }
 
     private void writeVariable(Rockstar.VariableContext variable, ResultHandle value) {
