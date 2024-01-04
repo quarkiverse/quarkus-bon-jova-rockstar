@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ParseHelper {
 
     public static Rockstar.AssignmentStmtContext getAssignment(String program) {
-        return (Rockstar.AssignmentStmtContext) getGrammarElement(program, (CapturingListener l) -> l.getAssignmentStatement());
+        return (Rockstar.AssignmentStmtContext) getGrammarElement(program, CapturingListener::getAssignmentStatement);
     }
 
     public static Rockstar.PoeticNumberLiteralContext getPoeticNumberLiteral(String program) {
-        return (Rockstar.PoeticNumberLiteralContext) getGrammarElement(program, (CapturingListener l) -> l.getPoeticNumberLiteral());
+        return (Rockstar.PoeticNumberLiteralContext) getGrammarElement(program, CapturingListener::getPoeticNumberLiteral);
     }
 
     private static RuleContext getGrammarElement(String program, Function<CapturingListener,
