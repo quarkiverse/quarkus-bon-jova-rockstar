@@ -46,11 +46,11 @@ loopStmt: KW_LOOP WS expr=expression NL statementList;
 
 incrementStmt: KW_BUILD WS variable WS ups;
 
-ups: KW_UP (COMMA WS KW_UP)*;
+ups: KW_UP (COMMA? WS+ KW_UP)*;
 
 decrementStmt: KW_KNOCK WS variable WS downs;
 
-downs: KW_DOWN (COMMA WS KW_DOWN)*;
+downs: KW_DOWN (COMMA? WS+ KW_DOWN)*;
 
 returnStmt: KW_GIVE WS KW_BACK WS expression;
 

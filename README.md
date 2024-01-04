@@ -95,7 +95,7 @@ Some of these may work but have not been validated with tests.
 
 ## Number operations
 
-- [ ] Incrementing and decrementing
+- [X] Incrementing and decrementing
 - [ ] Arithmetic operators
 - [ ] Aliases for arithmetic operators
 - [ ] Compound assignment using `let`

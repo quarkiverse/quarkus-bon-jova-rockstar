@@ -278,9 +278,20 @@ names in Rockstar.)
         assertEquals("2\n", output);
     }
 
-    @Disabled("Repeated increments in the same statement not supported by grammar, yet")
     @Test
-    public void shouldHandleIncrementForRepetitionCase() {
+    public void shouldHandleIncrementForRepetitionWithCommasCase() {
+        String program = """
+                My world is 0
+                Build my world up, up, up
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("3\n", output);
+    }
+
+    @Test
+    public void shouldHandleIncrementForRepetitionWithoutCommasCase() {
         String program = """
                 My world is 0
                 Build my world up, up up
@@ -288,7 +299,7 @@ names in Rockstar.)
                 """;
         String output = compileAndLaunch(program);
 
-        assertEquals("2\n", output);
+        assertEquals("3\n", output);
     }
 
 
@@ -357,6 +368,30 @@ names in Rockstar.)
 
         // Floating points are hard! Satriani also gives this as -0.5800000000000001, and a simple "1.42 - 2.0" also gives that result
         assertEquals("-0.5800000000000001\n", output);
+    }
+
+    @Test
+    public void shouldHandleDecrementForRepetitionWithCommasCase() {
+        String program = """
+                My world is 4
+                Knock my world down, down, down
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("1\n", output);
+    }
+
+    @Test
+    public void shouldHandleDecrementForRepetitionWithoutCommasCase() {
+        String program = """
+                My world is 4
+                Knock my world down down, down
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("1\n", output);
     }
 
     @Test
