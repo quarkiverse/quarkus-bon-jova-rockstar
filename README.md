@@ -14,9 +14,24 @@ Andreas Scheja as a starting point.
 
 ## Getting started
 
-After cloning the repo, you will need to run `mvn compile` to generate the Antlr Java classes. These will appear
-in `target/generated-sources`, so you may also need to configure your IDE to treat that folder as a generated sources
-folder.
+In the top-level directory, run
+
+`mvn install`
+
+This will build the Rockstar parser, the Quarkus extension, and the sample app.
+You can then run the sample app with
+
+```
+cd bon-jova-app
+mvn quarkus:dev
+```
+
+### IDE integration
+
+After cloning the repo, you will need to run `mvn compile` in the `bon-jova-implementation` folder to generate the Antlr
+Java classes, or your IDE will report compile failures and missing classes. (A top-level `mvn install` will also work.)
+The generated classes will appear in `target/generated-sources`, so you may also need to configure your IDE to treat
+that folder as a generated sources folder.
 
 ## What's implemented
 
