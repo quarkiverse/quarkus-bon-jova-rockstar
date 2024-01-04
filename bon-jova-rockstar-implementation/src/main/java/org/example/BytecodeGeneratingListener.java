@@ -4,6 +4,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodCreator;
+import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.objectweb.asm.Opcodes;
@@ -73,39 +74,89 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
+    public void enterIncrementStmt(Rockstar.IncrementStmtContext ctx) {
+        Rockstar.VariableContext variable = ctx.variable();
+
+        // TODO this is assuming integers, also need to handle strings and doubles
+        ResultHandle value = getVariable(variable);
+        ResultHandle incremented;
+        try {
+            // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
+            // (or to track it ourselves)
+            // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
+            //  that's not what's implemented now
+            incremented = main.increment(value);
+        } catch (RuntimeException e) {
+            try {
+                incremented = main.add(value, main.load((double) 1));
+            } catch (RuntimeException ee) {
+                // This must be a string
+                ResultHandle constant = main.load("1");
+                incremented = main.invokeVirtualMethod(
+                        MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
+                        constant);
+            }
+        }
+
+        writeVariable(variable, incremented);
+    }
+
+    private void writeVariable(Rockstar.VariableContext variable, ResultHandle value) {
+        String variableName = getVariableName(variable);
+        FieldDescriptor field = variables.get(variableName);
+
+        main.writeStaticField(field, value);
+    }
+
+    @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
         Rockstar.VariableContext variable = ctx.expression()
                                                .variable();
-        String text = ctx.expression()
-                         .getText();
         if (variable != null) {
-            String variableName;
-            TerminalNode pronouns = variable.PRONOUNS();
-            if (pronouns != null) {
-                if (mostRecentVariableName == null) {
-                    // This could be an internal error or a program one
-                    throw new RuntimeException("No good: Unassociated pronoun");
-                }
-                variableName = mostRecentVariableName;
 
-            } else {
-                variableName = text.toLowerCase();
-            }
-            if (variables.containsKey(variableName)) {
-                ResultHandle value = main.readStaticField(variables.get(variableName));
-                Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
+            ResultHandle value = getVariable(variable);
 
-            } else {
-                // This is an internal error, not a program one
-                throw new RuntimeException("Moral panic: Could not find variable called " + variableName);
-            }
+            Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
+
         } else {
             // This is a literal
             // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
             // idiomatic-ish)
+            String text = ctx.expression()
+                             .getText();
             text = text.replaceAll("\"", "");
             Gizmo.systemOutPrintln(main, main.load(text));
         }
+    }
+
+    private ResultHandle getVariable(Rockstar.VariableContext variable) {
+        String variableName = getVariableName(variable);
+        if (variables.containsKey(variableName)) {
+            return main.readStaticField(variables.get(variableName));
+
+        } else {
+            // This is an internal error, not a program one
+            throw new RuntimeException("Moral panic: Could not find variable called " + variableName);
+        }
+    }
+
+    // In principal trivial, in practice made a bit complicated by normalisation and more complicated by pronouns
+    private String getVariableName(Rockstar.VariableContext variable) {
+        String variableName;
+        TerminalNode pronouns = variable.PRONOUNS();
+        if (pronouns != null) {
+            if (mostRecentVariableName == null) {
+                // This could be an internal error or a program one
+                throw new RuntimeException("No good: Unassociated pronoun");
+            }
+            variableName = mostRecentVariableName;
+
+        } else {
+            String text = variable
+                    .getText();
+            variableName = text.toLowerCase();
+        }
+        return variableName;
     }
 
     /*

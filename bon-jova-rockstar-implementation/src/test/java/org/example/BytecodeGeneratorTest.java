@@ -264,7 +264,74 @@ names in Rockstar.)
                 "pass!", output);
 
     }
-    
+
+    @Test
+    public void shouldHandleIncrementForSimpleCase() {
+        String program = """
+                My world is 0
+                Build my world up
+                Build my world up
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("2\n", output);
+    }
+
+    @Disabled("Repeated increments in the same statement not supported by grammar, yet")
+    @Test
+    public void shouldHandleIncrementForRepetitionCase() {
+        String program = """
+                My world is 0
+                Build my world up, up up
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("2\n", output);
+    }
+
+
+    @Test
+    public void shouldHandleIncrementForPronounCase() {
+        String program = """
+                My world is 0
+                Build it up
+                Build it up
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("2\n", output);
+
+    }
+
+    @Test
+    public void shouldHandleIncrementForDecimalCase() {
+        String program = """
+                My world is 3.141
+                Build my world up
+                Build my world up
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("5.141\n", output);
+    }
+
+    @Test
+    public void shouldHandleIncrementForStringCase() {
+        String program = """
+                My world is "hello"
+                Build my world up
+                Build my world up
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("hello11\n", output);
+    }
+
     private String compileAndLaunch(String program) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;
