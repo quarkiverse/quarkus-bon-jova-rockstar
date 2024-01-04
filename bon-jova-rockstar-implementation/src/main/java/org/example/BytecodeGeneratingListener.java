@@ -101,6 +101,26 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         writeVariable(variable, incremented);
     }
 
+    @Override
+    public void enterDecrementStmt(Rockstar.DecrementStmtContext ctx) {
+        Rockstar.VariableContext variable = ctx.variable();
+
+        // TODO this is assuming integers, also need to handle strings and doubles
+        ResultHandle value = getVariable(variable);
+        ResultHandle incremented;
+        try {
+            // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
+            // (or to track it ourselves)
+            // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
+            //  that's not what's implemented now
+            incremented = main.add(value, main.load(-1));
+        } catch (RuntimeException e) {
+            incremented = main.add(value, main.load((double) -1));
+        }
+
+        writeVariable(variable, incremented);
+    }
+
     private void writeVariable(Rockstar.VariableContext variable, ResultHandle value) {
         String variableName = getVariableName(variable);
         FieldDescriptor field = variables.get(variableName);

@@ -295,14 +295,14 @@ names in Rockstar.)
     @Test
     public void shouldHandleIncrementForPronounCase() {
         String program = """
-                My world is 0
+                My world is 1
                 Build it up
                 Build it up
                 Say my world
                 """;
         String output = compileAndLaunch(program);
 
-        assertEquals("2\n", output);
+        assertEquals("3\n", output);
 
     }
 
@@ -320,6 +320,46 @@ names in Rockstar.)
     }
 
     @Test
+    public void shouldHandleDecrementForSimpleCase() {
+        String program = """
+                The walls is 0
+                Knock the walls down
+                Knock the walls down
+                Shout the walls
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("-2\n", output);
+    }
+
+    @Test
+    public void shouldHandleDecrementForPronounCase() {
+        String program = """
+                The walls is 1
+                Knock them down
+                Knock them down
+                Shout the walls
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("-1\n", output);
+    }
+
+    @Test
+    public void shouldHandleDecrementForDecimalCase() {
+        String program = """
+                The walls is 1.42
+                Knock the walls down
+                Knock the walls down
+                Shout the walls
+                """;
+        String output = compileAndLaunch(program);
+
+        // Floating points are hard! Satriani also gives this as -0.5800000000000001, and a simple "1.42 - 2.0" also gives that result
+        assertEquals("-0.5800000000000001\n", output);
+    }
+
+    @Test
     public void shouldHandleIncrementForStringCase() {
         String program = """
                 My world is "hello"
@@ -331,6 +371,8 @@ names in Rockstar.)
 
         assertEquals("hello11\n", output);
     }
+
+    // No need for decrement for a string, it's NaN in Satriani
 
     private String compileAndLaunch(String program) {
         // Save the current System.out for later restoration
