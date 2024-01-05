@@ -2,6 +2,7 @@ package org.example;
 
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
 
@@ -11,11 +12,21 @@ public class Expression {
     private Object value;
     private Variable variable;
 
+    private Expression lhe;
+    private Expression rhe;
+    private Token op;
+
     public Expression(Rockstar.ExpressionContext ctx) {
         if (ctx != null) {
             Rockstar.LiteralContext literal = ctx.literal();
             Rockstar.ConstantContext constant = ctx.constant();
             Rockstar.VariableContext variableContext = ctx.variable();
+
+            op = ctx.op;
+            if (op != null) {
+                lhe = new Expression(ctx.lhe);
+                rhe = new Expression(ctx.rhe);
+            }
 
             if (literal != null) {
                 if (literal
@@ -76,7 +87,20 @@ public class Expression {
     }
 
     public ResultHandle getResultHandle(MethodCreator method) {
-        if (variable != null) {
+        if (op != null) {
+            if ("+".equals(op.getText())) {
+                return method.add(lhe.getResultHandle(method), rhe.getResultHandle(method));
+            } else if ("-".equals(op.getText())) {
+                // Handle subtraction by multiplying by -1 and adding
+                ResultHandle negativeRightSide = method.multiply(method.load(-1d), rhe.getResultHandle(method));
+                return method.add(lhe.getResultHandle(method), negativeRightSide);
+            } else if ("*".equals(op.getText())) {
+                return method.multiply(lhe.getResultHandle(method), rhe.getResultHandle(method));
+            } else if ("/".equals(op.getText())) {
+                //  return method.divide(lhe.getResultHandle(method), rhe.getResultHandle(method));
+                throw new RuntimeException("Unsupported operation: divided we fall, and all that");
+            }
+        } else if (variable != null) {
             return variable.read(method);
         } else {
             // This is a literal

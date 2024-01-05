@@ -3,10 +3,15 @@ package org.example;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
+import org.example.util.DynamicClassLoader;
 import org.example.util.ParseHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
+
+import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -131,6 +136,44 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     @Test
+    public void shouldHandleSimpleAddition() throws Exception {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 + 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(9d, answer);
+    }
+
+
+    @Test
+    public void shouldHandleSimpleSubtraction() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 - 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(-3d, answer);
+    }
+
+    @Test
+    public void shouldHandleSimpleMultiplication() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 * 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(18, answer);
+    }
+
+    @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
+    @Test
+    public void shouldHandleSimpleDivision() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 24/6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(4, answer);
+    }
+
+    @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {
         ClassCreator creator = ClassCreator.builder()
                                            .className("holder")
@@ -176,5 +219,29 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         assertTrue(handle.toString()
                          .contains("type='Z'"), handle.toString());
 
+    }
+
+    private Object execute(Expression a) {
+        DynamicClassLoader cl = new DynamicClassLoader();
+
+        // The auto-close on this triggers the write
+        try (ClassCreator creator = ClassCreator.builder()
+                                                .classOutput(cl)
+                                                .className("com.MyTest")
+                                                .build()) {
+
+            MethodCreator method = creator.getMethodCreator("method", Object.class)
+                                          .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+            ResultHandle rh = a.getResultHandle(method);
+            method.returnValue(rh);
+        }
+
+        try {
+            Class<?> clazz = cl.loadClass("com.MyTest");
+            return clazz.getMethod("method")
+                        .invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Test error: " + e);
+        }
     }
 }
