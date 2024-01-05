@@ -1,6 +1,9 @@
 package org.example;
 
+import io.quarkus.gizmo.ClassCreator;
+import io.quarkus.gizmo.MethodCreator;
 import org.example.util.ParseHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
@@ -8,6 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class AssignmentTest {
+
+    @BeforeEach
+    public void clearState() {
+        Variable.clearPronouns();
+    }
 
     @Test
     public void shouldParseVariableNameWithSimpleVariableAssignment() {
@@ -28,29 +36,20 @@ public class AssignmentTest {
     }
 
     @Test
-    public void shouldGenerateAJavaCompliantVariableName() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is 6");
-        Assignment a = new Assignment(ctx);
-        // Variable names should be normalised to lower case
-        String name = "my_thing";
-        assertEquals(name, a.getNormalisedVariableName());
-    }
-
-    @Test
     public void shouldParseVariableNameWithProperVariableAssignment() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Doctor Feelgood is 6");
         Assignment a = new Assignment(ctx);
         // Variable names should be normalised to lower case
         assertEquals("doctor feelgood", a.getVariableName());
-        assertEquals("doctor_feelgood", a.getNormalisedVariableName());
     }
 
     @Test
     public void shouldParseIntegerLiterals() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is 5");
         Assignment a = new Assignment(ctx);
-        assertEquals(5, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        // The number should be stored as a double, even though it was entered as an integer
+        assertEquals(5d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     /* Numbers in Rockstar are double-precision floating point numbers, stored according to the IEEE 754 standard.*/
@@ -93,8 +92,8 @@ public class AssignmentTest {
     public void shouldParseIntegerPoeticNumberLiterals() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is a big bad monster");
         Assignment a = new Assignment(ctx);
-        assertEquals(1337, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(1337d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     /*
@@ -192,7 +191,7 @@ public class AssignmentTest {
     public void shouldHandleAssignmentUsingPut() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put 123 into X");
         Assignment a = new Assignment(ctx);
-        assertEquals(123, a.getValue());
+        assertEquals(123d, a.getValue());
     }
 
     @Test
@@ -200,6 +199,35 @@ public class AssignmentTest {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put lies into X");
         Assignment a = new Assignment(ctx);
         assertEquals(false, a.getValue());
+    }
+
+    // Assignment to a variable should be interpreted as a poetic number literal, not the variable.
+    // "A poetic number literal begins with a variable name, followed by the keyword is, or the aliases are, was or were. As long as the
+    // next symbol is not a Literal Word, the rest of the line is treated as a decimal number in which the values of consecutive digits
+    // are given by the lengths of the subsequent barewords, up until the end of the line. "
+    // Validated by comparison to Satriani.
+    @Test
+    public void shouldInterpretAssignmentToVariablesAsPoeticNumberLiterals() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"hello\"\nEverything is my thing");
+        Assignment a = new Assignment(ctx);
+        assertEquals(25d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
+    }
+
+    @Test
+    public void shouldWriteToClass() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"hello\"\nEverything is my thing");
+        Assignment a = new Assignment(ctx);
+
+        ClassCreator creator = ClassCreator.builder()
+                                           .className("holder")
+                                           .build();
+        MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
+
+        a.toCode(creator, method);
+        // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's
+        // awfully close to just writing the code down twice, so just be happy if we get here without explosions
+
     }
 
 }
