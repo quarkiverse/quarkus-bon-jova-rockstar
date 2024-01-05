@@ -136,7 +136,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     @Test
-    public void shouldHandleSimpleAddition() throws Exception {
+    public void shouldHandleSimpleAddition() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 + 6", 0);
         Expression a = new Expression(ctx);
         assertNull(a.getValue());
@@ -144,6 +144,19 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         assertEquals(9d, answer);
     }
 
+    @Test
+    public void shouldHandleAdditionWithAliases() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 plus 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(9d, answer);
+
+        ctx = ParseHelper.getExpression("shout 8 with 5", 0);
+        a = new Expression(ctx);
+        answer = (double) execute(a);
+        assertEquals(13d, answer);
+    }
 
     @Test
     public void shouldHandleSimpleSubtraction() {
@@ -155,12 +168,40 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     @Test
+    public void shouldHandleSubtractionWithAliases() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 minus 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(-3d, answer);
+
+        ctx = ParseHelper.getExpression("shout 8 without 5", 0);
+        a = new Expression(ctx);
+        answer = (double) execute(a);
+        assertEquals(3d, answer);
+    }
+
+    @Test
     public void shouldHandleSimpleMultiplication() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 * 6", 0);
         Expression a = new Expression(ctx);
         assertNull(a.getValue());
         double answer = (double) execute(a);
         assertEquals(18, answer);
+    }
+
+    @Test
+    public void shouldHandleMultiplicationWithAliases() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 times 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(18d, answer);
+
+        ctx = ParseHelper.getExpression("shout 8 of 5", 0);
+        a = new Expression(ctx);
+        answer = (double) execute(a);
+        assertEquals(40d, answer);
     }
 
     @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
@@ -173,12 +214,29 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         assertEquals(4, answer);
     }
 
+    @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
+    @Test
+    public void shouldHandleDivisionWithAliases() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 over 6", 0);
+        Expression a = new Expression(ctx);
+        assertNull(a.getValue());
+        double answer = (double) execute(a);
+        assertEquals(0.5, answer);
+
+        ctx = ParseHelper.getExpression("shout 40 between 5", 0);
+        a = new Expression(ctx);
+        answer = (double) execute(a);
+        assertEquals(5d, answer);
+    }
+
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {
-        ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
-        MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+        MethodCreator main;
+        try (ClassCreator creator = ClassCreator.builder()
+                                                .className("holder")
+                                                .build()) {
+            main = creator.getMethodCreator("main", void.class, String[].class);
+        }
 
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\"");
         ResultHandle handle = new Expression(ctx).getResultHandle(main);
@@ -191,10 +249,12 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForNumbers() {
-        ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
-        MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+        MethodCreator main;
+        try (ClassCreator creator = ClassCreator.builder()
+                                                .className("holder")
+                                                .build()) {
+            main = creator.getMethodCreator("main", void.class, String[].class);
+        }
 
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 5");
         ResultHandle handle = new Expression(ctx).getResultHandle(main);
@@ -207,10 +267,12 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForBooleans() {
-        ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
-        MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+        MethodCreator main;
+        try (ClassCreator creator = ClassCreator.builder()
+                                                .className("holder")
+                                                .build()) {
+            main = creator.getMethodCreator("main", void.class, String[].class);
+        }
 
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout ok");
         ResultHandle handle = new Expression(ctx).getResultHandle(main);

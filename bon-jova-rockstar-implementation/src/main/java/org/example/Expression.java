@@ -2,7 +2,6 @@ package org.example;
 
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
 
@@ -14,7 +13,10 @@ public class Expression {
 
     private Expression lhe;
     private Expression rhe;
-    private Token op;
+    private Operation operation;
+
+    private enum Operation {ADD, SUBTRACT, MULTIPLY, DIVIDE}
+
 
     public Expression(Rockstar.ExpressionContext ctx) {
         if (ctx != null) {
@@ -22,10 +24,19 @@ public class Expression {
             Rockstar.ConstantContext constant = ctx.constant();
             Rockstar.VariableContext variableContext = ctx.variable();
 
-            op = ctx.op;
-            if (op != null) {
+            if (ctx.op != null) {
                 lhe = new Expression(ctx.lhe);
                 rhe = new Expression(ctx.rhe);
+
+                if (ctx.KW_ADD() != null || "+".equals(ctx.op.getText())) {
+                    operation = Operation.ADD;
+                } else if (ctx.KW_SUBTRACT() != null || "-".equals(ctx.op.getText())) {
+                    operation = Operation.SUBTRACT;
+                } else if (ctx.KW_MULTIPLY() != null || "*".equals(ctx.op.getText())) {
+                    operation = Operation.MULTIPLY;
+                } else if (ctx.KW_DIVIDE() != null || "/".equals(ctx.op.getText())) {
+                    operation = Operation.DIVIDE;
+                }
             }
 
             if (literal != null) {
@@ -87,16 +98,16 @@ public class Expression {
     }
 
     public ResultHandle getResultHandle(MethodCreator method) {
-        if (op != null) {
-            if ("+".equals(op.getText())) {
+        if (operation != null) {
+            if (operation == Operation.ADD) {
                 return method.add(lhe.getResultHandle(method), rhe.getResultHandle(method));
-            } else if ("-".equals(op.getText())) {
+            } else if (operation == Operation.SUBTRACT) {
                 // Handle subtraction by multiplying by -1 and adding
                 ResultHandle negativeRightSide = method.multiply(method.load(-1d), rhe.getResultHandle(method));
                 return method.add(lhe.getResultHandle(method), negativeRightSide);
-            } else if ("*".equals(op.getText())) {
+            } else if (operation == Operation.MULTIPLY) {
                 return method.multiply(lhe.getResultHandle(method), rhe.getResultHandle(method));
-            } else if ("/".equals(op.getText())) {
+            } else if (operation == Operation.DIVIDE) {
                 //  return method.divide(lhe.getResultHandle(method), rhe.getResultHandle(method));
                 throw new RuntimeException("Unsupported operation: divided we fall, and all that");
             }

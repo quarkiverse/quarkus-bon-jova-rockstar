@@ -428,8 +428,6 @@ names in Rockstar.)
     // No need for decrement for a string, it's NaN in Satriani
 
     // Rockstar supports the infix arithmetic operators +, -, * and /
-
-
     @Test
     public void shouldHandleSimpleAdditionOfVariables() {
         String program = """
@@ -459,6 +457,53 @@ names in Rockstar.)
         // letters > 2) instead of having to think of 12- and 13-letter words.
         //         The semi-colon, comma, apostrophe and any other non-alphabetical characters are ignored.
         assertEquals("254\n", output);
+    }
+
+
+    @Test
+    public void shouldHandleArithmeticWithVariablesAndPut() {
+
+        String program = """
+                Your heart is love
+                The whole is happy
+                My hands is awaiting
+                Put the whole of your heart into my hands
+                Say my hands
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("20\n", output);
+    }
+
+    @Disabled("Not yet supported")
+    @Test
+    public void shouldHandleInitializeVariableOnAssignment() {
+
+        // No declaration of my hands before put-ing into it
+        String program = """
+                Your heart is love
+                The whole is happy
+                Put the whole of your heart into my hands
+                Say my hands
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("20\n", output);
+    }
+
+    @Disabled("Division not working")
+    @Test
+    public void shouldHandleDivisionWithVariablesAndPut() {
+
+        String program = """
+                My heart is full
+                The moon is aflame
+                My heart over the moon
+                Whisper my heart
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("4\n", output);
     }
 
     private String compileAndLaunch(String program) {
