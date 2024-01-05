@@ -130,7 +130,7 @@ KW_NOR: N O R;
 PROPER_NOUN: [A-Z][A-Z|a-z]*;
 WORD: [a-z|A-Z]+;
 
-NUMERIC_LITERAL: [0-9]+ ('.' [0-9]+)?;
+NUMERIC_LITERAL: HYPHEN?[0-9]+ ('.' [0-9]+)?;
 STRING_LITERAL: '"' .*? '"';
 
 NL: [,. ]* '\r'? '\n';

@@ -31,6 +31,15 @@ public class LiteralTest {
     }
 
     @Test
+    public void shouldParseNegativeLiterals() {
+        Rockstar.LiteralContext ctx = ParseHelper.getLiteral("thing is -5");
+        Literal a = new Literal(ctx);
+        // The number should be stored as a double, even though it was entered as an integer
+        assertEquals(-5d, a.getValue());
+        assertEquals(double.class, a.getValueClass());
+    }
+
+    @Test
     public void shouldParseStringLiterals() {
         Rockstar.LiteralContext ctx = ParseHelper.getLiteral("thing is \"Yes hello\"");
         Literal a = new Literal(ctx);
