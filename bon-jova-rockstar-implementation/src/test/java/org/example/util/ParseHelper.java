@@ -27,6 +27,22 @@ public class ParseHelper {
         return (Rockstar.PoeticNumberLiteralContext) getGrammarElement(program, CapturingListener::getPoeticNumberLiteral);
     }
 
+    public static Rockstar.ExpressionContext getExpression(String program) {
+        return (Rockstar.ExpressionContext) getGrammarElement(program, CapturingListener::getExpression);
+    }
+
+    public static Rockstar.LiteralContext getLiteral(String program) {
+        return (Rockstar.LiteralContext) getGrammarElement(program, CapturingListener::getLiteral);
+    }
+
+    public static Rockstar.ConstantContext getConstant(String program) {
+        return (Rockstar.ConstantContext) getGrammarElement(program, CapturingListener::getConstant);
+    }
+
+    public static Rockstar.VariableContext getVariable(String program) {
+        return (Rockstar.VariableContext) getGrammarElement(program, CapturingListener::getVariable);
+    }
+
     private static RuleContext getGrammarElement(String program, Function<CapturingListener,
             RuleContext> getter) {
 /*
@@ -53,7 +69,7 @@ drive a parse to extract the thing we want.
 
             RuleContext answer = getter.apply(listener);
             if (answer == null) {
-                fail("There were no assignment statements. Did the program parse correctly?");
+                fail("There were no statements of the expected type. Did the program parse correctly?");
             }
             return answer;
         } catch (IOException e) {

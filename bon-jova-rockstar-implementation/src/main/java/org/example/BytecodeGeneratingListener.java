@@ -6,13 +6,11 @@ import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
 import rock.RockstarBaseListener;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.text.DecimalFormat;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -22,16 +20,32 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     private final MethodCreator main;
     private final ClassCreator creator;
 
-    private final Map<String, FieldDescriptor> variables = new HashMap<>();
-    private String mostRecentVariableName = null;
+    private final FieldDescriptor formatter;
+
 
     public BytecodeGeneratingListener(ClassCreator creator) {
         super();
+
         main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);
 
+        // Ideally this would be static final, but I got a bit stuck on the <clinit>
+        ResultHandle formatterInstance = main.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
+                main.load("#.#########"));
+        formatter = creator.getFieldCreator("formatter", DecimalFormat.class)
+                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
+                           .getFieldDescriptor();
+        main.writeStaticField(formatter, formatterInstance);
+
+
         this.creator = creator;
 
+    }
+
+    // Ensure we don't get cross-talk between programs for the statics
+    @Override
+    public void enterProgram(Rockstar.ProgramContext ctx) {
+        Variable.clearPronouns();
     }
 
     @Override
@@ -43,39 +57,11 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext ctx) {
 
         Assignment assignment = new Assignment(ctx);
-        trackVariable(ctx.variable());
-
-        String originalName = assignment.getVariableName();
-        FieldDescriptor field;
-        if (!variables.containsKey(originalName)) {
-
-            String variableName = assignment.getNormalisedVariableName();
-
-            // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-            field = creator.getFieldCreator(variableName, assignment.getVariableClass())
-                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
-                           .getFieldDescriptor();
-            variables.put(originalName, field);
-        } else {
-            field = variables.get(originalName);
-        }
-
-        Object value = assignment.getValue();
-        if (String.class.equals(assignment.getVariableClass())) {
-            main.writeStaticField(field, main.load((String) value));
-        } else if (int.class.equals(assignment.getVariableClass())) {
-            main.writeStaticField(field, main.load((int) value));
-        } else if (double.class.equals(assignment.getVariableClass())) {
-            main.writeStaticField(field, main.load((double) value));
-        } else if (boolean.class.equals(assignment.getVariableClass())) {
-            main.writeStaticField(field, main.load((boolean) value));
-        }
-
+        assignment.toCode(creator, main);
     }
 
     @Override
     public void enterIncrementStmt(Rockstar.IncrementStmtContext ctx) {
-        Rockstar.VariableContext variable = ctx.variable();
 
         int count = ctx.ups()
                        .KW_UP()
@@ -83,120 +69,72 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         for (int i = 0; i < count; i++) {
 
-            ResultHandle value = getVariable(variable);
+            Variable variable = new Variable(ctx.variable());
+            ResultHandle value = variable.read(main);
             ResultHandle incremented;
             try {
                 // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
                 // (or to track it ourselves)
-                // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
-                //  that's not what's implemented now
-                incremented = main.increment(value);
-            } catch (RuntimeException e) {
-                try {
-                    incremented = main.add(value, main.load((double) 1));
-                } catch (RuntimeException ee) {
-                    // This must be a string
-                    ResultHandle constant = main.load("1");
-                    incremented = main.invokeVirtualMethod(
-                            MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
-                            constant);
-                }
+                incremented = main.add(value, main.load((double) 1));
+            } catch (RuntimeException ee) {
+                // This must be a string
+                ResultHandle constant = main.load("1");
+                incremented = main.invokeVirtualMethod(
+                        MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
+                        constant);
             }
 
-            writeVariable(variable, incremented);
+            variable.write(main, incremented);
         }
     }
 
     @Override
     public void enterDecrementStmt(Rockstar.DecrementStmtContext ctx) {
-        Rockstar.VariableContext variable = ctx.variable();
 
         int count = ctx.downs()
                        .KW_DOWN()
                        .size();
 
         for (int i = 0; i < count; i++) {
-            ResultHandle value = getVariable(variable);
-            ResultHandle incremented;
-            try {
-                // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
-                // (or to track it ourselves)
-                // TODO According to the spec, all numbers are actually double, and so in principle we should always increment with 1.0, but
-                //  that's not what's implemented now
-                incremented = main.add(value, main.load(-1));
-            } catch (RuntimeException e) {
-                incremented = main.add(value, main.load((double) -1));
-            }
-
-            writeVariable(variable, incremented);
+            Variable variable = new Variable(ctx.variable());
+            ResultHandle value = variable.read(main);
+            ResultHandle incremented = main.add(value, main.load((double) -1));
+            variable.write(main, incremented);
         }
     }
 
-    private void writeVariable(Rockstar.VariableContext variable, ResultHandle value) {
-        String variableName = getVariableName(variable);
-        FieldDescriptor field = variables.get(variableName);
-
-        main.writeStaticField(field, value);
-    }
 
     @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
-        Rockstar.VariableContext variable = ctx.expression()
-                                               .variable();
-        if (variable != null) {
 
-            ResultHandle value = getVariable(variable);
+        Expression expression = new Expression(ctx.expression());
+        ResultHandle value = expression.getResultHandle(main);
 
-            Gizmo.systemOutPrintln(main, Gizmo.toString(main, value));
+        // We want to do a special toString on numbers, to avoid tacking decimals onto integers
+        final ResultHandle toStringed;
+        if (isNumber(value)) {
+            ResultHandle df = main.readStaticField(formatter);
 
-        } else {
-            // This is a literal
-            // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
-            // idiomatic-ish)
-            String text = ctx.expression()
-                             .getText();
-            text = text.replaceAll("\"", "");
-            Gizmo.systemOutPrintln(main, main.load(text));
-        }
-    }
-
-    private ResultHandle getVariable(Rockstar.VariableContext variable) {
-        String variableName = getVariableName(variable);
-        if (variables.containsKey(variableName)) {
-            return main.readStaticField(variables.get(variableName));
+            toStringed = main
+                    .invokeVirtualMethod(
+                            MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
+                            df, value);
 
         } else {
-            // This is an internal error, not a program one
-            throw new RuntimeException("Moral panic: Could not find variable called " + variableName);
+            toStringed = Gizmo.toString(main, value);
         }
+        Gizmo.systemOutPrintln(main, toStringed);
     }
 
-    // In principal trivial, in practice made a bit complicated by normalisation and more complicated by pronouns
-    private String getVariableName(Rockstar.VariableContext variable) {
-        String variableName;
-        TerminalNode pronouns = variable.PRONOUNS();
-        if (pronouns != null) {
-            if (mostRecentVariableName == null) {
-                // This could be an internal error or a program one
-                throw new RuntimeException("No good: Unassociated pronoun");
-            }
-            variableName = mostRecentVariableName;
-
-        } else {
-            String text = variable
-                    .getText();
-            variableName = text.toLowerCase();
-        }
-        return variableName;
+    // It would be nice to get rid of this, but when we get an expression, we don't always know what the type of thing in the result
+    // handle is
+    private static boolean isNumber(ResultHandle value) {
+        // ResultHandle knows the type, but it's private
+        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
+        // Take advantage of the toString format of ResultHandle
+        return value.toString()
+                    .contains("type='D'");
     }
 
-    /*
-       Pronouns refer to the last named variable determined by parsing order.
-     */
-    private void trackVariable(Rockstar.VariableContext variable) {
-        if (variable != null) {
-            mostRecentVariableName = variable.getText()
-                                             .toLowerCase();
-        }
-    }
+
 }

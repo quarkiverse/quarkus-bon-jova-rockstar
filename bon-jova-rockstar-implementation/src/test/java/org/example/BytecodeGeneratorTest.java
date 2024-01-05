@@ -26,6 +26,21 @@ public class BytecodeGeneratorTest {
         assertEquals("Hello San Francisco\n", output);
     }
 
+    @Test
+    public void shouldHandleSimpleNumericLiterals() {
+        String program = "Shout 31";
+        String output = compileAndLaunch(program);
+        assertEquals("31\n", output);
+
+        // Output should be rounded even of entered with decimals
+        program = "Shout 34.0";
+        output = compileAndLaunch(program);
+        assertEquals("34\n", output);
+
+        program = "Shout 34.2";
+        output = compileAndLaunch(program);
+        assertEquals("34.2\n", output);
+    }
 
     /*
     Simple variables are valid identifiers that are not language keywords. A simple variable name must contain only letters, and cannot
@@ -133,6 +148,7 @@ names in Rockstar.)
                                             """;
         String output = compileAndLaunch(program);
 
+        // Even though is stored as a double internally, we want (and the spec expects) an integer-format output
         assertEquals("5\n", output);
     }
 
@@ -367,7 +383,9 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         // Floating points are hard! Satriani also gives this as -0.5800000000000001, and a simple "1.42 - 2.0" also gives that result
-        assertEquals("-0.5800000000000001\n", output);
+        // Here, because we have to round to handle integers correctly, we can set a maximum precision that's shorter than the point
+        // where floats go weird
+        assertEquals("-0.58\n", output);
     }
 
     @Test

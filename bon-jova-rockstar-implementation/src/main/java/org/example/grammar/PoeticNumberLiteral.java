@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 public class PoeticNumberLiteral {
     private final Class<?> variableClass;
 
-    final Number value;
+    final double value;
 
     public PoeticNumberLiteral(Rockstar.PoeticNumberLiteralContext ctx) {
         // A poetic number literal begins with a variable name, followed by the keyword is , or the aliases are , was or were .
@@ -48,7 +48,8 @@ public class PoeticNumberLiteral {
             variableClass = double.class;
             value = Double.parseDouble(string);
         } else {
-            variableClass = int.class;
+            variableClass = double.class;
+            // We can parse as an int, and then store as a double
             value = Integer.parseInt(string);
         }
 

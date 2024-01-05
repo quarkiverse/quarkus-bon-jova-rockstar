@@ -1,69 +1,46 @@
 package org.example;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
+import io.quarkus.gizmo.ClassCreator;
+import io.quarkus.gizmo.FieldDescriptor;
+import io.quarkus.gizmo.MethodCreator;
 import org.example.grammar.PoeticNumberLiteral;
 import rock.Rockstar;
 
 public class Assignment {
     private final String originalName;
-    private Object value = null;
-    private Class<?> variableClass;
+    private final Object value;
+    private final Class<?> variableClass;
 
+    private Expression expression;
+    private final Variable variable;
 
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
-        originalName = ctx.variable()
-                          .getText()
-                          .toLowerCase();
 
+        variable = new Variable(ctx.variable());
+        originalName = variable.getVariableName();
+        // Variables should 'apply' to future pronouns when used in assignments
+        variable.track();
 
-        Rockstar.LiteralContext literal = ctx.expression() != null ? ctx.expression()
-                                                                        .literal() : ctx.literal();
-        Rockstar.ConstantContext constant = ctx.expression() != null ? ctx.expression()
-                                                                          .constant() : ctx.constant();
+        // The literals and constant could be in an expression, or top-level
+        Rockstar.LiteralContext literalContext = ctx.expression() != null ? ctx.expression()
+                                                                               .literal() : ctx.literal();
+        Rockstar.ConstantContext constantContext = ctx.expression() != null ? ctx.expression()
+                                                                                 .constant() : ctx.constant();
 
-        if (literal != null) {
-            if (literal
-                    .NUMERIC_LITERAL() != null) {
+        // Don't bother instantiating an expression, since we may need to go direct to a literal, and since
+        // (in the reference implementation, at least) assignment to a variable isn't possible; variable names are interpreted as poetic
+        // number literals
 
-                TerminalNode num = literal
-                        .NUMERIC_LITERAL();
-                double parsed = Double.parseDouble(num.getText());
-                if (Math.round(parsed) == parsed) {
-                    value = Integer.parseInt(num
-                            .getText());
-                    variableClass = int.class;
-                } else {
-                    value = parsed;
-                    variableClass = double.class;
-                }
-            } else if (literal
-                    .STRING_LITERAL() != null) {
-                value = literal
-                        .STRING_LITERAL()
-                        .getText()
-                        .replaceAll("\"", "");
-                // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
-                // idiomatic-ish)
-                variableClass = String.class;
-            }
-
+        if (literalContext != null) {
+            Literal literal = new Literal(literalContext);
+            value = literal.getValue();
+            variableClass = literal.getValueClass();
+        } else if (constantContext != null) {
+            Constant constant = new Constant(constantContext);
+            value = constant.getValue();
+            variableClass = constant.getValueClass();
         } else {
-            if (constant != null) {
-                if (constant
-                        .CONSTANT_TRUE() != null) {
-                    value = true;
-                    variableClass = boolean.class;
-                } else if (constant
-                        .CONSTANT_FALSE() != null) {
-                    value = false;
-                    variableClass = boolean.class;
-                } else if (constant
-                        .CONSTANT_EMPTY() != null) {
-                    value = "";
-                    variableClass = String.class;
-                }
-
-            } else if (ctx.poeticStringLiteral() != null) {
+            if (ctx.poeticStringLiteral() != null) {
                 value = ctx.poeticStringLiteral()
                            .getText();
                 variableClass = String.class;
@@ -73,6 +50,7 @@ public class Assignment {
                 value = lit.getValue();
                 variableClass = lit.getVariableClass();
             } else {
+                value = null;
                 variableClass = Object.class;
             }
         }
@@ -82,17 +60,26 @@ public class Assignment {
         return originalName;
     }
 
-    public String getNormalisedVariableName() {
-        return originalName
-                .replace(" ", "_")
-                .toLowerCase();
-    }
-
     public Object getValue() {
         return value;
     }
 
     public Class<?> getVariableClass() {
         return variableClass;
+    }
+
+    public void toCode(ClassCreator creator, MethodCreator method) {
+
+        FieldDescriptor field = variable.getField(creator, method, getVariableClass());
+
+        // This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
+        Object value = getValue();
+        if (String.class.equals(variableClass)) {
+            method.writeStaticField(field, method.load((String) value));
+        } else if (double.class.equals(variableClass)) {
+            method.writeStaticField(field, method.load((double) value));
+        } else if (boolean.class.equals(variableClass)) {
+            method.writeStaticField(field, method.load((boolean) value));
+        }
     }
 }

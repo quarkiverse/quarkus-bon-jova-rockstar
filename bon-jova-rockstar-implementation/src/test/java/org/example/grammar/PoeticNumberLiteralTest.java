@@ -13,40 +13,40 @@ public class PoeticNumberLiteralTest {
     public void shouldParseIntegerPoeticNumberLiterals() {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("My thing is a big bad monster");
         PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
-        assertEquals(1337, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(1337d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     @Test
     public void shouldParsePoeticNumberLiteralsContainingZeros() {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("Tommy was a lovestruck ladykiller");
         PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
-        assertEquals(100, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(100d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     @Test
     public void shouldIgnoreCommas() {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("My thing is a big, bad, monster");
         PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
-        assertEquals(1337, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(1337d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     @Test
     public void shouldIgnoreApostrophes() {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("My thing is a smokin' gun");
         PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
-        assertEquals(163, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(163d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     @Test
     public void shouldIgnoreSemicolons() {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("My thing is good; too good for you");
         PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
-        assertEquals(43433, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(43433d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
     }
 
     @Test
@@ -73,8 +73,8 @@ public class PoeticNumberLiteralTest {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral(
                 "life is all-consuming");
         PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
-        assertEquals(3, a.getValue());
-        assertEquals(int.class, a.getVariableClass());
+        assertEquals(3d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
 
         ctx = ParseHelper.getPoeticNumberLiteral(
                 "life is all-consuming. death is a sweet rest.");
