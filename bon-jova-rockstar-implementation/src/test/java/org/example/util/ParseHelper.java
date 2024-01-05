@@ -31,6 +31,10 @@ public class ParseHelper {
         return (Rockstar.ExpressionContext) getGrammarElement(program, CapturingListener::getExpression);
     }
 
+    public static Rockstar.ExpressionContext getExpression(String program, int expressionPosition) {
+        return (Rockstar.ExpressionContext) getGrammarElement(program, (CapturingListener l) -> l.getExpression(expressionPosition));
+    }
+
     public static Rockstar.LiteralContext getLiteral(String program) {
         return (Rockstar.LiteralContext) getGrammarElement(program, CapturingListener::getLiteral);
     }

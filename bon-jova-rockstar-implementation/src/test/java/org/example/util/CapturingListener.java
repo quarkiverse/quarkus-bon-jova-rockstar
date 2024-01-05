@@ -3,13 +3,16 @@ package org.example.util;
 import rock.Rockstar;
 import rock.RockstarBaseListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Used in tests as an alternative to mocking.
  */
 public class CapturingListener extends RockstarBaseListener {
     private Rockstar.AssignmentStmtContext assignmentStatement;
     private Rockstar.PoeticNumberLiteralContext poeticNumberLiteral;
-    private Rockstar.ExpressionContext expression;
+    private List<Rockstar.ExpressionContext> expressions = new ArrayList<>();
     private Rockstar.LiteralContext literal;
     private Rockstar.ConstantContext constant;
 
@@ -42,7 +45,7 @@ public class CapturingListener extends RockstarBaseListener {
 
     @Override
     public void enterExpression(Rockstar.ExpressionContext expression) {
-        this.expression = expression;
+        this.expressions.add(expression);
     }
 
 
@@ -55,7 +58,11 @@ public class CapturingListener extends RockstarBaseListener {
     }
 
     public Rockstar.ExpressionContext getExpression() {
-        return expression;
+        return expressions.get(expressions.size() - 1);
+    }
+
+    public Rockstar.ExpressionContext getExpression(int pos) {
+        return expressions.get(0);
     }
 
     public Rockstar.LiteralContext getLiteral() {

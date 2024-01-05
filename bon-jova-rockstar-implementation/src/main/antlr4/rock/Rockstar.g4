@@ -11,6 +11,8 @@ statement: (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | d
 expression: functionCall
           | lhe=expression WS op=(KW_MULTIPLY|KW_DIVIDE) WS rhe=expression
           | lhe=expression WS op=(KW_ADD|KW_SUBTRACT) WS rhe=expression
+          | lhe=expression WS op=(PLUS_SIGN|HYPHEN) WS rhe=expression
+          | lhe=expression WS op=(ASTERISK|SLASH) WS rhe=expression
           | lhe=expression WS comparisionOp WS rhe=expression
           | lhe=expression WS op=(KW_AND|KW_OR|KW_NOR) WS rhe=expression
           | (literal|variable|constant)
@@ -75,7 +77,7 @@ variable: COMMON_VARIABLE_PREFIXES WS WORD
 
 poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralGarbage* WS* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
 
-poeticNumberLiteralGarbage: WS* (COMMA | EXCLAMATION_MARK | QUESTION_MARK) WS*
+poeticNumberLiteralGarbage: WS* (COMMA | EXCLAMATION_MARK | QUESTION_MARK | PLUS_SIGN | AMPERSAND) WS*
 ;
 
 poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
@@ -95,6 +97,7 @@ poeticStringLiteralGarbage: DOT
                           | QUESTION_MARK
                           | EXCLAMATION_MARK
                           | AMPERSAND
+                          | PLUS_SIGN
 ;
 
 poeticStringLiteralWord: COMMON_VARIABLE_PREFIXES

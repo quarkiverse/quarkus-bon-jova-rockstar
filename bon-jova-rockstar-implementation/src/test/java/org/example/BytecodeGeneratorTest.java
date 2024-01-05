@@ -427,6 +427,40 @@ names in Rockstar.)
 
     // No need for decrement for a string, it's NaN in Satriani
 
+    // Rockstar supports the infix arithmetic operators +, -, * and /
+
+
+    @Test
+    public void shouldHandleSimpleAdditionOfVariables() {
+        String program = """
+                My world is 4
+                Soil is 1
+                Say my world + soil
+                """;
+        String output = compileAndLaunch(program);
+
+        // Counter-intuitive, but what Satriani does
+        assertEquals("5\n", output);
+    }
+
+
+    @Test
+    public void shouldTreatAdditionInVariablesAsPoeticStringLiterals() {
+        String program = """
+                My world is 4
+                Soil is 1
+                My universe is my world + soil
+                Say my universe
+                """;
+        String output = compileAndLaunch(program);
+
+        // Counter-intuitive, but what Satriani does - on the right side of a variable assignment, values are poetic string literals
+        // The hyphen (-) is counted as a letter – so you can use terms like ‘all-consuming’ (13 letters > 3) and ‘power-hungry’ (12
+        // letters > 2) instead of having to think of 12- and 13-letter words.
+        //         The semi-colon, comma, apostrophe and any other non-alphabetical characters are ignored.
+        assertEquals("254\n", output);
+    }
+
     private String compileAndLaunch(String program) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;
