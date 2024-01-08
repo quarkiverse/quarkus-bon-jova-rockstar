@@ -41,6 +41,34 @@ public class PoeticNumberLiteralTest {
         assertEquals(double.class, a.getVariableClass());
     }
 
+    // The hyphen (-) is counted as a letter – so you can use terms like ‘all-consuming’ (13 letters > 3) and ‘power-hungry’ (12 letters
+    // > 2) instead of having to think of 12- and 13-letter words.
+    @Test
+    public void shouldCountHyphenAsALetter() {
+        Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("grace is all-consuming");
+        assertEquals(3d, new PoeticNumberLiteral(ctx).getValue());
+
+        ctx = ParseHelper.getPoeticNumberLiteral("bob is power-hungry");
+        assertEquals(2d, new PoeticNumberLiteral(ctx).getValue());
+    }
+
+    @Test
+    public void shouldIgnoreApostrophesAtTheBeginningOfWords() {
+        String program = "Life is 'bout love";
+        Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral(program);
+        PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
+        assertEquals(44d, a.getValue());
+    }
+
+    @Test
+    public void shouldIgnoreApostrophesInTheMiddleOfWords() {
+        String program = "The beers were numbering fa'too'many";
+        Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral(program);
+        PoeticNumberLiteral a = new PoeticNumberLiteral(ctx);
+        assertEquals(99d, a.getValue());
+        assertEquals(double.class, a.getVariableClass());
+    }
+
     @Test
     public void shouldIgnoreSemicolons() {
         Rockstar.PoeticNumberLiteralContext ctx = ParseHelper.getPoeticNumberLiteral("My thing is good; too good for you");
@@ -103,6 +131,5 @@ public class PoeticNumberLiteralTest {
         assertEquals(3424.44, a.getValue());
         assertEquals(double.class, a.getVariableClass());
     }
-
 
 }

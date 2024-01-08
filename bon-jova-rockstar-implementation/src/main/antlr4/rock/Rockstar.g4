@@ -32,7 +32,7 @@ comparisionOp: KW_IS
              | KW_IS WS KW_AS WS (KW_GREATER_EQUAL|KW_LESS_EQUAL) WS KW_AS
 ;
 
-assignmentStmt: variable (APOSTROPHE_S | WS (KW_IS|KW_WAS_WERE)) WS (poeticNumberLiteral|constant|literal)
+assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | WS (KW_IS|KW_WAS_WERE)) WS (poeticNumberLiteral|constant|literal)
               | KW_LET WS variable WS KW_BE WS expression
               | KW_PUT WS expression WS KW_INTO WS variable
               | variable WS (KW_SAYS | KW_SAY) WS poeticStringLiteral
@@ -71,16 +71,21 @@ literal: NUMERIC_LITERAL | STRING_LITERAL;
 
 variable: COMMON_VARIABLE_PREFIXES WS WORD
         | WORD
+        | WORD_WITH_AP
         | PROPER_NOUN (WS PROPER_NOUN)*
         | PRONOUNS
 ;
 
 poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralGarbage* WS* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
 
-poeticNumberLiteralGarbage: WS* (COMMA | EXCLAMATION_MARK | QUESTION_MARK | PLUS_SIGN | AMPERSAND) WS*
+poeticNumberLiteralGarbage: WS* (COMMA | EXCLAMATION_MARK | QUESTION_MARK | PLUS_SIGN | AMPERSAND | SINGLE_QUOTE) WS*
 ;
 
 poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
+                       | poeticNumberLiteralWord SINGLE_QUOTE poeticNumberLiteralWord?
+                       | poeticNumberLiteralWord APOSTROPHE_S poeticNumberLiteralWord?
+                       | poeticNumberLiteralWord APOSTROPHE_RE poeticNumberLiteralWord?
+                       | poeticNumberLiteralWord APOSTROPHED_N poeticNumberLiteralWord?
                        | COMMON_VARIABLE_PREFIXES
                        | allKeywords
                        | PRONOUNS
@@ -98,6 +103,7 @@ poeticStringLiteralGarbage: DOT
                           | EXCLAMATION_MARK
                           | AMPERSAND
                           | PLUS_SIGN
+                          | SINGLE_QUOTE
 ;
 
 poeticStringLiteralWord: COMMON_VARIABLE_PREFIXES
@@ -108,6 +114,7 @@ poeticStringLiteralWord: COMMON_VARIABLE_PREFIXES
                        | CONSTANT_FALSE
                        | allKeywords
                        | WORD
+                       | WORD_WITH_QUOTES
                        | PROPER_NOUN
 ;
 
