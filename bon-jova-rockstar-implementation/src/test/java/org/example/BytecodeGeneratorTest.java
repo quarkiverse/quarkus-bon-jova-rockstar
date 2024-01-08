@@ -120,12 +120,25 @@ names in Rockstar.)
     }
 
     @Test
+    public void shouldUseApostrophesForAssignmentAndIgnoreOtherApostrophes() {
+        String program = """
+                The fire's burning Tommy's feet     
+                Shout the fire
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("764\n", output);
+
+    }
+
+    @Test
     public void shouldNotBeSensitiveToWhitespace() {
         String program = """
                 Time is an illusion
                   Shout time
                     Shout time
-                Shout time          
+                Shout time        
+                  
                 Shout time
                                             """;
         String output = compileAndLaunch(program);
@@ -291,7 +304,7 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         assertEquals("pass\n" +
-                "pass!", output);
+                     "pass!", output);
 
     }
 

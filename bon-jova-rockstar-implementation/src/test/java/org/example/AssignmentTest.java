@@ -195,6 +195,30 @@ public class AssignmentTest {
     }
 
     @Test
+    public void shouldHandleAssignmentToSimpleVariablesUsingApostrophe() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Janie's got a gun");
+        assertEquals(313d, new Assignment(ctx).getValue());
+
+        ctx = ParseHelper.getAssignment("Union's been on strike");
+        assertEquals(426d, new Assignment(ctx).getValue());
+
+        ctx = ParseHelper.getAssignment("We're here to see the show");
+        assertEquals(42334d, new Assignment(ctx).getValue());
+    }
+
+    @Test
+    public void shouldHandleAssignmentToCommonVariablesUsingApostrophe() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("The fire's burning");
+        assertEquals(7d, new Assignment(ctx).getValue());
+    }
+
+    @Test
+    public void shouldHandleAssignmentToProperVariablesUsingApostrophe() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Doctor Feelgood's mad");
+        assertEquals(3d, new Assignment(ctx).getValue());
+    }
+
+    @Test
     public void shouldHandleAssignmentOfConstantsUsingPut() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put lies into X");
         Assignment a = new Assignment(ctx);

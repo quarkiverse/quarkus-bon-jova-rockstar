@@ -18,8 +18,7 @@ public class PoeticNumberLiteral {
         String string = ctx
                 .poeticNumberLiteralWord()
                 .stream()
-                .map(word -> String.valueOf(Math.floorMod(word.getText()
-                                                              .length(), 10)))
+                .map(word -> wordToNumber(word))
                 .collect(Collectors.joining());
 
         // This is a complex way of handling the decimal point; the antlr listener mechanism may be simpler
@@ -54,6 +53,14 @@ public class PoeticNumberLiteral {
         }
 
 
+    }
+
+    private static String wordToNumber(Rockstar.PoeticNumberLiteralWordContext word) {
+        // Ignore apostrophes; because they can be in the middle of the word this is hard to do in the grammar
+        int length = word.getText()
+                         .replaceAll("'", "")
+                         .length();
+        return String.valueOf(Math.floorMod(length, 10));
     }
 
     public Class<?> getVariableClass() {
