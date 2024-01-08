@@ -40,3 +40,4 @@ build/
 .DS_Store
 
 /bon-jova-quarkus-extension/src/main/antlr4/rock/RockstarLexer.tokens
+/bon-jova-rockstar-implementation/src/main/antlr4/rock/gen/
