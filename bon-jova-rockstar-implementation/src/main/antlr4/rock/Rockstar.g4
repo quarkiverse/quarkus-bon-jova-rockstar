@@ -6,7 +6,7 @@ program: (NL|WS)* (statementList | functionDeclaration)* WS*;
 
 statementList: statement+;
 
-statement: (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: WS* (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
           | lhe=expression WS op=(KW_MULTIPLY|KW_DIVIDE) WS rhe=expression

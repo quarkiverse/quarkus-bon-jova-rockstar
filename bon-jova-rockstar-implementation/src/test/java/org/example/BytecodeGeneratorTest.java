@@ -119,6 +119,20 @@ names in Rockstar.)
         assertEquals("28\n28\n28\n", output);
     }
 
+    @Test
+    public void shouldNotBeSensitiveToWhitespace() {
+        String program = """
+                Time is an illusion
+                  Shout time
+                    Shout time
+                Shout time          
+                Shout time
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("28\n28\n28\n28\n", output);
+    }
+
     /*
  Common variables consist of one of the keywords a , an , the , my , your or our followed by whitespace and a unique variable name,
  which must contain only lowercase ASCII letters a-z. The keyword is part of the variable name, so a boy is a different variable from
