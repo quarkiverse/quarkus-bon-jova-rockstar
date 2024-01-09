@@ -75,7 +75,6 @@ public class Expression {
                     operation = Operation.DIVIDE;
                 }
             }
-            System.out.println("operastion is " + operation);
 
             if (literal != null) {
                 if (literal
