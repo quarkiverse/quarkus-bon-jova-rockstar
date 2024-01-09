@@ -1,8 +1,8 @@
 package org.example;
 
+import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
-import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.objectweb.asm.Opcodes;
@@ -68,7 +68,7 @@ public class Variable {
     }
 
 
-    public ResultHandle read(MethodCreator method) {
+    public ResultHandle read(BytecodeCreator method) {
         if (variables.containsKey(variableName)) {
             return method.readStaticField(variables.get(variableName));
 
@@ -78,7 +78,8 @@ public class Variable {
         }
     }
 
-    public void write(MethodCreator method, ResultHandle value) {
+    public void write(BytecodeCreator method, ResultHandle value) {
+
         FieldDescriptor field = variables.get(variableName);
 
         method.writeStaticField(field, value);
@@ -86,9 +87,8 @@ public class Variable {
 
     // TODO if we use local variables we can drop passing the class creator
     // TODO would it be nicer to store our own class?
-    public FieldDescriptor getField(ClassCreator creator, MethodCreator method, Class<?> clazz) {
+    public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method, Class<?> clazz) {
         FieldDescriptor field;
-
         if (!variables.containsKey(variableName)) {
 
             String javaCompliantName = getNormalisedVariableName();
