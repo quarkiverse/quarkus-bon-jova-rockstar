@@ -88,7 +88,8 @@ KW_LISTEN: L I S T E N;
 KW_TO: T O ;
 KW_SHOUT:  S H O U T | W H I S P E R | S C R E A M;
 
-KW_LOOP: W H I L E | U N T I L;
+KW_WHILE: W H I L E ;
+KW_UNTIL: U N T I L;
 KW_IF: I F;
 KW_ELSE: E L S E;
 

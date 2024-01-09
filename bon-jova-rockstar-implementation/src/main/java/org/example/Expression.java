@@ -195,7 +195,7 @@ public class Expression {
                 return method.load((boolean) value);
             }
         }
-        throw new RuntimeException("Could not interpret type " + valueClass);
+        throw new RuntimeException("Confused expression: Could not interpret type " + valueClass);
     }
 
     private static AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,

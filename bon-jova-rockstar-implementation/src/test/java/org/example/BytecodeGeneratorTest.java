@@ -122,7 +122,7 @@ names in Rockstar.)
     @Test
     public void shouldUseApostrophesForAssignmentAndIgnoreOtherApostrophes() {
         String program = """
-                The fire's burning Tommy's feet     
+                The fire's burning Tommy's feet 
                 Shout the fire
                                             """;
         String output = compileAndLaunch(program);
@@ -564,7 +564,7 @@ names in Rockstar.)
                 Tommy is a big bad monster
                 If Tommy ain't 1337
                 Say "main case"
-                Else 
+                Else
                 Say "else case"
                 """;
         String output = compileAndLaunch(program);
@@ -612,6 +612,40 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         assertEquals("this is the false branch\n", output);
+    }
+
+    @Test
+    public void shouldHandleWhileLoops() {
+        // Positive case
+        String program = """
+                Tommy was a dancer
+                While Tommy ain't 0,
+                Knock Tommy down
+                Say Tommy
+                """;
+        String output = compileAndLaunch(program);
+
+        // TODO Ain't nothing should also work, but does not
+
+        // TODO This should be a full number list, but that will not work until block support is implemented
+        assertEquals("0\n", output);
+    }
+
+    @Test
+    public void shouldHandleUntilLoops() {
+        // Positive case
+        String program = """
+                Tommy was a dancer
+                Until Tommy is 0,
+                Knock Tommy down
+                Say Tommy
+                """;
+        String output = compileAndLaunch(program);
+
+        // TODO Is nothing should also work, but does not
+
+        // TODO This should be a full number list, but that will not work until block support is implemented
+        assertEquals("0\n", output);
     }
 
     private String compileAndLaunch(String program) {

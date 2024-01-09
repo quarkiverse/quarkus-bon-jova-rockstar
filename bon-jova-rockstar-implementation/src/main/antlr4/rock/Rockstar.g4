@@ -47,7 +47,7 @@ outputStmt: (KW_SHOUT | KW_SAY) WS expression;
 
 ifStmt: KW_IF WS expr=expression NL statementList  (WS* KW_ELSE NL? statementList)?;
 
-loopStmt: KW_LOOP WS expr=expression NL statementList;
+loopStmt: (KW_WHILE | KW_UNTIL) WS expr=expression NL statementList;
 
 incrementStmt: KW_BUILD WS variable WS ups;
 
@@ -130,7 +130,8 @@ allKeywords: KW_PUT
            | KW_TO
            | KW_SAY
            | KW_SHOUT
-           | KW_LOOP
+           | KW_WHILE
+           | KW_UNTIL
            | KW_IF
            | KW_ELSE
            | KW_BUILD
