@@ -1,8 +1,8 @@
 package org.example;
 
+import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
-import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import org.example.grammar.PoeticNumberLiteral;
 import rock.Rockstar;
@@ -69,7 +69,7 @@ public class Assignment {
         return variableClass;
     }
 
-    public void toCode(ClassCreator creator, MethodCreator method) {
+    public void toCode(ClassCreator creator, BytecodeCreator method) {
 
         FieldDescriptor field = variable.getField(creator, method, getVariableClass());
 

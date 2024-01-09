@@ -1,5 +1,7 @@
 package org.example;
 
+import io.quarkus.gizmo.BranchResult;
+import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.Gizmo;
@@ -11,31 +13,36 @@ import rock.Rockstar;
 import rock.RockstarBaseListener;
 
 import java.text.DecimalFormat;
+import java.util.Stack;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
 public class BytecodeGeneratingListener extends RockstarBaseListener {
 
-    private final MethodCreator main;
+    private BytecodeCreator currentCreator;
     private final ClassCreator creator;
 
     private final FieldDescriptor formatter;
+
+    private final Stack<BytecodeCreator> blocks = new Stack<>();
 
 
     public BytecodeGeneratingListener(ClassCreator creator) {
         super();
 
-        main = creator.getMethodCreator("main", void.class, String[].class);
+        MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);
 
+        enterBlock(main);
+
         // Ideally this would be static final, but I got a bit stuck on the <clinit>
-        ResultHandle formatterInstance = main.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
-                main.load("#.#########"));
+        ResultHandle formatterInstance = currentCreator.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
+                currentCreator.load("#.#########"));
         formatter = creator.getFieldCreator("formatter", DecimalFormat.class)
                            .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                            .getFieldDescriptor();
-        main.writeStaticField(formatter, formatterInstance);
+        currentCreator.writeStaticField(formatter, formatterInstance);
 
 
         this.creator = creator;
@@ -50,14 +57,17 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     @Override
     public void exitProgram(Rockstar.ProgramContext ctx) {
-        main.returnVoid();
+        while (!blocks.isEmpty()) {
+            currentCreator.returnVoid();
+            currentCreator = blocks.pop();
+        }
     }
 
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext ctx) {
 
         Assignment assignment = new Assignment(ctx);
-        assignment.toCode(creator, main);
+        assignment.toCode(creator, currentCreator);
     }
 
     @Override
@@ -70,21 +80,21 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         for (int i = 0; i < count; i++) {
 
             Variable variable = new Variable(ctx.variable());
-            ResultHandle value = variable.read(main);
+            ResultHandle value = variable.read(currentCreator);
             ResultHandle incremented;
             try {
                 // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
                 // (or to track it ourselves)
-                incremented = main.add(value, main.load((double) 1));
+                incremented = currentCreator.add(value, currentCreator.load((double) 1));
             } catch (RuntimeException ee) {
                 // This must be a string
-                ResultHandle constant = main.load("1");
-                incremented = main.invokeVirtualMethod(
+                ResultHandle constant = currentCreator.load("1");
+                incremented = currentCreator.invokeVirtualMethod(
                         MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
                         constant);
             }
 
-            variable.write(main, incremented);
+            variable.write(currentCreator, incremented);
         }
     }
 
@@ -97,33 +107,61 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         for (int i = 0; i < count; i++) {
             Variable variable = new Variable(ctx.variable());
-            ResultHandle value = variable.read(main);
-            ResultHandle incremented = main.add(value, main.load((double) -1));
-            variable.write(main, incremented);
+            ResultHandle value = variable.read(currentCreator);
+            ResultHandle incremented = currentCreator.add(value, currentCreator.load((double) -1));
+            variable.write(currentCreator, incremented);
         }
     }
 
+    @Override
+    public void enterIfStmt(Rockstar.IfStmtContext ctx) {
+
+        Condition condition = new Condition(ctx);
+        BranchResult code = condition.toCode(currentCreator);
+        if (condition.hasElse()) {
+            enterBlock(code.falseBranch());
+        }
+        enterBlock(code.trueBranch());
+    }
+
+    @Override
+    public void exitStatement(Rockstar.StatementContext ctx) {
+        // For now, assume all blocks are one line long
+
+        if (blocks.size() > 1) {
+            exitBlock();
+        }
+    }
 
     @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
-
         Expression expression = new Expression(ctx.expression());
-        ResultHandle value = expression.getResultHandle(main);
+        ResultHandle value = expression.getResultHandle(currentCreator);
 
         // We want to do a special toString on numbers, to avoid tacking decimals onto integers
         final ResultHandle toStringed;
         if (isNumber(value)) {
-            ResultHandle df = main.readStaticField(formatter);
+            ResultHandle df = currentCreator.readStaticField(formatter);
 
-            toStringed = main
+            toStringed = currentCreator
                     .invokeVirtualMethod(
                             MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
                             df, value);
 
         } else {
-            toStringed = Gizmo.toString(main, value);
+            toStringed = Gizmo.toString(currentCreator, value);
         }
-        Gizmo.systemOutPrintln(main, toStringed);
+        Gizmo.systemOutPrintln(currentCreator, toStringed);
+    }
+
+    private void exitBlock() {
+        blocks.pop();
+        currentCreator = blocks.peek();
+    }
+
+    private void enterBlock(BytecodeCreator blockCreator) {
+        currentCreator = blockCreator;
+        blocks.push(blockCreator);
     }
 
     // It would be nice to get rid of this, but when we get an expression, we don't always know what the type of thing in the result
@@ -135,6 +173,4 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         return value.toString()
                     .contains("type='D'");
     }
-
-
 }

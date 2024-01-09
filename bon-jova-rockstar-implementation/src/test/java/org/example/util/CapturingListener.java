@@ -1,5 +1,6 @@
 package org.example.util;
 
+import org.antlr.v4.runtime.RuleContext;
 import rock.Rockstar;
 import rock.RockstarBaseListener;
 
@@ -15,8 +16,8 @@ public class CapturingListener extends RockstarBaseListener {
     private List<Rockstar.ExpressionContext> expressions = new ArrayList<>();
     private Rockstar.LiteralContext literal;
     private Rockstar.ConstantContext constant;
-
     private Rockstar.VariableContext variable;
+    private Rockstar.IfStmtContext ifCondition;
 
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext assignmentStatement) {
@@ -48,6 +49,10 @@ public class CapturingListener extends RockstarBaseListener {
         this.expressions.add(expression);
     }
 
+    @Override
+    public void enterIfStmt(Rockstar.IfStmtContext ifCondition) {
+        this.ifCondition = ifCondition;
+    }
 
     public Rockstar.AssignmentStmtContext getAssignmentStatement() {
         return assignmentStatement;
@@ -75,5 +80,9 @@ public class CapturingListener extends RockstarBaseListener {
 
     public Rockstar.VariableContext getVariable() {
         return variable;
+    }
+
+    public RuleContext getIf() {
+        return ifCondition;
     }
 }

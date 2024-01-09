@@ -533,6 +533,87 @@ names in Rockstar.)
         assertEquals("4\n", output);
     }
 
+    @Test
+    public void shouldHandleComparisons() {
+        String program = """
+                Say 1 is 2
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("false\n", output);
+    }
+
+    @Test
+    public void shouldHandleConditionalsForTrueCase() {
+        // Positive case
+        String program = """
+                Tommy is a big bad monster
+                If Tommy is 1337
+                Say "he is bad"
+                Say "end line"
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("he is bad\nend line\n", output);
+    }
+
+    @Test
+    public void shouldHandleConditionalsForAintCheck() {
+        // Positive case
+        String program = """
+                Tommy is a big bad monster
+                If Tommy ain't 1337
+                Say "main case"
+                Else 
+                Say "else case"
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("else case\n", output);
+    }
+
+    @Test
+    public void shouldHandleConditionalsForFalseCase() {
+        // Negative case
+        String program = """
+                 Tommy is a big bad monster
+                 If Tommy is 133333373737777
+                 Say "he is very bad"
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("", output);
+    }
+
+
+    @Test
+    public void shouldHandleIfElseConditionalsForTrueBranch() {
+        String program = """
+                Tommy is a big bad monster
+                If Tommy is 1337
+                Say "he is bad"
+                Else
+                Say "he is good"
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("he is bad\n", output);
+    }
+
+    @Test
+    public void shouldHandleIfElseConditionalsForFalseBranch() {
+        String program = """
+                Tommy is a big bad monster
+                If Tommy is 13337737373337
+                Say "this is the true branch"
+                Else
+                Say "this is the false branch"
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("this is the false branch\n", output);
+    }
+
     private String compileAndLaunch(String program) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;

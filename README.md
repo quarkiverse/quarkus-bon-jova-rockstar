@@ -90,8 +90,8 @@ Some of these may work but have not been validated with tests.
 
 ## Single quotes
 
-- [ ] Equivalency to `is'
-- [ ] Ignoring in other cases
+- [X] Equivalency to `is'
+- [X] Ignoring in other cases
 
 ## Number operations
 
@@ -109,7 +109,7 @@ Some of these may work but have not been validated with tests.
 ## Comparison and logical operations
 
 - [ ] Assignment using comparison
-- [ ] Equality tests
+- [X] Equality tests
 - [ ] Conjunction
 - [ ] Disjunction
 - [ ] Joint denial
@@ -122,7 +122,7 @@ Some of these may work but have not been validated with tests.
 
 ## Flow control
 
-- [ ] Conditionals
+- [X] Conditionals
 - [ ] Loops
 - [ ] Blocks
 - [ ] Functions
