@@ -14,6 +14,7 @@ import rock.RockstarBaseListener;
 
 import java.text.DecimalFormat;
 import java.util.Stack;
+import java.util.function.Function;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -152,6 +153,32 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             toStringed = Gizmo.toString(currentCreator, value);
         }
         Gizmo.systemOutPrintln(currentCreator, toStringed);
+    }
+
+    @Override
+    public void enterLoopStmt(Rockstar.LoopStmtContext ctx) {
+
+        Expression expression = new Expression(ctx.expression());
+
+        final Function<BytecodeCreator, BranchResult> fun;
+
+        if (ctx.KW_WHILE() != null) {
+            fun = (BytecodeCreator method) -> {
+                ResultHandle evaluated = expression.getResultHandle(method);
+                return method.ifTrue(evaluated);
+            };
+        } else if (ctx.KW_UNTIL() != null) {
+            fun = (BytecodeCreator method) -> {
+                ResultHandle evaluated = expression.getResultHandle(method);
+                return method.ifFalse(evaluated);
+            };
+        } else {
+            throw new RuntimeException("Could not understand loop " + ctx.getText());
+        }
+        BytecodeCreator loop = currentCreator.whileLoop(fun)
+                                             .block();
+        enterBlock(loop);
+        // TODO once we have proper block support, we should just do things with the statement list in the parse tree
     }
 
     private void exitBlock() {

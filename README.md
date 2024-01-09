@@ -110,6 +110,7 @@ Some of these may work but have not been validated with tests.
 
 - [ ] Assignment using comparison
 - [X] Equality tests
+- [ ] Comparisons to mysterious and null
 - [ ] Conjunction
 - [ ] Disjunction
 - [ ] Joint denial
@@ -123,7 +124,7 @@ Some of these may work but have not been validated with tests.
 ## Flow control
 
 - [X] Conditionals
-- [ ] Loops
-- [ ] Blocks
+- [X] Loops
+- [ ] Blocks, break, and continue
 - [ ] Functions
 
