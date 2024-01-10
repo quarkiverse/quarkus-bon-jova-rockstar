@@ -35,7 +35,6 @@ public class BytecodeGenerator {
             // Walk the tree so our listener can generate bytecode
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(listener, tree);
-
         }
     }
 }

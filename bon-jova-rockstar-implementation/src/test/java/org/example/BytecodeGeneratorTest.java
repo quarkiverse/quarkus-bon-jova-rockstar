@@ -592,12 +592,13 @@ names in Rockstar.)
                 Tommy is a big bad monster
                 If Tommy is 1337
                 Say "he is bad"
+                Say "this is still the true branch"
                 Else
                 Say "he is good"
                 """;
         String output = compileAndLaunch(program);
 
-        assertEquals("he is bad\n", output);
+        assertEquals("he is bad\nthis is still the true branch\n", output);
     }
 
     @Test
@@ -618,7 +619,7 @@ names in Rockstar.)
     public void shouldHandleWhileLoops() {
         // Positive case
         String program = """
-                Tommy was a dancer
+                Tommy was shy
                 While Tommy ain't 0,
                 Knock Tommy down
                 Say Tommy
@@ -627,15 +628,19 @@ names in Rockstar.)
 
         // TODO Ain't nothing should also work, but does not
 
-        // TODO This should be a full number list, but that will not work until block support is implemented
-        assertEquals("0\n", output);
+        String expected = """
+                2
+                1
+                0
+                """;
+        assertEquals(expected, output);
     }
 
     @Test
     public void shouldHandleUntilLoops() {
         // Positive case
         String program = """
-                Tommy was a dancer
+                Tommy was nice
                 Until Tommy is 0,
                 Knock Tommy down
                 Say Tommy
@@ -644,8 +649,13 @@ names in Rockstar.)
 
         // TODO Is nothing should also work, but does not
 
-        // TODO This should be a full number list, but that will not work until block support is implemented
-        assertEquals("0\n", output);
+        String expected = """
+                3
+                2
+                1
+                0
+                """;
+        assertEquals(expected, output);
     }
 
     private String compileAndLaunch(String program) {
