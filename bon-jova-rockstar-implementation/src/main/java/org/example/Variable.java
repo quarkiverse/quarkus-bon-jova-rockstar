@@ -35,7 +35,7 @@ public class Variable {
         } else {
             String text = variable
                     .getText();
-            variableName = text.toLowerCase();
+            variableName = getNormalisedVariableName(text);
         }
     }
 
@@ -46,9 +46,9 @@ public class Variable {
     /**
      * This is useful for things like variable names in bytecode, where spaces are not ok
      */
-    private String getNormalisedVariableName() {
+    private static String getNormalisedVariableName(String variableName) {
         return variableName
-                .replace(" ", "__") // use two underscores to reduce the chance of a clash with variable names in the program
+                .replaceAll(" +", "__") // use two underscores to reduce the chance of a clash with variable names in the program
                 .toLowerCase();
     }
 
@@ -91,10 +91,8 @@ public class Variable {
         FieldDescriptor field;
         if (!variables.containsKey(variableName)) {
 
-            String javaCompliantName = getNormalisedVariableName();
-
             // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-            field = creator.getFieldCreator(javaCompliantName, clazz)
+            field = creator.getFieldCreator(variableName, clazz)
                            .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                            .getFieldDescriptor();
             variables.put(variableName, field);
