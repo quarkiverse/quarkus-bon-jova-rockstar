@@ -91,6 +91,7 @@ poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
                        | poeticNumberLiteralWord APOSTROPHE_S poeticNumberLiteralWord?
                        | poeticNumberLiteralWord APOSTROPHE_RE poeticNumberLiteralWord?
                        | poeticNumberLiteralWord APOSTROPHED_N poeticNumberLiteralWord?
+                       | SINGLE_QUOTE poeticNumberLiteralWord
                        | COMMON_VARIABLE_PREFIXES
                        | allKeywords
                        | PRONOUNS
