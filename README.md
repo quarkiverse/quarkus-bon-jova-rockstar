@@ -125,6 +125,6 @@ Some of these may work but have not been validated with tests.
 
 - [X] Conditionals
 - [X] Loops
-- [ ] Blocks, break, and continue
+- [X] Blocks, break, and continue
 - [ ] Functions
 
