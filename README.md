@@ -58,10 +58,10 @@ Some of these may work but have not been validated with tests.
 - [X] String literals
 - [X] Poetic string literals
 
-## Types
+## ✓ Types
 
-- [ ] Mysterious
-- [ ] Null equality to 0 and false
+- [X] Mysterious
+- [X] Null equality to 0 and false
 - [X] Null aliases `nothing`, `nowhere`, `nobody`, `gone`
 - [X] True aliases `right`, `yes`, `ok`
 - [X] False aliases `wrong`, `no`, `lies`
@@ -108,9 +108,9 @@ Some of these may work but have not been validated with tests.
 
 ## Comparison and logical operations
 
-- [ ] Assignment using comparison
+- [ ] Assignment using comparison and other operators
 - [X] Equality tests
-- [ ] Comparisons to mysterious and null
+- [X] Comparisons to mysterious and null
 - [ ] Conjunction
 - [ ] Disjunction
 - [ ] Joint denial

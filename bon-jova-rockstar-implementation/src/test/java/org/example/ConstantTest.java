@@ -4,6 +4,7 @@ import org.example.util.ParseHelper;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
+import static org.example.Constant.NOTHING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -79,26 +80,25 @@ public class ConstantTest {
         Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is mysterious");
         Constant a = new Constant(ctx);
         assertNull(a.getValue());
-        // Not great, but the best we can do
     }
 
     @Test
     public void shouldParseNullConstants() {
         Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is nothing");
         Constant a = new Constant(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getConstant("life is nobody");
         a = new Constant(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getConstant("life is nowhere");
         a = new Constant(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getConstant("life is gone");
         a = new Constant(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
     }
 
 }

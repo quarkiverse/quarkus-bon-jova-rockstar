@@ -13,6 +13,7 @@ import rock.Rockstar;
 
 import java.lang.reflect.InvocationTargetException;
 
+import static org.example.Constant.NOTHING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -122,19 +123,19 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     public void shouldParseNullConstants() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing");
         Expression a = new Expression(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getExpression("shout nobody");
         a = new Expression(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getExpression("shout nowhere");
         a = new Expression(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getExpression("shout gone");
         a = new Expression(ctx);
-        assertNull(a.getValue());
+        assertEquals(NOTHING, a.getValue());
     }
 
     @Test
@@ -269,7 +270,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Disabled("This also fails to parse in the reference implementation")
     @Test
     public void shouldHandleAintComparisonOfStrings() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 123 ain’t \"nobody\"", 0);
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 123 ain’t \"all that\"", 0);
         assertTrue((boolean) execute(new Expression(ctx)));
 
         ctx = ParseHelper.getExpression("say \"Tommy\" ain’t \"Tommy\"", 0);
@@ -432,7 +433,6 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
     /*    "2" ain't Mysterious evaluates to true because all types are non equal to mysterious, besides mysterious itself.
      */
-    @Disabled("Mysterious support")
     @Test
     public void shouldFindAnythingExceptMysteriousIsNotMysterious() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"2\" ain't Mysterious", 0);
@@ -442,12 +442,53 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     /*
    all types are non equal to mysterious, besides mysterious itself
      */
-    @Disabled("Mysterious support")
     @Test
     public void shouldHaveMysteriousEqualToItself() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say mysterious ain't Mysterious", 0);
         assertFalse((boolean) execute(new Expression(ctx)));
     }
+
+    @Test
+    public void shouldTreatNothingAsEqualToFalse() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say wrong ain't nothing", 0);
+        assertFalse((boolean) execute(new Expression(ctx)));
+
+        ctx = ParseHelper.getExpression("say right ain't nothing", 0);
+        assertTrue((boolean) execute(new Expression(ctx)));
+    }
+
+    @Test
+    public void shouldTreatNothingAsEqualToZero() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 0 ain't nothing", 0);
+        assertFalse((boolean) execute(new Expression(ctx)));
+
+        ParseHelper.getExpression("say nothing ain't 0", 0);
+        assertFalse((boolean) execute(new Expression(ctx)));
+
+        ctx = ParseHelper.getExpression("say 0 is nothing", 0);
+        assertTrue((boolean) execute(new Expression(ctx)));
+    }
+
+    // The spec is a bit vague on this, so this is based on observation in Satriani
+    // (note that on concatenation, null is "null", but I haven't implemented that
+    @Test
+    public void shouldTreatNothingAsEqualToEmptyStringForComparisons() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"\" ain't nothing", 0);
+        assertFalse((boolean) execute(new Expression(ctx)));
+
+        ctx = ParseHelper.getExpression("say \"\" is nothing", 0);
+        assertTrue((boolean) execute(new Expression(ctx)));
+    }
+
+    @Test
+    public void shouldHaveNothingEqualToItself() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say nothing ain't gone", 0);
+        assertFalse((boolean) execute(new Expression(ctx)));
+
+        ctx = ParseHelper.getExpression("say nothing is gone", 0);
+        assertTrue((boolean) execute(new Expression(ctx)));
+    }
+
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {

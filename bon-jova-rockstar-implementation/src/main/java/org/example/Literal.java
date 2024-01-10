@@ -8,10 +8,8 @@ public class Literal {
     private Object value;
 
     public Literal(Rockstar.LiteralContext literal) {
-
         if (literal != null) {
-            if (literal
-                    .NUMERIC_LITERAL() != null) {
+            if (literal.NUMERIC_LITERAL() != null) {
 
                 TerminalNode num = literal
                         .NUMERIC_LITERAL();
@@ -21,8 +19,7 @@ public class Literal {
 
                 valueClass = double.class;
 
-            } else if (literal
-                    .STRING_LITERAL() != null) {
+            } else if (literal.STRING_LITERAL() != null) {
                 value = literal
                         .STRING_LITERAL()
                         .getText()

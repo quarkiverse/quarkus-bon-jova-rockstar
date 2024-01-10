@@ -652,8 +652,6 @@ names in Rockstar.)
                 """;
         String output = compileAndLaunch(program);
 
-        // TODO Ain't nothing should also work, but does not
-
         String expected = """
                 2
                 1
@@ -671,8 +669,6 @@ names in Rockstar.)
                 Say Tommy
                 """;
         String output = compileAndLaunch(program);
-
-        // TODO Is nothing should also work, but does not
 
         String expected = """
                 3
