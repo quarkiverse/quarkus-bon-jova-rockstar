@@ -1,4 +1,4 @@
-name: "Bon Jova"
+name: "Bon Jova 🎸"
 artifact: ${project.groupId}:${project.artifactId}:${project.version}
 description: Run Rockstar programs with Quarkus
 metadata:
