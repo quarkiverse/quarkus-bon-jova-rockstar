@@ -8,6 +8,8 @@ import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
 
+import java.text.DecimalFormat;
+
 import static org.example.BytecodeGeneratingListener.isNull;
 import static org.example.BytecodeGeneratingListener.isNumber;
 import static org.example.Constant.coerceNothingIntoType;
@@ -126,8 +128,8 @@ public class Expression {
                     if (isNumber(lrh) && isNumber(rrh)) {
                         return method.add(lrh, rrh);
                     } else {
-                        ResultHandle lsrh = Gizmo.toString(method, lrh);
-                        ResultHandle rsrh = Gizmo.toString(method, rrh);
+                        ResultHandle lsrh = stringify(method, lrh);
+                        ResultHandle rsrh = stringify(method, rrh);
 
                         return method.invokeVirtualMethod(
                                 MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"),
@@ -191,6 +193,26 @@ public class Expression {
             }
         }
         throw new RuntimeException("Confused expression: Could not interpret type " + valueClass);
+    }
+
+    private ResultHandle stringify(BytecodeCreator method, ResultHandle rh) {
+
+
+        // We want to do a special toString on numbers, to avoid tacking decimal points onto integers
+        final ResultHandle toStringed;
+        if (isNumber(rh)) {
+            // TODO save this in a field and re-use it (in a way that works in unit tests)
+            ResultHandle formatterHandle = method.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
+                    method.load("#.#########"));
+            toStringed = method
+                    .invokeVirtualMethod(
+                            MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
+                            formatterHandle, rh);
+
+        } else {
+            toStringed = Gizmo.toString(method, rh);
+        }
+        return toStringed;
     }
 
     private ResultHandle doEqualityCheck(BytecodeCreator method, ResultHandle lrh, ResultHandle rrh) {

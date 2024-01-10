@@ -170,6 +170,19 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     @Test
+    public void shouldFormatNumbersCorrectlyOnStringAddition() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 99 plus \" red balloons\"", 0);
+        Expression e = new Expression(ctx);
+        String answer = (String) execute(e);
+        assertEquals("99 red balloons", answer);
+
+        ctx = ParseHelper.getExpression("say \"blink\" plus 42", 0);
+        e = new Expression(ctx);
+        answer = (String) execute(e);
+        assertEquals("blink42", answer);
+    }
+
+    @Test
     public void shouldHandleSimpleSubtraction() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 - 6", 0);
         Expression a = new Expression(ctx);
