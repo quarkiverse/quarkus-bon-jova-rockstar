@@ -26,7 +26,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     private final FieldDescriptor formatter;
 
+    // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
+    private BytecodeCreator targetScopeForJumps;
+
     private final Stack<BytecodeCreator> blocks = new Stack<>();
+
+    // For some constructs, we may want to create a scope but not switch to it until the next statement list; this stack is a convenient
+    // place to store them
+    private final Stack<BytecodeCreator> controlScopes = new Stack<>();
 
 
     public BytecodeGeneratingListener(ClassCreator creator) {
@@ -44,7 +51,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                            .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                            .getFieldDescriptor();
         currentCreator.writeStaticField(formatter, formatterInstance);
-
 
         this.creator = creator;
 
@@ -115,24 +121,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
-    public void enterIfStmt(Rockstar.IfStmtContext ctx) {
-
-        Condition condition = new Condition(ctx);
-        BranchResult code = condition.toCode(currentCreator);
-        if (condition.hasElse()) {
-            enterBlock(code.falseBranch());
-        }
-        enterBlock(code.trueBranch());
-    }
-
-    @Override
-    public void exitStatementList(Rockstar.StatementListContext ctx) {
-        if (blocks.size() > 1) {
-            exitBlock();
-        }
-    }
-
-    @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
         Expression expression = new Expression(ctx.expression());
         ResultHandle value = expression.getResultHandle(currentCreator);
@@ -154,11 +142,33 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
+    public void enterBreakStmt(Rockstar.BreakStmtContext ctx) {
+        if (targetScopeForJumps != null) {
+            currentCreator.breakScope(targetScopeForJumps);
+        } else {
+            currentCreator.breakScope();
+        }
+    }
+
+    @Override
+    public void enterContinueStmt(Rockstar.ContinueStmtContext ctx) {
+        if (targetScopeForJumps != null) {
+            currentCreator.continueScope(targetScopeForJumps);
+        } else {
+            // This is rather dodgy, but if we don't have an enclosing loop-y scope, then a continue behaves like a break
+            currentCreator.breakScope();
+        }
+    }
+
+    @Override
     public void enterLoopStmt(Rockstar.LoopStmtContext ctx) {
 
         Expression expression = new Expression(ctx.expression());
 
         final Function<BytecodeCreator, BranchResult> fun;
+
+        targetScopeForJumps = currentCreator.createScope();
+        enterBlock(targetScopeForJumps);
 
         if (ctx.KW_WHILE() != null) {
             fun = (BytecodeCreator method) -> {
@@ -176,6 +186,47 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         BytecodeCreator loop = currentCreator.whileLoop(fun)
                                              .block();
         enterBlock(loop);
+    }
+
+    @Override
+    public void exitLoopStmt(Rockstar.LoopStmtContext ctx) {
+
+        exitBlock();
+        targetScopeForJumps = null;
+    }
+
+    @Override
+    public void enterIfStmt(Rockstar.IfStmtContext ctx) {
+
+        Condition condition = new Condition(ctx);
+        BranchResult code = condition.toCode(currentCreator);
+        if (condition.hasElse()) {
+            controlScopes.push(code.falseBranch());
+        }
+        controlScopes.push(code.trueBranch());
+    }
+
+    @Override
+    public void exitIfStmt(Rockstar.IfStmtContext ctx) {
+        exitBlock();
+    }
+
+    @Override
+    public void enterStatementList(Rockstar.StatementListContext ctx) {
+        if (controlScopes.isEmpty()) {
+            BytecodeCreator scope = currentCreator.createScope();
+            enterBlock(scope);
+        } else {
+            BytecodeCreator scope = controlScopes.pop();
+            enterBlock(scope);
+        }
+    }
+
+    @Override
+    public void exitStatementList(Rockstar.StatementListContext ctx) {
+        if (blocks.size() > 1) {
+            exitBlock();
+        }
     }
 
     private void exitBlock() {
