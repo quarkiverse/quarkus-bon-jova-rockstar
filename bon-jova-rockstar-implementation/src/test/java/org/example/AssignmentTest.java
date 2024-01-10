@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
+import static org.example.Constant.NOTHING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -157,34 +158,37 @@ public class AssignmentTest {
     }
 
     /*
-    Rockstar makes a distinction between `null` and `undefined`. Javascript also does this,
-    but since Java does not, we will ignore that for the moment.
+    Rockstar makes a distinction between `null` and `undefined`. The undefined is closer to Java's null.
      */
     @Test
     public void shouldParseUndefinedConstants() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is mysterious");
         Assignment a = new Assignment(ctx);
         assertNull(a.getValue());
-        // Not great, but the best we can do
     }
 
+    /*
+ Rockstar makes a distinction between `null` and `undefined`. The null class is equal to 0 and false, so it can't be represented by a
+ Java null.
+  */
     @Test
     public void shouldParseNullConstants() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is nothing");
         Assignment a = new Assignment(ctx);
-        assertNull(a.getValue());
+        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is nobody");
-        a = new Assignment(ctx);
-        assertNull(a.getValue());
+        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is nowhere");
-        a = new Assignment(ctx);
-        assertNull(a.getValue());
+        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is gone");
-        a = new Assignment(ctx);
-        assertNull(a.getValue());
+        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(NOTHING, a.getValue());
     }
 
     @Test

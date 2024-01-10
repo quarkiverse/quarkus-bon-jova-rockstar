@@ -6,10 +6,11 @@ import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
 
+import static org.example.BytecodeGeneratingListener.isNull;
 import static org.example.BytecodeGeneratingListener.isNumber;
+import static org.example.Constant.coerceNothingIntoType;
 
 public class Expression {
 
@@ -80,41 +81,13 @@ public class Expression {
             }
 
             if (literal != null) {
-                if (literal
-                            .NUMERIC_LITERAL() != null) {
-
-                    TerminalNode num = literal
-                            .NUMERIC_LITERAL();
-                    //  Numbers in Rockstar are double-precision floating point numbers, stored according to the IEEE 754 standard.
-                    // ... so we don't need to worry about integers
-                    value = Double.parseDouble(num.getText());
-
-                    valueClass = double.class;
-
-                } else if (literal
-                                   .STRING_LITERAL() != null) {
-                    value = literal
-                            .STRING_LITERAL()
-                            .getText()
-                            .replaceAll("\"", "");
-                    // Strip out the quotes around literals (doing it in the listener rather than the lexer is simpler, and apparently
-                    // idiomatic-ish)
-                    valueClass = String.class;
-                }
-
+                Literal l = new Literal(literal);
+                value = l.getValue();
+                valueClass = l.getValueClass();
             } else if (constant != null) {
-                if (constant.CONSTANT_TRUE() != null) {
-                    value = true;
-                    valueClass = boolean.class;
-                } else if (constant.CONSTANT_FALSE() != null) {
-                    value = false;
-                    valueClass = boolean.class;
-                } else if (constant.CONSTANT_EMPTY() != null) {
-                    value = "";
-                    valueClass = String.class;
-                }
-
-
+                Constant c = new Constant(constant);
+                value = c.getValue();
+                valueClass = c.getValueClass();
             } else if (variableContext != null) {
                 variable = new Variable(variableContext);
                 value = variable.getVariableName();
@@ -138,6 +111,15 @@ public class Expression {
         if (operation != null) {
             ResultHandle lrh = lhe.getResultHandle(method);
             ResultHandle rrh = rhe.getResultHandle(method);
+
+            // Do type coercion of rockstar nulls (which are a special type, not null)
+            // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
+            if (lhe.isNothing()) {
+                lrh = coerceNothingIntoType(method, rrh);
+            }
+            if (rhe.isNothing()) {
+                rrh = coerceNothingIntoType(method, lrh);
+            }
 
             switch (operation) {
                 case ADD -> {
@@ -165,15 +147,12 @@ public class Expression {
                     throw new RuntimeException("Unsupported operation: divided we fall, and all that");
                 }
                 case EQUALITY_CHECK -> {
-                    return method.invokeVirtualMethod(MethodDescriptor.ofMethod("java/lang/Object", "equals", "Z", "Ljava/lang/Object;"),
-                            lrh, rrh);
+                    return doEqualityCheck(method, lrh, rrh);
                 }
                 case INEQUALITY_CHECK -> {
                     // A boolean negation in bytecode is a bit tricky, since the jvm doesn't really recognise booleans, so do a bitwise xor
                     // to simulate it
-                    ResultHandle equalityCheck = method.invokeVirtualMethod(
-                            MethodDescriptor.ofMethod("java/lang/Object", "equals", "Z", "Ljava/lang/Object;"),
-                            lrh, rrh);
+                    ResultHandle equalityCheck = doEqualityCheck(method, lrh, rrh);
                     return method.bitwiseXor(equalityCheck, method.load(true));
                 }
                 case GREATER_THAN_CHECK -> {
@@ -205,9 +184,35 @@ public class Expression {
                 return method.load((double) value);
             } else if (boolean.class.equals(valueClass)) {
                 return method.load((boolean) value);
+            } else if (valueClass == null) {
+                return method.loadNull();
+            } else if (valueClass == Nothing.class) {
+                return method.loadNull();
             }
         }
         throw new RuntimeException("Confused expression: Could not interpret type " + valueClass);
+    }
+
+    private ResultHandle doEqualityCheck(BytecodeCreator method, ResultHandle lrh, ResultHandle rrh) {
+        // Should we do this check in bytecode instead?
+        if (!isNull(lrh)) {
+            return method.invokeVirtualMethod(
+                    MethodDescriptor.ofMethod("java/lang/Object", "equals", "Z", "Ljava/lang/Object;"),
+                    lrh, rrh);
+        } else {
+            BytecodeCreator scope = method;
+            AssignableResultHandle answer = scope.createVariable("Z");
+            BranchResult br = method.ifReferencesEqual(lrh, rrh);
+            br.trueBranch()
+              .assign(answer, scope.load(true));
+            br.falseBranch()
+              .assign(answer, scope.load(false));
+            return answer;
+        }
+    }
+
+    public boolean isNothing() {
+        return value == Constant.NOTHING;
     }
 
     private static AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
