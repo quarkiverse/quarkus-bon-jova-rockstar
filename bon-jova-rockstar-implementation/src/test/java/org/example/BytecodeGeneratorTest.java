@@ -321,7 +321,6 @@ names in Rockstar.)
         assertEquals("25\n25\n25\n25\n", output);
     }
 
-    @Disabled("Needs support for plus")
     @Test
     public void shouldHandleOperationsOnPronounReferences() {
         String program = """
@@ -332,7 +331,7 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         assertEquals("pass\n" +
-                     "pass!", output);
+                     "pass!\n", output);
 
     }
 

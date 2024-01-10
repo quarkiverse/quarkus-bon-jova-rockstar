@@ -3,10 +3,13 @@ package org.example;
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
+import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
+
+import static org.example.BytecodeGeneratingListener.isNumber;
 
 public class Expression {
 
@@ -138,7 +141,16 @@ public class Expression {
 
             switch (operation) {
                 case ADD -> {
-                    return method.add(lrh, rrh);
+                    if (isNumber(lrh) && isNumber(rrh)) {
+                        return method.add(lrh, rrh);
+                    } else {
+                        ResultHandle lsrh = Gizmo.toString(method, lrh);
+                        ResultHandle rsrh = Gizmo.toString(method, rrh);
+
+                        return method.invokeVirtualMethod(
+                                MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"),
+                                lsrh, rsrh);
+                    }
                 }
                 case SUBTRACT -> {
                     // Handle subtraction by multiplying by -1 and adding
