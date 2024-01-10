@@ -7,6 +7,8 @@
 /dataSources/
 /dataSources.local.xml
 
+/sonarlint
+
 misc.xml
 vcs.xml
 encodings.xml
