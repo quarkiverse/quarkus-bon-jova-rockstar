@@ -161,6 +161,14 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     @Test
+    public void shouldHandleStringAddition() {
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"rock\" plus \"roll\"", 0);
+        Expression e = new Expression(ctx);
+        String answer = (String) execute(e);
+        assertEquals("rockroll", answer);
+    }
+
+    @Test
     public void shouldHandleSimpleSubtraction() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 - 6", 0);
         Expression a = new Expression(ctx);

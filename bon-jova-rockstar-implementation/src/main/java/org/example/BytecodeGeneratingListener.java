@@ -241,7 +241,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     // It would be nice to get rid of this, but when we get an expression, we don't always know what the type of thing in the result
     // handle is
-    private static boolean isNumber(ResultHandle value) {
+    public static boolean isNumber(ResultHandle value) {
         // ResultHandle knows the type, but it's private
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
         // Take advantage of the toString format of ResultHandle
