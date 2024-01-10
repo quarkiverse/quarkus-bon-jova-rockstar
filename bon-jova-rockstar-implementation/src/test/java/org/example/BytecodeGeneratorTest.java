@@ -151,17 +151,39 @@ names in Rockstar.)
     @Test
     public void shouldNotBeSensitiveToWhitespaceInTheMiddleOfLines() {
         String program = """
-                Your heart says  bottles of beer on the wall
-                Say it with your heart
+                Your heart  says bottles of beer on the wall
+                Say  it with your heart
                                                             """;
         String output = compileAndLaunch(program);
 
-        assertTrue(output.matches(" ?bottles of beer on the wall ?bottles of beer on the wall\n"));
+        assertTrue(output.matches("bottles of beer on the wallbottles of beer on the wall\n"));
     }
+
+    @Test
+    public void shouldNotBeSensitiveToLotsOfWhitespaceInTheMiddleOfLines() {
+        String program = """
+                Your heart   says bottles of beer on the wall
+                Say  it  with   your heart
+                                                            """;
+        String output = compileAndLaunch(program);
+
+        assertTrue(output.matches("bottles of beer on the wallbottles of beer on the wall\n"));
+    }
+
+    @Test
+    public void shouldNotBeSensitiveToWhitespaceInCommonVariableNames() {
+        String program = """
+                Your heart says bottles of beer on the wall
+                Say it with your    heart
+                                                            """;
+        String output = compileAndLaunch(program);
+
+        assertTrue(output.matches("bottles of beer on the wallbottles of beer on the wall\n"));
+    }
+
 
     // This is taken from the sample of 99 bottles on the try it out site
     // The reference implementation attaches the leading whitespace to the string literal, rather than ignoring it
-    @Disabled("not yet working")
     @Test
     public void shouldIncludeWhitespaceInPoeticStringLiteralDeclarations() {
         String program = """
@@ -170,7 +192,7 @@ names in Rockstar.)
                                                             """;
         String output = compileAndLaunch(program);
 
-        // TODO the reference implementation attaches the leading whitespace to the string literal, rather than ignoring it
+        // the reference implementation attaches the leading whitespace to the string literal, rather than ignoring it
         assertEquals(" bottles of beer on the wall bottles of beer on the wall\n", output);
     }
 

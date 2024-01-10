@@ -9,13 +9,13 @@ statementList: statement+;
 statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
-          | lhe=expression WS op=(KW_MULTIPLY|KW_DIVIDE) WS rhe=expression
-          | lhe=expression WS op=(KW_ADD|KW_SUBTRACT) WS rhe=expression
-          | lhe=expression WS op=(PLUS_SIGN|HYPHEN) WS rhe=expression
-          | lhe=expression WS op=(ASTERISK|SLASH) WS rhe=expression
-          | lhe=expression WS comparisionOp WS rhe=expression
-          | lhe=expression contractedComparisionOp WS rhe=expression
-          | lhe=expression WS op=(KW_AND|KW_OR|KW_NOR) WS rhe=expression
+          | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
+          | lhe=expression ws op=(KW_ADD|KW_SUBTRACT) ws rhe=expression
+          | lhe=expression ws op=(PLUS_SIGN|HYPHEN) ws rhe=expression
+          | lhe=expression ws op=(ASTERISK|SLASH) ws rhe=expression
+          | lhe=expression ws comparisionOp ws rhe=expression
+          | lhe=expression contractedComparisionOp ws rhe=expression
+          | lhe=expression ws op=(KW_AND|KW_OR|KW_NOR) ws rhe=expression
           | (literal|variable|constant)
 ;
 
@@ -30,7 +30,7 @@ paramList: variable ((COMMA? WS KW_AND WS | COMMA | AMPERSAND | APOSTROPHED_N) v
 assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws (KW_IS|KW_WAS_WERE)) ws (poeticNumberLiteral|constant|literal)
               | KW_LET ws variable ws KW_BE ws expression
               | KW_PUT ws expression ws KW_INTO ws variable
-              | variable ws (KW_SAYS | KW_SAY) ws poeticStringLiteral
+              | variable ws (KW_SAYS | KW_SAY) WS poeticStringLiteral
 ;
 
 comparisionOp: KW_IS
@@ -100,7 +100,7 @@ poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
 
 poeticNumberLiteralDecimalSeparator: DOT;
 
-poeticStringLiteral: poeticStringLiteralWord poeticStringLiteralGarbage* (ws poeticStringLiteralGarbage* poeticStringLiteralWord poeticStringLiteralGarbage*)*;
+poeticStringLiteral: ws* poeticStringLiteralWord poeticStringLiteralGarbage* (ws poeticStringLiteralGarbage* poeticStringLiteralWord poeticStringLiteralGarbage*)*;
 
 poeticStringLiteralGarbage: DOT
                           | COMMA

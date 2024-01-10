@@ -32,7 +32,7 @@ public class AssignmentTest {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is 6");
         Assignment a = new Assignment(ctx);
         // Variable names should be normalised to lower case
-        String name = "my thing";
+        String name = "my__thing";
         assertEquals(name, a.getVariableName());
     }
 
@@ -41,7 +41,7 @@ public class AssignmentTest {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Doctor Feelgood is 6");
         Assignment a = new Assignment(ctx);
         // Variable names should be normalised to lower case
-        assertEquals("doctor feelgood", a.getVariableName());
+        assertEquals("doctor__feelgood", a.getVariableName());
     }
 
     @Test

@@ -25,7 +25,7 @@ public class VariableTest {
         Rockstar.VariableContext ctx = ParseHelper.getVariable("my thing is 5\nshout my thing");
         Variable a = new Variable(ctx);
         // The 'value' is the variable name
-        assertEquals("my thing", a.getVariableName());
+        assertEquals("my__thing", a.getVariableName());
 
     }
 
@@ -59,7 +59,18 @@ public class VariableTest {
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
         Variable v = new Variable(ctx);
-        assertEquals("my thing", v.getVariableName());
+        assertEquals("my__thing", v.getVariableName());
+    }
+
+    @Test
+    public void shouldIgnoreExtraWhitespaceInCommonVariableNames() {
+        String program = """
+                My             thing is true
+                Shout my   thing
+                                            """;
+        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Variable v = new Variable(ctx);
+        assertEquals("my__thing", v.getVariableName());
     }
 
     /*
@@ -79,7 +90,7 @@ names in Rockstar.)
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
         Variable v = new Variable(ctx);
-        assertEquals("doctor feelgood", v.getVariableName());
+        assertEquals("doctor__feelgood", v.getVariableName());
     }
 
     @Test
@@ -115,7 +126,7 @@ names in Rockstar.)
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
         Variable v = new Variable(ctx);
-        assertEquals("my thing", v.getVariableName());
+        assertEquals("my__thing", v.getVariableName());
     }
 
 
@@ -158,7 +169,7 @@ names in Rockstar.)
                 """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
         Variable v = new Variable(ctx);
-        assertEquals("my balance", v.getVariableName());
+        assertEquals("my__balance", v.getVariableName());
     }
 
 
@@ -179,7 +190,7 @@ names in Rockstar.)
         v = new Variable(ctx);
 
         // Now go again and make sure we can interpret the pronoun
-        assertEquals("the message", v.getVariableName());
+        assertEquals("the__message", v.getVariableName());
     }
 
     @Test

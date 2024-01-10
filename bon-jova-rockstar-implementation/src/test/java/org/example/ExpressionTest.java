@@ -45,7 +45,7 @@ public class ExpressionTest {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("my thing is 5\nshout my thing");
         Expression a = new Expression(ctx);
         // The 'value' is the variable name
-        assertEquals("my thing", a.getValue());
+        assertEquals("my__thing", a.getValue());
         // A bit clunky, but finding an optimum value is non-obvious
         assertEquals(Variable.class, a.getValueClass());
     }
