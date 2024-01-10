@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytecodeGeneratorTest {
 
@@ -132,7 +133,7 @@ names in Rockstar.)
     }
 
     @Test
-    public void shouldNotBeSensitiveToWhitespace() {
+    public void shouldNotBeSensitiveToWhitespaceAtBeginningAndEndOfLines() {
         String program = """
                 Time is an illusion
                   Shout time
@@ -144,6 +145,33 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         assertEquals("28\n28\n28\n28\n", output);
+    }
+
+    // This is taken from the sample of 99 bottles on the try it out site
+    @Test
+    public void shouldNotBeSensitiveToWhitespaceInTheMiddleOfLines() {
+        String program = """
+                Your heart says  bottles of beer on the wall
+                Say it with your heart
+                                                            """;
+        String output = compileAndLaunch(program);
+
+        assertTrue(output.matches(" ?bottles of beer on the wall ?bottles of beer on the wall\n"));
+    }
+
+    // This is taken from the sample of 99 bottles on the try it out site
+    // The reference implementation attaches the leading whitespace to the string literal, rather than ignoring it
+    @Disabled("not yet working")
+    @Test
+    public void shouldIncludeWhitespaceInPoeticStringLiteralDeclarations() {
+        String program = """
+                Your heart says  bottles of beer on the wall
+                Say it with your heart
+                                                            """;
+        String output = compileAndLaunch(program);
+
+        // TODO the reference implementation attaches the leading whitespace to the string literal, rather than ignoring it
+        assertEquals(" bottles of beer on the wall bottles of beer on the wall\n", output);
     }
 
     /*

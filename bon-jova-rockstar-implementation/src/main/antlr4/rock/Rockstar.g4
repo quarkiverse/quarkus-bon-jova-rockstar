@@ -2,11 +2,11 @@ parser grammar Rockstar;
 
 options { tokenVocab=RockstarLexer; }
 
-program: (NL|WS)* (statementList | functionDeclaration)* WS*;
+program: (NL|ws)* (statementList | functionDeclaration)* ws*;
 
 statementList: statement+;
 
-statement: WS* (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
           | lhe=expression WS op=(KW_MULTIPLY|KW_DIVIDE) WS rhe=expression
@@ -27,41 +27,43 @@ functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statement
 
 paramList: variable ((COMMA? WS KW_AND WS | COMMA | AMPERSAND | APOSTROPHED_N) variable)*;
 
-assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | WS (KW_IS|KW_WAS_WERE)) WS (poeticNumberLiteral|constant|literal)
-              | KW_LET WS variable WS KW_BE WS expression
-              | KW_PUT WS expression WS KW_INTO WS variable
-              | variable WS (KW_SAYS | KW_SAY) WS poeticStringLiteral
+assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws (KW_IS|KW_WAS_WERE)) ws (poeticNumberLiteral|constant|literal)
+              | KW_LET ws variable ws KW_BE ws expression
+              | KW_PUT ws expression ws KW_INTO ws variable
+              | variable ws (KW_SAYS | KW_SAY) ws poeticStringLiteral
 ;
 
 comparisionOp: KW_IS
              | KW_NOT_EQUAL
-             | KW_IS WS (KW_GREATER|KW_LESS) WS KW_THAN
-             | KW_IS WS KW_AS WS (KW_GREATER_EQUAL|KW_LESS_EQUAL) WS KW_AS
+             | KW_IS ws (KW_GREATER|KW_LESS) ws KW_THAN
+             | KW_IS ws KW_AS ws (KW_GREATER_EQUAL|KW_LESS_EQUAL) ws KW_AS
 ;
 
 contractedComparisionOp: APOSTROPHE_S;
 
-inputStmt: KW_LISTEN WS KW_TO WS variable;
+inputStmt: KW_LISTEN ws KW_TO ws variable;
 
-outputStmt: (KW_SHOUT | KW_SAY) WS expression;
+outputStmt: (KW_SHOUT | KW_SAY) ws expression;
 
-ifStmt: KW_IF WS expr=expression NL statementList  (WS* KW_ELSE NL? statementList)?;
+ifStmt: KW_IF ws expr=expression NL statementList  (ws* KW_ELSE NL? statementList)?;
 
-loopStmt: (KW_WHILE | KW_UNTIL) WS expr=expression NL statementList;
+loopStmt: (KW_WHILE | KW_UNTIL) ws expr=expression NL statementList;
 
-incrementStmt: KW_BUILD WS variable WS ups;
+incrementStmt: KW_BUILD ws variable ws ups;
 
-ups: KW_UP (COMMA? WS+ KW_UP)*;
+ups: KW_UP (COMMA? ws KW_UP)*;
 
-decrementStmt: KW_KNOCK WS variable WS downs;
+decrementStmt: KW_KNOCK ws variable ws downs;
 
-downs: KW_DOWN (COMMA? WS+ KW_DOWN)*;
+downs: KW_DOWN (COMMA? ws KW_DOWN)*;
 
-returnStmt: KW_GIVE WS KW_BACK WS expression;
+returnStmt: KW_GIVE ws KW_BACK ws expression;
 
 continueStmt: KW_CONTINUE;
 
 breakStmt: KW_BREAK;
+
+ws: WS+;
 
 constant: CONSTANT_UNDEFINED
         | CONSTANT_NULL
@@ -72,16 +74,16 @@ constant: CONSTANT_UNDEFINED
 
 literal: NUMERIC_LITERAL | STRING_LITERAL;
 
-variable: COMMON_VARIABLE_PREFIXES WS WORD
+variable: COMMON_VARIABLE_PREFIXES ws WORD
         | WORD
         | WORD_WITH_AP
-        | PROPER_NOUN (WS PROPER_NOUN)*
+        | PROPER_NOUN (ws PROPER_NOUN)*
         | PRONOUNS
 ;
 
-poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (WS poeticNumberLiteralGarbage* WS* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
+poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (ws poeticNumberLiteralGarbage* ws* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
 
-poeticNumberLiteralGarbage: WS* (COMMA | EXCLAMATION_MARK | QUESTION_MARK | PLUS_SIGN | AMPERSAND | SINGLE_QUOTE) WS*
+poeticNumberLiteralGarbage: ws* (COMMA | EXCLAMATION_MARK | QUESTION_MARK | PLUS_SIGN | AMPERSAND | SINGLE_QUOTE) ws*
 ;
 
 poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
@@ -98,7 +100,7 @@ poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
 
 poeticNumberLiteralDecimalSeparator: DOT;
 
-poeticStringLiteral: poeticStringLiteralWord poeticStringLiteralGarbage* (WS poeticStringLiteralGarbage* poeticStringLiteralWord poeticStringLiteralGarbage*)*;
+poeticStringLiteral: poeticStringLiteralWord poeticStringLiteralGarbage* (ws poeticStringLiteralGarbage* poeticStringLiteralWord poeticStringLiteralGarbage*)*;
 
 poeticStringLiteralGarbage: DOT
                           | COMMA
