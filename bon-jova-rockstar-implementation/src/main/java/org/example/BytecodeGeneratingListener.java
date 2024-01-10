@@ -126,9 +126,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
-    public void exitStatement(Rockstar.StatementContext ctx) {
-        // For now, assume all blocks are one line long
-
+    public void exitStatementList(Rockstar.StatementListContext ctx) {
         if (blocks.size() > 1) {
             exitBlock();
         }
@@ -178,7 +176,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         BytecodeCreator loop = currentCreator.whileLoop(fun)
                                              .block();
         enterBlock(loop);
-        // TODO once we have proper block support, we should just do things with the statement list in the parse tree
     }
 
     private void exitBlock() {
