@@ -1,12 +1,12 @@
-import io.quarkus.test.junit.QuarkusIntegrationTest;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.main.QuarkusMainTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,13 +21,23 @@ class HelloWorldTest {
     }
 
     @Test
-    void helloWorldDotRockShouldOutputHelloWorld() {
-//        var helloWorld = new hello_world();
-//        helloWorld.main(null);
+    void helloWorldDotRockShouldOutputHelloWorld() throws ClassNotFoundException, InvocationTargetException, IllegalAccessException,
+            NoSuchMethodException {
 
-        assertTrue(testOut.toString().contains("Hello World"));
-        assertTrue(testOut.toString().contains("Rockstar rockzzz"));
-        assertTrue(testOut.toString().contains("What what?"));
+        // Find the class using reflection, since the test will not have it at compile-time
+        Class clazz = this.getClass()
+                          .getClassLoader()
+                          .loadClass("hello_world");
+
+        Method meth = clazz.getMethod("main", String[].class);
+        meth.invoke(null, (Object) null);
+
+        assertTrue(testOut.toString()
+                          .contains("Hello World"));
+        assertTrue(testOut.toString()
+                          .contains("Rockstar rockzzz"));
+        assertTrue(testOut.toString()
+                          .contains("What what?"));
     }
 
     @AfterEach
