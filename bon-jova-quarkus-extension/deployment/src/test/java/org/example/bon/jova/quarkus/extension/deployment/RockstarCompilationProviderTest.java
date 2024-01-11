@@ -3,7 +3,6 @@ package org.example.bon.jova.quarkus.extension.deployment;
 import io.quarkus.deployment.dev.CompilationProvider;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -80,6 +79,8 @@ class RockstarCompilationProviderTest {
     @AfterAll
     static void cleanUp() throws IOException {
         var classesDir = new File("src/test/resources/classes");
-        FileUtils.cleanDirectory(classesDir);
+        if (classesDir.exists()) {
+            FileUtils.cleanDirectory(classesDir);
+        }
     }
 }

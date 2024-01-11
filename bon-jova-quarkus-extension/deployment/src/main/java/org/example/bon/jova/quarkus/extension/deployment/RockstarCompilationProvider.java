@@ -12,12 +12,14 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
 
+import static org.example.RockFileCompiler.DOT_CLASS;
+import static org.example.RockFileCompiler.DOT_ROCK;
+
 public class RockstarCompilationProvider implements CompilationProvider {
-    public static final String DOT_CLASS = ".class";
 
     @Override
     public Set<String> handledExtensions() {
-        return Collections.singleton(".rock");
+        return Collections.singleton(DOT_ROCK);
     }
 
     @Override
@@ -27,11 +29,17 @@ public class RockstarCompilationProvider implements CompilationProvider {
 
     @Override
     public void compile(Set<File> files, Context context) {
+
+        // Ensure the directory we're going to write into exists
+        context.getOutputDirectory()
+               .mkdirs();
+
         final var compiler = new RockFileCompiler();
 
         for (var file : files) {
-            final var outFile = new File(context.getOutputDirectory().getPath() + File.separator +
-                            FilenameUtils.getBaseName(file.getName()) + DOT_CLASS);
+            final var outFile = new File(context.getOutputDirectory()
+                                                .getPath(),
+                    FilenameUtils.getBaseName(file.getName()) + DOT_CLASS);
 
             try {
                 compiler.compile(new FileInputStream(file), outFile);
