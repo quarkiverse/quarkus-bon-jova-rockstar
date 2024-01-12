@@ -47,10 +47,6 @@
       <artifactId>quarkus-junit5</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-reactive</artifactId>
-    </dependency>
   </dependencies>
   <build>
     <sourceDirectory>src/main/rockstar</sourceDirectory>
