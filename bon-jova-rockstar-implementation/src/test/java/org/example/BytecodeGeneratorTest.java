@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +42,9 @@ public class BytecodeGeneratorTest {
 
         program = "Shout 34.2";
         output = compileAndLaunch(program);
-        assertEquals("34.2\n", output);
+
+        var expected = BigDecimal.valueOf(34.2);
+        assertEquals("%.1f%n".formatted(expected), output);
     }
 
     /*
@@ -237,7 +241,8 @@ names in Rockstar.)
                                             """;
         String output = compileAndLaunch(program);
 
-        assertEquals("4.89\n", output);
+        var expected = BigDecimal.valueOf(4.89);
+        assertEquals("%.2f%n".formatted(expected), output);
     }
 
     /*
@@ -419,7 +424,8 @@ names in Rockstar.)
                 """;
         String output = compileAndLaunch(program);
 
-        assertEquals("5.141\n", output);
+        var expected = BigDecimal.valueOf(5.141);
+        assertEquals("%.3f%n".formatted(expected), output);
     }
 
     @Test
@@ -461,7 +467,8 @@ names in Rockstar.)
         // Floating points are hard! Satriani also gives this as -0.5800000000000001, and a simple "1.42 - 2.0" also gives that result
         // Here, because we have to round to handle integers correctly, we can set a maximum precision that's shorter than the point
         // where floats go weird
-        assertEquals("-0.58\n", output);
+        var expected = BigDecimal.valueOf(-0.58);
+        assertEquals("%.2f%n".formatted(expected), output);
     }
 
     @Test
