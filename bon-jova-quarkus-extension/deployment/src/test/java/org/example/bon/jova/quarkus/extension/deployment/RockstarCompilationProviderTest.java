@@ -1,12 +1,15 @@
 package org.example.bon.jova.quarkus.extension.deployment;
 
 import io.quarkus.deployment.dev.CompilationProvider;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -14,6 +17,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RockstarCompilationProviderTest {
+    private static final String sourceDirectory = "src/test/resources/";
+    private static final String outputDirectory = "target/classes/";
+    private static final Set<File> sourceFiles = Set.of(
+            new File(sourceDirectory + "hello_world.rock"),
+            new File(sourceDirectory + "leet_tommy.rock"));
+    private static final Set<File> outputFiles = Set.of(
+            new File(outputDirectory + "hello_world.class"),
+            new File(outputDirectory + "leet_tommy.class"));
+
+    @BeforeAll
+    public static void removeOutputFiles() throws IOException {
+        if (!new File(outputDirectory).exists()) {
+            Files.createDirectory(Path.of(outputDirectory));
+        }
+
+        outputFiles.forEach(File::delete);
+    }
 
     @Test
     void handledExtensionsShouldSpecifyRockExtension() throws IOException {
@@ -34,18 +54,8 @@ class RockstarCompilationProviderTest {
 
     @Test
     void compileShouldProduceClassFiles() throws IOException {
-        var files = Set.of(
-                new File("src/test/resources/hello-world.rock"),
-                new File("src/test/resources/leet-tommy.rock"));
-        try (var compilationProvider = new RockstarCompilationProvider()) {
-            compilationProvider.compile(files, createContext());
-        }
-
-        File helloWorld = new File("src/test/resources/classes/hello-world.class");
-        File tommyLeet = new File("src/test/resources/classes/leet-tommy.class");
-
-        assertTrue(helloWorld.exists());
-        assertTrue(tommyLeet.exists());
+        compile(sourceFiles, new File(outputDirectory));
+        outputFiles.forEach(outputFile -> assertTrue(outputFile.exists()));
     }
 
     @Test
@@ -57,10 +67,15 @@ class RockstarCompilationProviderTest {
         }
     }
 
-    private CompilationProvider.Context createContext() {
-        var outputDirectory = new File("src/test/resources/classes");
+    private static void compile(Set<File> files, File outputDirectory) throws IOException {
+        try (var compilationProvider = new RockstarCompilationProvider()) {
+            compilationProvider.compile(files,
+                    createContext(outputDirectory));
+        }
+    }
 
-        return new CompilationProvider.Context("RockstarCompilationProviderTest",
+    private static CompilationProvider.Context createContext(File outputDirectory) {
+        return new CompilationProvider.Context("RockstarTest",
                 null,
                 null,
                 null,

@@ -2,7 +2,6 @@ package org.example.bon.jova.quarkus.extension.deployment;
 
 import io.quarkus.test.QuarkusUnitTest;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -14,10 +13,9 @@ public class BonJovaQuarkusExtensionTest {
             .withEmptyApplication();
 
     @Test
-    @Disabled("until generation of rockstar endpoints is available")
     public void testRockstarEndpoint() {
-        RestAssured.when().get("/rockstar/hello-world.rock")
+        RestAssured.when().get("/rockstar/hello_world.rock")
                 .then().statusCode(200)
-                .and().body(containsString("Hello World!"));
+                .and().body(containsString("Hello World"));
     }
 }

@@ -2,6 +2,7 @@ package org.example.bon.jova.quarkus.extension.deployment;
 
 import io.quarkus.bootstrap.model.ApplicationModel;
 import io.quarkus.bootstrap.workspace.SourceDir;
+import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.AdditionalClassLoaderResourcesBuildItem;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.example.RockFileCompiler.DOT_CLASS;
 import static org.example.RockFileCompiler.DOT_ROCK;
+import org.example.bon.jova.quarkus.extension.runtime.RockstarResource;
 
 class BonJovaQuarkusExtensionProcessor {
 
@@ -32,7 +34,6 @@ class BonJovaQuarkusExtensionProcessor {
     FeatureBuildItem feature() {
         return new FeatureBuildItem(FEATURE);
     }
-
 
     /**
      * Because there's no maven support for compiling .rock files, and writing a maven plugin seems like overkill,
@@ -107,5 +108,10 @@ class BonJovaQuarkusExtensionProcessor {
     private boolean isUpToDate(File outFile, File sourceFile) {
         // Check the file exists, and also that it's not significantly older than the source file
         return outFile.exists() && outFile.lastModified() > (sourceFile.lastModified() - 2 * MINUTES);
+    }
+
+    @BuildStep
+    void addRockstarResource(BuildProducer<AdditionalBeanBuildItem> additionalBeans) {
+        additionalBeans.produce(AdditionalBeanBuildItem.unremovableOf(RockstarResource.class));
     }
 }

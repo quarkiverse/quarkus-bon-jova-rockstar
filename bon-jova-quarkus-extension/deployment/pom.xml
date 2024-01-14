@@ -40,6 +40,10 @@
       <artifactId>commons-io</artifactId>
       <version>2.15.1</version>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-resteasy-reactive-deployment</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
