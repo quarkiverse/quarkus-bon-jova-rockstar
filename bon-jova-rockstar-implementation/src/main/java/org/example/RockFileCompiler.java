@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class RockFileCompiler {
-    private static final String DOT_CLASS = ".class";
+    public static final String DOT_CLASS = ".class";
+    public static final String DOT_ROCK = ".rock";
 
     public static void main(String[] args) {
         System.out.println("Hello World!");
