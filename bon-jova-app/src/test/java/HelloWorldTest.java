@@ -35,9 +35,9 @@ class HelloWorldTest {
         assertTrue(testOut.toString()
                           .contains("Hello World"));
         assertTrue(testOut.toString()
-                          .contains("Rockstar rockzzz"));
+                          .contains("Rockstar rockzzzzzzz"));
         assertTrue(testOut.toString()
-                          .contains("What what?"));
+                          .contains("What what?!"));
     }
 
     @AfterEach
