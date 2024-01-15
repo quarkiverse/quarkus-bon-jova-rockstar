@@ -16,7 +16,7 @@ class SimpleHelloWorldTest {
     private final PrintStream originalOut = System.out;
 
     @BeforeEach
-    public void setup() throws InterruptedException {
+    public void setup() {
         System.setOut(new PrintStream(testOut));
     }
 
