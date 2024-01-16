@@ -18,6 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytecodeGeneratorTest {
 
+    @Test
+    public void shouldIgnoreComments() {
+        String program = "Shout 1\n(Shout 2)\nShout 3\n";
+        String output = compileAndLaunch(program);
+        assertEquals("1\n3\n", output);
+    }
 
     @Test
     public void shouldHandleSimpleStringLiterals() {
