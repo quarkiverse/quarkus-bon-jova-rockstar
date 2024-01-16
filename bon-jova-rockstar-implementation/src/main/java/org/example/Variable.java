@@ -16,11 +16,28 @@ public class Variable {
     // clearing statics
     private static String mostRecentVariableName = null;
     private static final Map<String, FieldDescriptor> variables = new HashMap<>();
+    private static final Map<String, Class> variableTypes = new HashMap<>();
 
     private final String variableName;
+    private Class variableClass;
+
+
+    public Variable(Rockstar.VariableContext variable, Class<?> variableClass) {
+        this(variable, false);
+
+        this.variableClass = variableClass;
+        if (!variableTypes.containsKey(variableName)) {
+            variableTypes.put(variableName, variableClass);
+        }
+
+        // TODO check the type if it exists, re-assign the variable name so we have truly dynamic types
+    }
 
     public Variable(Rockstar.VariableContext variable) {
+        this(variable, true);
+    }
 
+    private Variable(Rockstar.VariableContext variable, boolean enforceType) {
         // Work out the variable name
         // In principle trivial, in practice made a bit complicated by normalisation and more complicated by pronouns
 
@@ -37,8 +54,21 @@ public class Variable {
                     .getText();
             variableName = getNormalisedVariableName(text);
         }
+
+        if (enforceType) {
+            if (variableTypes.containsKey(variableName)) {
+                variableClass = variableTypes.get(variableName);
+            } else {
+                throw new RuntimeException(
+                        "Reference to a variable, " + variableName + ", but we do not have enough information about the type.");
+            }
+        }
     }
 
+    public Class<?> getVariableClass() {
+        return variableClass;
+    }
+    
     public String getVariableName() {
         return variableName;
     }
@@ -65,6 +95,7 @@ public class Variable {
     public static void clearPronouns() {
         mostRecentVariableName = null;
         variables.clear();
+        variableTypes.clear();
     }
 
 
@@ -87,12 +118,12 @@ public class Variable {
 
     // TODO if we use local variables we can drop passing the class creator
     // TODO would it be nicer to store our own class?
-    public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method, Class<?> clazz) {
+    public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method) {
         FieldDescriptor field;
         if (!variables.containsKey(variableName)) {
 
             // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
-            field = creator.getFieldCreator(variableName, clazz)
+            field = creator.getFieldCreator(variableName, variableClass)
                            .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                            .getFieldDescriptor();
             variables.put(variableName, field);
@@ -101,7 +132,5 @@ public class Variable {
         }
         return field;
     }
-
-
 }
 

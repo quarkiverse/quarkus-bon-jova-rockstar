@@ -243,6 +243,19 @@ public class AssignmentTest {
     }
 
     @Test
+    public void shouldHandleInitializeVariableOnAssignment() {
+
+        // No declaration of my hands before put-ing into it
+        String program = """
+                Put 5 of 6 into my hands
+                """;
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment(program);
+        Assignment a = new Assignment(ctx);
+        assertEquals(double.class, a.getVariableClass());
+
+    }
+
+    @Test
     public void shouldWriteToClass() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"hello\"\nEverything is my thing");
         Assignment a = new Assignment(ctx);

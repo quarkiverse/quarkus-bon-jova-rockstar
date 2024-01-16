@@ -12,7 +12,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -358,7 +357,7 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         assertEquals("pass\n" +
-                     "pass!\n", output);
+                "pass!\n", output);
 
     }
 
@@ -558,7 +557,6 @@ names in Rockstar.)
         assertEquals("20\n", output);
     }
 
-    @Disabled("Not yet supported")
     @Test
     public void shouldHandleInitializeVariableOnAssignment() {
 

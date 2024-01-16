@@ -73,11 +73,29 @@ public class Expression {
 
                 if (ctx.KW_ADD() != null || "+".equals(ctx.op.getText())) {
                     operation = Operation.ADD;
+                    if (lhe.getValueClass() == double.class && rhe.getValueClass() == double.class) {
+                        valueClass = double.class;
+                    } else if (lhe.getValueClass() == String.class || rhe.getValueClass() == String.class) {
+                        valueClass = String.class;
+                    }
                 } else if (ctx.KW_SUBTRACT() != null || "-".equals(ctx.op.getText())) {
                     operation = Operation.SUBTRACT;
+                    if (lhe.getValueClass() == double.class && rhe.getValueClass() == double.class) {
+                        valueClass = double.class;
+                    }
                 } else if (ctx.KW_MULTIPLY() != null || "*".equals(ctx.op.getText())) {
                     operation = Operation.MULTIPLY;
+
+                    if (lhe.getValueClass() == double.class && rhe.getValueClass() == double.class) {
+                        valueClass = double.class;
+                    } else if (lhe.getValueClass() == String.class || rhe.getValueClass() == String.class) {
+                        valueClass = String.class;
+                    }
+
                 } else if (ctx.KW_DIVIDE() != null || "/".equals(ctx.op.getText())) {
+                    if (lhe.getValueClass() == double.class && rhe.getValueClass() == double.class) {
+                        valueClass = double.class;
+                    }
                     operation = Operation.DIVIDE;
                 }
             }
@@ -93,8 +111,7 @@ public class Expression {
             } else if (variableContext != null) {
                 variable = new Variable(variableContext);
                 value = variable.getVariableName();
-                // A somewhat arbitrary choice, but at least it's a marker
-                valueClass = Variable.class;
+                valueClass = variable.getVariableClass();
 
             }
         }
