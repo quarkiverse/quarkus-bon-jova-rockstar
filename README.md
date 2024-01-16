@@ -42,7 +42,7 @@ Some of these may work but have not been validated with tests.
 ## General
 
 - [ ] Enforcement of the file extension and encoding
-- [ ] Comments
+- [X] Comments
 - [ ] The `with` keyword for parameters
 
 ## ✓ Variables and constants
