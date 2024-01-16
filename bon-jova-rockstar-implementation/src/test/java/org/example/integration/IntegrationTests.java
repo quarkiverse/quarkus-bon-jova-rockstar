@@ -21,6 +21,14 @@ public class IntegrationTests {
         assertEquals(expected, output);
     }
 
+    @Disabled("a lot closer to working, but not quite working because of a problem with Nothing")
+    @Test
+    public void shouldRunFizzBuzz() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/fizzbuzz.rock");
+        String expected = getFileContents("/expected-fizzbuzz.output");
+        assertEquals(expected, output);
+    }
+
     private String getFileContents(String name) throws URISyntaxException, IOException {
         Path filePath = Path.of(this.getClass()
                 .getResource(name)

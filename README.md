@@ -121,10 +121,10 @@ Some of these may work but have not been validated with tests.
 - [X] Input from stdin
 - [X] Output to stdout
 
-## Flow control
+## ✓ Flow control
 
 - [X] Conditionals
 - [X] Loops
 - [X] Blocks, break, and continue
-- [ ] Functions
+- [X] Functions
 

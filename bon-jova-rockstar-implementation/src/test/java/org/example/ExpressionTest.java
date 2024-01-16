@@ -504,56 +504,85 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {
-        MethodCreator main;
         try (ClassCreator creator = ClassCreator.builder()
                 .className("holder")
                 .build()) {
-            main = creator.getMethodCreator("main", void.class, String[].class);
+            MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+
+
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\"");
+            ResultHandle handle = new Expression(ctx).getResultHandle(main, creator);
+
+            // We can't interrogate the type directly, so read it from the string
+            assertTrue(handle.toString()
+                             .contains("type='Ljava/lang/String;'"), handle.toString());
         }
-
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\"");
-        ResultHandle handle = new Expression(ctx).getResultHandle(main);
-
-        // We can't interrogate the type directly, so read it from the string
-        assertTrue(handle.toString()
-                .contains("type='Ljava/lang/String;'"), handle.toString());
-
     }
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForNumbers() {
-        MethodCreator main;
         try (ClassCreator creator = ClassCreator.builder()
                 .className("holder")
                 .build()) {
-            main = creator.getMethodCreator("main", void.class, String[].class);
+            MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+
+
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 5");
+            ResultHandle handle = new Expression(ctx).getResultHandle(main, creator);
+
+            // We can't interrogate the type directly, so read it from the string
+            assertTrue(handle.toString()
+                             .contains("type='D'"), handle.toString());
+
         }
-
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 5");
-        ResultHandle handle = new Expression(ctx).getResultHandle(main);
-
-        // We can't interrogate the type directly, so read it from the string
-        assertTrue(handle.toString()
-                .contains("type='D'"), handle.toString());
-
     }
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForBooleans() {
-        MethodCreator main;
         try (ClassCreator creator = ClassCreator.builder()
                 .className("holder")
                 .build()) {
-            main = creator.getMethodCreator("main", void.class, String[].class);
+            MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+
+
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout ok");
+            ResultHandle handle = new Expression(ctx).getResultHandle(main, creator);
+
+            // We can't interrogate the type directly, so read it from the string
+            assertTrue(handle.toString()
+                             .contains("type='Z'"), handle.toString());
+
         }
+    }
 
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout ok");
-        ResultHandle handle = new Expression(ctx).getResultHandle(main);
+    /* This is a pretty limited test because functions depend on multi-line context to work. All we can really test is the return type. */
+    @Test
+    public void shouldHandleFunctionCalls() {
+        // The parameter needs to be a literal so the expression can be self-contained in a single context
+        String program = """
+                Midnight takes your heart
+                Give back "does not really matter as we cannot test execution in this kind of unit test"
+                                      
+                Ice is nice
+                Say Midnight taking "ice"
+                """;
 
-        // We can't interrogate the type directly, so read it from the string
-        assertTrue(handle.toString()
-                .contains("type='Z'"), handle.toString());
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression(program, 1);
+        System.out.println(ctx.getText());
+        DynamicClassLoader cl = new DynamicClassLoader();
+        try (ClassCreator creator = ClassCreator.builder()
+                                                .classOutput(cl)
+                                                .className("com.MyTest")
+                                                .build()) {
 
+            MethodCreator method = creator.getMethodCreator("method", Object.class)
+                                          .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+            ResultHandle handle = new Expression(ctx).getResultHandle(method, creator);
+
+            // We can't really know the return type of a function, so go with Object
+            assertTrue(handle.toString()
+                             .contains("type='Ljava/lang/Object;'"), handle.toString());
+        }
     }
 
     private Object execute(Expression a) {
@@ -567,7 +596,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.getResultHandle(method);
+            ResultHandle rh = a.getResultHandle(method, creator);
             method.returnValue(rh);
         }
 
@@ -575,8 +604,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             Class<?> clazz = cl.loadClass("com.MyTest");
             return clazz.getMethod("method")
                     .invoke(null);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                 InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
             throw new RuntimeException("Test error: " + e);
         }
     }

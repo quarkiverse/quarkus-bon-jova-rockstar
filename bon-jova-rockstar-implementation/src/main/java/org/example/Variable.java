@@ -108,9 +108,7 @@ public class Variable {
     }
 
     public void write(BytecodeCreator method, ResultHandle value) {
-
         FieldDescriptor field = variables.get(variableName);
-
         method.writeStaticField(field, value);
     }
 

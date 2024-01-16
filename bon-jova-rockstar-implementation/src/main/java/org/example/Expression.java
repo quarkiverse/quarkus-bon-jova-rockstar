@@ -3,12 +3,18 @@ package org.example;
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
+import io.quarkus.gizmo.CatchBlockCreator;
+import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
+import io.quarkus.gizmo.TryBlock;
 import rock.Rockstar;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.example.BytecodeGeneratingListener.isNull;
 import static org.example.BytecodeGeneratingListener.isNumber;
@@ -16,12 +22,16 @@ import static org.example.Constant.coerceNothingIntoType;
 
 public class Expression {
 
+    private String function;
     private Class<?> valueClass;
     private Object value;
     private Variable variable;
 
     private Expression lhe;
     private Expression rhe;
+
+    private List<Expression> params;
+
     private Operation operation;
 
     public Expression(Rockstar.ExpressionContext ctx) {
@@ -29,6 +39,7 @@ public class Expression {
             Rockstar.LiteralContext literal = ctx.literal();
             Rockstar.ConstantContext constant = ctx.constant();
             Rockstar.VariableContext variableContext = ctx.variable();
+            Rockstar.FunctionCallContext functionCall = ctx.functionCall();
 
             if (ctx.comparisionOp() != null) {
                 Rockstar.ComparisionOpContext cop = ctx.comparisionOp();
@@ -92,9 +103,16 @@ public class Expression {
                     }
                     operation = Operation.DIVIDE;
                 }
-            }
+            } else if (functionCall != null) {
+                function = functionCall.functionName.getText();
 
-            if (literal != null) {
+                params = functionCall.argList()
+                                     .expression()
+                                     .stream()
+                                     .map(Expression::new)
+                                     .collect(Collectors.toList());
+                valueClass = Object.class;
+            } else if (literal != null) {
                 Literal l = new Literal(literal);
                 value = l.getValue();
                 valueClass = l.getValueClass();
@@ -133,10 +151,24 @@ public class Expression {
         return valueClass;
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method) {
+    public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator) {
+        if (function != null) {
+            List<ResultHandle> args = params.stream()
+                                            .map(v -> v.getResultHandle(method, classCreator))
+                                            .collect(Collectors.toList());
+            Class[] paramClasses = new Class[params.size()];
+            Arrays.fill(paramClasses, Object.class);
+
+            MethodDescriptor methodDescriptor = MethodDescriptor.ofMethod(classCreator.getClassName(), function, "Ljava/lang/Object;",
+                    paramClasses);
+            ResultHandle[] rhs = args.toArray(new ResultHandle[]{});
+            return method.invokeStaticMethod(
+                    methodDescriptor,
+                    rhs);
+        }
         if (operation != null) {
-            ResultHandle lrh = lhe.getResultHandle(method);
-            ResultHandle rrh = rhe.getResultHandle(method);
+            ResultHandle lrh = lhe.getResultHandle(method, classCreator);
+            ResultHandle rrh = rhe.getResultHandle(method, classCreator);
 
             // Do type coercion of rockstar nulls (which are a special type, not null)
             // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
@@ -149,24 +181,36 @@ public class Expression {
 
             switch (operation) {
                 case ADD -> {
-                    if (isNumber(lrh) && isNumber(rrh)) {
-                        return method.add(lrh, rrh);
-                    } else {
-                        ResultHandle lsrh = stringify(method, lrh);
-                        ResultHandle rsrh = stringify(method, rrh);
 
-                        return method.invokeVirtualMethod(
+                    return doOperation(method, lrh, rrh, (bc, a, b) -> {// Handle subtraction by multiplying by -1 and adding
+                        return bc.add(a, b);
+                    }, (bc, a, b) -> {
+                        ResultHandle lsrh = stringify(bc, a);
+                        ResultHandle rsrh = stringify(bc, b);
+                        return bc.invokeVirtualMethod(
                                 MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"),
                                 lsrh, rsrh);
-                    }
+                    });
+
+
                 }
                 case SUBTRACT -> {
-                    // Handle subtraction by multiplying by -1 and adding
-                    ResultHandle negativeRightSide = method.multiply(method.load(-1d), rrh);
-                    return method.add(lrh, negativeRightSide);
+
+                    return doOperation(method, lrh, rrh, (bc, a, b) -> {
+                        // Handle subtraction by multiplying by -1 and adding
+                        ResultHandle negativeRightSide = bc.multiply(bc.load(-1d), b);
+                        return bc.add(a, negativeRightSide);
+                    }, (bc, a, b) -> {
+                        bc.throwException(UnsupportedOperationException.class, "Subtraction of strings is not possible.");
+                        return bc.load("nope");
+                    });
+
                 }
                 case MULTIPLY -> {
-                    return method.multiply(lrh, rrh);
+                    return doOperation(method, lrh, rrh, (bc, a, b) -> bc.multiply(a, b), (bc, a, b) -> {// TODO of should be implemented
+                        bc.throwException(UnsupportedOperationException.class, "Multiplication of strings not yet implemented.");
+                        return bc.load("not yet");
+                    });
                 }
                 case DIVIDE -> {
                     //  return method.divide(lhe.getResultHandle(method), rhe.getResultHandle(method));
@@ -217,6 +261,40 @@ public class Expression {
             }
         }
         throw new RuntimeException("Confused expression: Could not interpret type " + valueClass);
+    }
+
+    interface BytecodeInvoker {
+        ResultHandle invoke(BytecodeCreator bc, ResultHandle a, ResultHandle b);
+    }
+
+    private ResultHandle doOperation(BytecodeCreator method, ResultHandle lrh, ResultHandle rrh, BytecodeInvoker numberCaseOp,
+                                     BytecodeInvoker stringCaseOp) {
+        // If we know we're working with numbers, do the simplest thing
+        if (isNumber(lrh) && isNumber(rrh)) {
+            return numberCaseOp.invoke(method, lrh, rrh);
+        }
+        // Otherwise, do some checking and casting
+        AssignableResultHandle answer = method.createVariable(Object.class);
+        // We want to do a special toString on numbers, to avoid tacking decimals onto integers
+        TryBlock tryBlock = method.tryBlock();
+        ResultHandle castlrh = tryBlock.checkCast(lrh, Double.class);
+        ResultHandle castrrh = tryBlock.checkCast(rrh, Double.class);
+
+        MethodDescriptor toDouble = MethodDescriptor.ofMethod("java/lang/Double", "doubleValue", double.class);
+        ResultHandle dlrh = tryBlock.invokeVirtualMethod(toDouble, castlrh);
+        ResultHandle drrh = tryBlock.invokeVirtualMethod(toDouble, castrrh);
+
+        ResultHandle added = numberCaseOp.invoke(tryBlock, dlrh, drrh);
+
+        tryBlock.assign(answer, added);
+
+        CatchBlockCreator catchBlock = tryBlock.addCatch(ClassCastException.class);
+        ResultHandle lsrh = stringify(catchBlock, lrh);
+        ResultHandle rsrh = stringify(catchBlock, rrh);
+        ResultHandle thing = stringCaseOp.invoke(catchBlock, lsrh, rsrh);
+        catchBlock.assign(answer, thing);
+
+        return answer;
     }
 
     private ResultHandle stringify(BytecodeCreator method, ResultHandle rh) {
