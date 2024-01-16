@@ -7,6 +7,8 @@ import org.example.util.DynamicClassLoader;
 import org.example.util.ParseHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
@@ -42,12 +44,15 @@ public class ExpressionTest {
 
     @Test
     public void shouldParseIntegerLiteralsAsVariables() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("my thing is 5\nshout my thing");
+        // Pre-initialise the variable so there's enough information about types
+        Rockstar.VariableContext vctx = ParseHelper.getVariable("my thing is 5");
+        Variable variable = new Variable(vctx, double.class);
+
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout my thing");
         Expression a = new Expression(ctx);
         // The 'value' is the variable name
         assertEquals("my__thing", a.getValue());
-        // A bit clunky, but finding an optimum value is non-obvious
-        assertEquals(Variable.class, a.getValueClass());
+        assertEquals(double.class, a.getValueClass());
     }
 
     /* Numbers in Rockstar are double-precision floating point numbers, stored according to the IEEE 754 standard.*/
@@ -211,7 +216,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         Expression a = new Expression(ctx);
         assertNull(a.getValue());
         double answer = (double) execute(a);
-        assertEquals(18, answer);
+        assertEquals(18d, answer);
     }
 
     @Test
@@ -226,6 +231,53 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         a = new Expression(ctx);
         answer = (double) execute(a);
         assertEquals(40d, answer);
+    }
+
+    // This is a whole section of implementation, but handle some simple cases
+    @Nested
+    @DisplayName("Types of operations on types")
+    class TypeTests {
+        @Test
+        public void shouldInferASuitableTypeForMultiplicationOfTwoNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 times 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(double.class, a.getValueClass());
+        }
+
+        // String <times> Number => String gets repeated <Number> times
+        @Test
+        public void shouldInferASuitableTypeForMultiplicationOfANumberAndAString() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\" times 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(String.class, a.getValueClass());
+        }
+
+        @Test
+        public void shouldInferASuitableTypeForSubtractionOfTwoNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 minus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(double.class, a.getValueClass());
+        }
+
+        @Test
+        public void shouldInferASuitableTypeForAdditionOfTwoNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 plus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(double.class, a.getValueClass());
+        }
+
+        // String <times> Number => String gets repeated <Number> times
+        @Test
+        public void shouldInferASuitableTypeForAdditionOfANumberAndAString() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\" plus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(String.class, a.getValueClass());
+        }
     }
 
     @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")

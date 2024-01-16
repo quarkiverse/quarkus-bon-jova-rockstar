@@ -16,10 +16,7 @@ public class Assignment {
     private final Variable variable;
 
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
-        variable = new Variable(ctx.variable());
-        originalName = variable.getVariableName();
-        // Variables should 'apply' to future pronouns when used in assignments
-        variable.track();
+
 
         if (ctx.expression() != null) {
             expression = new Expression(ctx.expression());
@@ -55,6 +52,11 @@ public class Assignment {
                 }
             }
         }
+        variable = new Variable(ctx.variable(), variableClass);
+        originalName = variable.getVariableName();
+        // Variables should 'apply' to future pronouns when used in assignments
+        variable.track();
+
     }
 
     public String getVariableName() {
@@ -71,7 +73,7 @@ public class Assignment {
 
     public void toCode(ClassCreator creator, BytecodeCreator method) {
 
-        FieldDescriptor field = variable.getField(creator, method, getVariableClass());
+        FieldDescriptor field = variable.getField(creator, method);
 
         ResultHandle rh;
 

@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class VariableTest {
 
+    // The variable test doesn't need to care about the class we pass in
+    private static final Class defaultVariableClass = Object.class;
+
     @BeforeEach
     public void clearState() {
         Variable.clearPronouns();
@@ -23,7 +26,7 @@ public class VariableTest {
     @Test
     public void shouldParseIntegerLiteralsAsVariables() {
         Rockstar.VariableContext ctx = ParseHelper.getVariable("my thing is 5\nshout my thing");
-        Variable a = new Variable(ctx);
+        Variable a = new Variable(ctx, double.class);
         // The 'value' is the variable name
         assertEquals("my__thing", a.getVariableName());
 
@@ -41,7 +44,7 @@ public class VariableTest {
                 Shout Variable
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, String.class);
 
         assertEquals("variable", v.getVariableName());
     }
@@ -58,7 +61,7 @@ public class VariableTest {
                 Shout my thing
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, boolean.class);
         assertEquals("my__thing", v.getVariableName());
     }
 
@@ -69,7 +72,7 @@ public class VariableTest {
                 Shout my   thing
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, boolean.class);
         assertEquals("my__thing", v.getVariableName());
     }
 
@@ -89,7 +92,7 @@ names in Rockstar.)
                 Shout Doctor FeelGOOD
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, double.class);
         assertEquals("doctor__feelgood", v.getVariableName());
     }
 
@@ -99,7 +102,7 @@ names in Rockstar.)
                 tIMe is an illusion
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("time", v.getVariableName());
     }
 
@@ -109,7 +112,7 @@ names in Rockstar.)
                 TIME is an illusion
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("time", v.getVariableName());
     }
 
@@ -125,7 +128,7 @@ names in Rockstar.)
                 Shout my thing
                                             """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("my__thing", v.getVariableName());
     }
 
@@ -138,7 +141,7 @@ names in Rockstar.)
     public void shouldHandleVariableAssignmentToPoeticNumberLiterals() {
         String program = "Rockstar is a big bad monster";
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
 
         assertEquals("rockstar", v.getVariableName());
     }
@@ -153,7 +156,7 @@ names in Rockstar.)
                 Shout X
                 """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("x", v.getVariableName());
     }
 
@@ -168,7 +171,7 @@ names in Rockstar.)
                 Shout my balance
                 """;
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("my__balance", v.getVariableName());
     }
 
@@ -181,13 +184,13 @@ names in Rockstar.)
 
         String program = "The message is \"pass\"";
         Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
-        Variable v = new Variable(ctx);
+        Variable v = new Variable(ctx, defaultVariableClass);
         v.track();
 
         program = "shout it";
 
         ctx = ParseHelper.getVariable(program);
-        v = new Variable(ctx);
+        v = new Variable(ctx, defaultVariableClass);
 
         // Now go again and make sure we can interpret the pronoun
         assertEquals("the__message", v.getVariableName());
@@ -200,12 +203,14 @@ names in Rockstar.)
                                            .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
-        Rockstar.VariableContext ctx = ParseHelper.getVariable("johnny is cool");
-        Variable variable = new Variable(ctx);
+        Rockstar.VariableContext ctx = ParseHelper.getVariable("johnny is \"nice\"");
+        // The class here needs to match the class of what we load into the result handle
+        Variable variable = new Variable(ctx, String.class);
         ResultHandle writtenValue = method.load("whatever");
         // We need to initialise the field before trying to write to it (yuck, clunk)
         // TODO should we maybe try and streamline that in the variable class, or is this the logical flow?
-        FieldDescriptor field = variable.getField(creator, method, String.class);
+        // TODO we now definitely have enough information for the variable to do its own field initialisation
+        FieldDescriptor field = variable.getField(creator, method);
         variable.write(method, writtenValue);
         ResultHandle readValue = variable.read(method);
 
@@ -226,16 +231,16 @@ names in Rockstar.)
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         Rockstar.VariableContext ctx = ParseHelper.getVariable("fred is 5");
-        Variable variable = new Variable(ctx);
+        Variable variable = new Variable(ctx, defaultVariableClass);
 
-        FieldDescriptor field1 = variable.getField(creator, method, Object.class);
+        FieldDescriptor field1 = variable.getField(creator, method);
         assertNotNull(field1);
 
         // Now a second variable instance with the same name should return the same field
         ctx = ParseHelper.getVariable("fred is 8");
-        variable = new Variable(ctx);
+        variable = new Variable(ctx, defaultVariableClass);
 
-        FieldDescriptor field2 = variable.getField(creator, method, Object.class);
+        FieldDescriptor field2 = variable.getField(creator, method);
         assertSame(field1, field2);
 
     }
@@ -248,9 +253,9 @@ names in Rockstar.)
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         Rockstar.VariableContext ctx = ParseHelper.getVariable("My thing is 6");
-        Variable variable = new Variable(ctx);
+        Variable variable = new Variable(ctx, defaultVariableClass);
 
-        FieldDescriptor field = variable.getField(creator, method, Object.class);
+        FieldDescriptor field = variable.getField(creator, method);
         assertEquals("my__thing", field.getName());
     }
 
