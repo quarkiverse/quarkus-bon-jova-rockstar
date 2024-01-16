@@ -32,12 +32,13 @@ class HelloWorldTest {
         Method meth = clazz.getMethod("main", String[].class);
         meth.invoke(null, (Object) null);
 
-        assertTrue(testOut.toString()
-                          .contains("Hello World"));
-        assertTrue(testOut.toString()
-                          .contains("Rockstar rockzzzzzzz"));
-        assertTrue(testOut.toString()
-                          .contains("What what?!"));
+        String output = testOut.toString();
+        assertTrue(output
+                .contains("Hello World"), "Output was: " + output);
+        assertTrue(output
+                .contains("Rockstar rockzzzzzzz"), "Output was: " + output);
+        assertTrue(output
+                .contains("What what?!"), "Output was: " + output);
     }
 
     @AfterEach
