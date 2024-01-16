@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.util.DynamicClassLoader;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -822,6 +823,212 @@ names in Rockstar.)
         String output = compileAndLaunch(program, "Tommy", "Gina");
 
         assertEquals("Tommy\nGina\n", output);
+    }
+
+    // Functions are called using the ‘taking’ keyword and must have at least one argument.
+    //
+
+    @Nested
+    class Functions {
+
+        @Test
+        public void shouldHandleSingleArgumentFunctionsOnStrings() {
+            String program = """
+                    Midnight takes your heart
+                    Give back your heart
+                                           
+                    Ice is "nice"
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice\n", output);
+        }
+
+        @Test
+        public void shouldHandleOperationsInSingleArgumentFunctionsOnStrings() {
+            String program = """
+                    Midnight takes your heart
+                    Give back your heart plus " was the param"
+                                           
+                    Ice is "nice"
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice was the param\n", output);
+        }
+
+        @Test
+        public void shouldHandleSingleArgumentFunctionsOnNumbers() {
+            String program = """
+                    Midnight takes your heart
+                    Give back your heart
+                                           
+                    Ice is nice
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("4\n", output);
+        }
+
+        @Test
+        public void shouldHandleMathematicalOperationsInSingleArgumentFunctionsOnNumbers() {
+            String program = """
+                    Midnight takes your heart
+                    Give back your heart plus 2
+                                           
+                    Ice is nice
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("6\n", output);
+        }
+
+        @Test
+        public void shouldHandleMultiArgumentFunctionsOnStringVariables() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Midnight taking Carol, Bob
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("niceless nice\n", output);
+
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Carol says Morning
+                    Bob says Evening
+                    Say Midnight taking Carol & Bob
+                    """;
+
+            assertEquals("MorningEvening\n", compileAndLaunch(program));
+
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Ice is "nicest"
+                    Fire is "hottest"
+                    Say Midnight taking ice 'n' fire
+                    """;
+
+            assertEquals("nicesthottest\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleMultiArgumentFunctionsOnStringLiterals() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Say Midnight taking "one", "two"
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("onetwo\n", output);
+        }
+
+        @Test
+        public void shouldHandleMultiArgumentFunctionsOnStringMixOfLiteralsAndVariables() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Thing is "three"
+                    Say Midnight taking "one", thing"
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("onethree\n", output);
+        }
+
+        @Test
+        public void shouldHandleMultiplicationInMultiArgumentFunctionsOnNumbers() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart of your soul
+                                           
+                    Ice is nice
+                    Fire is hot
+                    Say Midnight taking ice, fire
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("12\n", output);
+
+            // Multiple arguments are separated with one of the following: , & , and 'n'.
+
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart of your soul
+                                           
+                    Ice is nicer
+                    Fire is hotter
+                    Say Midnight taking ice & fire
+                    """;
+
+            assertEquals("30\n", compileAndLaunch(program));
+
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart of your soul
+                                           
+                    Ice is nicest
+                    Fire is hottest
+                    Say Midnight taking ice 'n' fire
+                    """;
+
+            assertEquals("42\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleSubtractionInMultiArgumentFunctionsOnNumbers() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart without your soul
+                                           
+                    Ice is nice
+                    Fire is hot
+                    Say Midnight taking ice, fire
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("1\n", output);
+        }
+
+        @Test
+        public void shouldHandleThreeArgumentFunctionsOnStrings() {
+            String program = """
+                    Midnight takes your heart and your soul and my hat
+                    Give back your heart plus your soul plus my hat
+                                           
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Hair is "frizzy"
+                    Say Midnight taking Carol, Bob, Hair
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("niceless nicefrizzy\n", output);
+        }
     }
 
     private String compileAndLaunch(String program, String... args) {

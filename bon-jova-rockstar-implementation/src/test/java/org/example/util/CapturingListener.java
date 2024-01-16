@@ -73,7 +73,7 @@ public class CapturingListener extends RockstarBaseListener {
     }
 
     public Rockstar.ExpressionContext getExpression(int pos) {
-        return expressions.get(0);
+        return expressions.get(pos);
     }
 
     public Rockstar.LiteralContext getLiteral() {

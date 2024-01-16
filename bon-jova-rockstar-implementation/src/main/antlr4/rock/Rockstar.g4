@@ -21,11 +21,11 @@ expression: functionCall
 
 functionCall: functionName=variable WS KW_TAKING WS argList;
 
-argList: (variable|literal) ((WS KW_AND|COMMA) WS (variable|literal))*;
+argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (expression))*;
 
 functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statementList NL;
 
-paramList: variable ((COMMA? WS KW_AND WS | COMMA | AMPERSAND | APOSTROPHED_N) variable)*;
+paramList: variable ((COMMA? WS* KW_AND WS | WS COMMA WS | WS AMPERSAND WS | WS APOSTROPHED_N WS) variable)*;
 
 assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws (KW_IS|KW_WAS_WERE)) ws (poeticNumberLiteral|constant|literal)
               | KW_LET ws variable ws KW_BE ws expression

@@ -70,6 +70,7 @@ public class Assignment {
         return variableClass;
     }
 
+    // TODO make argument order consistent across related classes
     public void toCode(ClassCreator creator, BytecodeCreator method) {
 
         FieldDescriptor field = variable.getField(creator, method);
@@ -77,7 +78,7 @@ public class Assignment {
         ResultHandle rh;
 
         if (expression != null) {
-            rh = expression.getResultHandle(method);
+            rh = expression.getResultHandle(method, creator);
         } else {
             // This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
             Object value = getValue();

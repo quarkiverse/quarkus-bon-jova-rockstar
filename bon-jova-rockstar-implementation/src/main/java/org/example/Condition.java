@@ -2,6 +2,7 @@ package org.example;
 
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
+import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
 
@@ -14,8 +15,8 @@ public class Condition {
         hasElse = ctx.KW_ELSE() != null;
     }
 
-    public BranchResult toCode(BytecodeCreator main) {
-        ResultHandle evaluated = expression.getResultHandle(main);
+    public BranchResult toCode(BytecodeCreator main, ClassCreator classCreator) {
+        ResultHandle evaluated = expression.getResultHandle(main, classCreator);
         BranchResult conditional = main.ifTrue(evaluated);
         return conditional;
     }
