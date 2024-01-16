@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 import java.util.Stack;
 import java.util.function.Function;
 
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
@@ -39,18 +40,22 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public BytecodeGeneratingListener(ClassCreator creator) {
         super();
 
+        MethodCreator clinit = creator.getMethodCreator(MethodDescriptor.CLINIT, void.class);
+        clinit.setModifiers(ACC_PUBLIC + ACC_STATIC + ACC_FINAL);
+        ResultHandle formatterInstance = clinit.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
+                clinit.load("#.#########"));
+        formatter = creator.getFieldCreator("formatter", DecimalFormat.class)
+                           .setModifiers(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + ACC_FINAL)
+                           .getFieldDescriptor();
+        clinit.writeStaticField(formatter, formatterInstance);
+        clinit.returnVoid();
+
+
         MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);
 
         enterBlock(main);
 
-        // Ideally this would be static final, but I got a bit stuck on the <clinit>
-        ResultHandle formatterInstance = currentCreator.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
-                currentCreator.load("#.#########"));
-        formatter = creator.getFieldCreator("formatter", DecimalFormat.class)
-                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
-                           .getFieldDescriptor();
-        currentCreator.writeStaticField(formatter, formatterInstance);
 
         this.creator = creator;
 
