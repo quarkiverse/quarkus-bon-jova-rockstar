@@ -1,7 +1,6 @@
 package org.example.bon.jova.quarkus.extension.deployment;
 
 import io.quarkus.deployment.dev.CompilationProvider;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RockstarCompilationProviderTest {
     private static final String sourceDirectory = "src/test/resources/";
-    private static final String outputDirectory = "target/classes/";
+    private static final String outputDirectory = "target/test-classes/";
     private static final Set<File> sourceFiles = Set.of(
             new File(sourceDirectory + "hello_world.rock"),
             new File(sourceDirectory + "leet_tommy.rock"));

@@ -3,15 +3,54 @@ package org.example.bon.jova.quarkus.extension.deployment;
 import io.quarkus.test.QuarkusUnitTest;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.Disabled;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
 
 public class BonJovaQuarkusExtensionTest {
+
+
+    private static final Set<File> outputFiles = Set.of(
+            new File("target/classes/hello_world.class"));
+
+    static Asset asset = new Asset() {
+        @Override
+        public InputStream openStream() {
+            // getResourceAsStream should work but I can't make it work, so just convert the string to a stream
+            return new ByteArrayInputStream("Say \"Hello World\"".getBytes(StandardCharsets.UTF_8));
+        }
+    };
+
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
-            .withEmptyApplication();
+            .setAllowTestClassOutsideDeployment(true)
+            .setArchiveProducer(() ->
+                    ShrinkWrap.create(JavaArchive.class)
+
+                              .addAsResource(
+                                      asset,
+                                      "src/main/java/hello_world.rock"));
+
+
+    /* Ideally we wouldn't create any rockstar classes in target/classes, but I can't quite figure out how to change the output directory
+     on the app model the app model creates from the Arquillian archive.
+     */
+    @AfterAll
+    public static void removeOutputFiles() throws IOException {
+        outputFiles.forEach(File::delete);
+    }
 
     @Test
     void testRockstarEndpoint() {
