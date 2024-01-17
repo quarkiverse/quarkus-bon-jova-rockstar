@@ -55,26 +55,13 @@ public class InputTest {
         assertEquals(second, execute(a, new String[]{first, second}));
     }
 
-    @Test
-    public void shouldWriteToClass() {
-        Rockstar.InputStmtContext ctx = ParseHelper.getInput("Listen to your heart");
-        Input a = new Input(ctx);
-
-        ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
-        MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
-
-    }
-
-
     private Object execute(Input a, String[] args) {
         DynamicClassLoader cl = new DynamicClassLoader();
 
         // The auto-close on this triggers the write
         try (ClassCreator creator = ClassCreator.builder()
                                                 .classOutput(cl)
-                                                .className("com.MyTest")
+                                                .className("com.InputRock")
                                                 .build()) {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class, String[].class)
@@ -88,7 +75,7 @@ public class InputTest {
         }
 
         try {
-            Class<?> clazz = cl.loadClass("com.MyTest");
+            Class<?> clazz = cl.loadClass("com.InputRock");
             return clazz.getMethod("method", String[].class)
                         .invoke(null, new Object[]{args});
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
