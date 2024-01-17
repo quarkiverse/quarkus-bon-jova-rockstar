@@ -18,6 +18,7 @@ public class CapturingListener extends RockstarBaseListener {
     private Rockstar.ConstantContext constant;
     private Rockstar.VariableContext variable;
     private Rockstar.IfStmtContext ifCondition;
+    private Rockstar.InputStmtContext input;
 
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext assignmentStatement) {
@@ -54,6 +55,11 @@ public class CapturingListener extends RockstarBaseListener {
         this.ifCondition = ifCondition;
     }
 
+    @Override
+    public void enterInputStmt(Rockstar.InputStmtContext ctx) {
+        this.input = ctx;
+    }
+
     public Rockstar.AssignmentStmtContext getAssignmentStatement() {
         return assignmentStatement;
     }
@@ -85,4 +91,6 @@ public class CapturingListener extends RockstarBaseListener {
     public RuleContext getIf() {
         return ifCondition;
     }
+
+    public Rockstar.InputStmtContext getInput() {return input;}
 }

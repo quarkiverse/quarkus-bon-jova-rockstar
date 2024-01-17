@@ -20,9 +20,13 @@ class RockstarCompilationProviderTest {
     private static final String outputDirectory = "target/test-classes/";
     private static final Set<File> sourceFiles = Set.of(
             new File(sourceDirectory + "hello_world.rock"),
+            new File(sourceDirectory + "hello_hanno_hello_holly.rock"),
+            // This isn't needed for this test, but the BonJovaQuarkusExtensionTest needs it to be compiled, and getting rid of the
+            // cross-dependency is non-trivial
             new File(sourceDirectory + "leet_tommy.rock"));
     private static final Set<File> outputFiles = Set.of(
             new File(outputDirectory + "hello_world.class"),
+            new File(outputDirectory + "hello_hanno_hello_holly.class"),
             new File(outputDirectory + "leet_tommy.class"));
 
     @BeforeAll
@@ -54,7 +58,7 @@ class RockstarCompilationProviderTest {
     @Test
     void compileShouldProduceClassFiles() throws IOException {
         compile(sourceFiles, new File(outputDirectory));
-        outputFiles.forEach(outputFile -> assertTrue(outputFile.exists()));
+        outputFiles.forEach(outputFile -> assertTrue(outputFile.exists(), outputFile + " does not exist"));
     }
 
     @Test
