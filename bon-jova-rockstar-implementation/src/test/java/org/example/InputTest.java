@@ -59,12 +59,14 @@ public class InputTest {
         DynamicClassLoader cl = new DynamicClassLoader();
 
         // The auto-close on this triggers the write
+        String className = "com.InputRock";
+        String methodName = "method";
         try (ClassCreator creator = ClassCreator.builder()
                                                 .classOutput(cl)
-                                                .className("com.InputRock")
+                                                .className(className)
                                                 .build()) {
 
-            MethodCreator method = creator.getMethodCreator("method", Object.class, String[].class)
+            MethodCreator method = creator.getMethodCreator(methodName, Object.class, String[].class)
                                           .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
             FieldDescriptor fd = a.toCode(creator, method, method);
@@ -74,12 +76,14 @@ public class InputTest {
 
         }
 
+        Class<?> clazz = null;
         try {
-            Class<?> clazz = cl.loadClass("com.InputRock");
-            return clazz.getMethod("method", String[].class)
+            clazz = cl.loadClass(className);
+            return clazz.getMethod(methodName, String[].class)
                         .invoke(null, new Object[]{args});
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
+            System.out.println("Diagnostics: the dynamic classloader's class is " + clazz.getName());
             throw new RuntimeException("Test error: " + e);
         }
     }
