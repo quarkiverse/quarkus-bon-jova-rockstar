@@ -811,8 +811,20 @@ names in Rockstar.)
         assertEquals("before the continue\n", output);
     }
 
+    @Test
+    public void shouldReadFromStdin() {
+        String program = """
+                Listen to your voices
+                Listen to your heart
+                Shout your voices
+                Whisper your heart
+                """;
+        String output = compileAndLaunch(program, "Tommy", "Gina");
 
-    private String compileAndLaunch(String program) {
+        assertEquals("Tommy\nGina\n", output);
+    }
+
+    private String compileAndLaunch(String program, String... args) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;
 
@@ -829,7 +841,8 @@ names in Rockstar.)
             PrintStream printStream = new PrintStream(outputStream);
             System.setOut(printStream);
 
-            main.invoke(null, (Object) null);
+            // We need to wrap the String[] in an Object[] because it's nested varargs
+            main.invoke(null, new Object[]{args});
 
             // Get the captured output as a string
             return outputStream.toString();

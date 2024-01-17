@@ -22,6 +22,8 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
 public class BytecodeGeneratingListener extends RockstarBaseListener {
 
+    private MethodCreator main;
+
     private BytecodeCreator currentCreator;
     private final ClassCreator creator;
 
@@ -51,7 +53,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         clinit.returnVoid();
 
 
-        MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
+        main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);
 
         enterBlock(main);
@@ -65,6 +67,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterProgram(Rockstar.ProgramContext ctx) {
         Variable.clearPronouns();
+        Input.setStdIn();
+
     }
 
     @Override
@@ -144,6 +148,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             toStringed = Gizmo.toString(currentCreator, value);
         }
         Gizmo.systemOutPrintln(currentCreator, toStringed);
+    }
+
+    @Override
+    public void enterInputStmt(Rockstar.InputStmtContext ctx) {
+        Input input = new Input(ctx);
+        input.toCode(creator, currentCreator, main);
+
     }
 
     @Override

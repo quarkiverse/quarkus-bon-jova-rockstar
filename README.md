@@ -116,9 +116,9 @@ Some of these may work but have not been validated with tests.
 - [ ] Joint denial
 - [ ] Negation
 
-## Input and output
+## ✓ Input and output
 
-- [ ] Input from stdin
+- [X] Input from stdin
 - [X] Output to stdout
 
 ## Flow control

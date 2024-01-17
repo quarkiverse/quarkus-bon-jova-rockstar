@@ -50,7 +50,11 @@ public class ParseHelper {
     public static Rockstar.IfStmtContext getIf(String program) {
         return (Rockstar.IfStmtContext) getGrammarElement(program, CapturingListener::getIf);
     }
-    
+
+    public static Rockstar.InputStmtContext getInput(String program) {
+        return (Rockstar.InputStmtContext) getGrammarElement(program, CapturingListener::getInput);
+    }
+
     private static RuleContext getGrammarElement(String program, Function<CapturingListener,
             RuleContext> getter) {
 /*
