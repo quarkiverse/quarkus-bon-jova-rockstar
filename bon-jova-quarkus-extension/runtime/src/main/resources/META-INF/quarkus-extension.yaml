@@ -1,6 +1,6 @@
 name: "Bon Jova 🎸"
 artifact: ${project.groupId}:${project.artifactId}:${project.version}
-description: Run Rockstar programs with Quarkus
+description: Shot through the heart and you're to blame! Run your Rockstar programs with Quarkus! 🎵
 metadata:
   keywords:
     - "bon-jova"
