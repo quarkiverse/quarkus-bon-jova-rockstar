@@ -89,6 +89,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .contains("type='Ljava/lang/String;'");
     }
 
+    public static boolean isObject(ResultHandle value) {
+        // ResultHandle knows the type, but it's private
+        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
+        // Take advantage of the toString format of ResultHandle
+        return value.toString()
+                .contains("type='Ljava/lang/Object;'");
+    }
+
     public static boolean isNull(ResultHandle value) {
         // ResultHandle knows the type, but it's private
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
