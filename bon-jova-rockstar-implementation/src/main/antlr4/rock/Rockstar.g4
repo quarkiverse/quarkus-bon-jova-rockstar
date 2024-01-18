@@ -21,7 +21,8 @@ expression: functionCall
 
 functionCall: functionName=variable WS KW_TAKING WS argList;
 
-argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (expression))*;
+// the second set of entries here isn't just an expression, to try and force the shortest match, rather than the longest match
+argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (literal|variable|constant|expression))*;
 
 functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statementList NL;
 

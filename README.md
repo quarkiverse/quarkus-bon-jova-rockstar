@@ -111,7 +111,7 @@ Some of these may work but have not been validated with tests.
 - [ ] Assignment using comparison and other operators
 - [X] Equality tests
 - [X] Comparisons to mysterious and null
-- [ ] Conjunction
+- [X] Conjunction
 - [ ] Disjunction
 - [ ] Joint denial
 - [ ] Negation

@@ -970,12 +970,27 @@ names in Rockstar.)
                     Give back your heart plus your soul
                                            
                     Thing is "three"
-                    Say Midnight taking "one", thing"
+                    Say Midnight taking "one", thing
                     """;
             String output = compileAndLaunch(program);
 
             // Function multiplies arguments, 4*3 is 12
             assertEquals("onethree\n", output);
+        }
+
+        @Test
+        public void shouldHandleMultiArgumentFunctionsOnStringMixOfLiteralsAndConstants() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Thing is "three"
+                    Say Midnight taking "one", right
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("onetrue\n", output);
         }
 
         @Test
@@ -1035,6 +1050,38 @@ names in Rockstar.)
         }
 
         @Test
+        public void shouldHandleAdditionInMultiArgumentFunctionsOnNothings() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+                                           
+                    Ice is nothing
+                    Fire is hot
+                    Say Midnight taking ice, fire
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("3\n", output);
+        }
+
+        @Test
+        public void shouldHandleSubtractionInMultiArgumentFunctionsOnNothings() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart minus your soul
+                                           
+                    Ice is nothing
+                    Fire is hot
+                    Say Midnight taking ice, fire
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function multiplies arguments, 4*3 is 12
+            assertEquals("-3\n", output);
+        }
+
+        @Test
         public void shouldHandleThreeArgumentFunctionsOnStrings() {
             String program = """
                     Midnight takes your heart and your soul and my hat
@@ -1048,6 +1095,75 @@ names in Rockstar.)
             String output = compileAndLaunch(program);
 
             assertEquals("niceless nicefrizzy\n", output);
+        }
+
+        @Test
+        public void shouldHandleFunctionInvocationsMixedWithOtherExpressionsInAddition() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart
+                            
+                            
+                    My world is 0
+                    Fire is ice
+                    Hate is water
+                    shout Midnight taking my world, Fire is 0 plus Midnight taking my world, Hate is 0
+                    """;
+
+            assertEquals("false\n", compileAndLaunch(program));
+
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus " concat " plus your soul
+                            
+                            
+                    My world is 0
+                    Fire is ice
+                    Hate is water
+                    shout Midnight taking my world, Fire plus Midnight taking my world, Hate
+                    """;
+
+            assertEquals("0 concat 30 concat 5\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleFunctionInvocationsMixedWithOtherExpressionsInConjunction() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart
+                            
+                    My world is 0
+                    Fire is ice
+                    Hate is water
+                    shout Midnight taking my world, Fire is 0 plus Midnight taking my world, Hate is 0
+                    """;
+
+            assertEquals("false\n", compileAndLaunch(program));
+
+            // A slightly harder version, with nulls
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart minus your soul
+                            
+                    My world is nothing
+                    Fire is ice
+                    Hate is water
+                    shout Midnight taking my world, Fire is nothing and Midnight taking my world, Hate is nothing
+                    """;
+            assertEquals("false\n", compileAndLaunch(program));
+
+            // Another hard version, with null coming back from the function
+            program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart
+                            
+                    My world is nothing
+                    Fire is ice
+                    Hate is water
+                    shout Midnight taking my world, Fire is nothing and Midnight taking my world, Hate is nothing
+                    """;
+            assertEquals("true\n", compileAndLaunch(program));
+
         }
     }
 

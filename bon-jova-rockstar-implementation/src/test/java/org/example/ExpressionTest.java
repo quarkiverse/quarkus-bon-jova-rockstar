@@ -144,361 +144,390 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
     }
 
-    @Test
-    public void shouldHandleSimpleAddition() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 + 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(9d, answer);
+
+    @Nested
+    @DisplayName("Arithmetic Operations")
+    class Operations {
+
+        @Test
+        public void shouldHandleSimpleAddition() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 + 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(9d, answer);
+        }
+
+        @Test
+        public void shouldHandleAdditionWithAliases() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 plus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(9d, answer);
+
+            ctx = ParseHelper.getExpression("shout 8 with 5", 0);
+            a = new Expression(ctx);
+            answer = (double) execute(a);
+            assertEquals(13d, answer);
+        }
+
+        @Test
+        public void shouldHandleStringAddition() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"rock\" plus \"roll\"", 0);
+            Expression e = new Expression(ctx);
+            String answer = (String) execute(e);
+            assertEquals("rockroll", answer);
+        }
+
+        @Test
+        public void shouldFormatNumbersCorrectlyOnStringAddition() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 99 plus \" red balloons\"", 0);
+            Expression e = new Expression(ctx);
+            String answer = (String) execute(e);
+            assertEquals("99 red balloons", answer);
+
+            ctx = ParseHelper.getExpression("say \"blink\" plus 42", 0);
+            e = new Expression(ctx);
+            answer = (String) execute(e);
+            assertEquals("blink42", answer);
+        }
+
+        @Test
+        public void shouldHandleStringAdditionWithNull() {
+            // Nothing coerces to "null" when added to a string (which is a bit confusing since on its own it's "")
+            // String <plus> Null => Convert the null to "null"
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing plus \" points\"", 0);
+            // Make sure we have the right expression
+            assertEquals("nothing plus \" points\"", ctx.getText());
+            Expression a = new Expression(ctx);
+            assertEquals("null points", execute(a));
+
+            // Now swap the order
+            ctx = ParseHelper.getExpression("shout  \"points \" plus nothing", 0);
+            assertEquals("\"points \" plus nothing", ctx.getText());
+            a = new Expression(ctx);
+            assertEquals("points null", execute(a));
+        }
+
+        @Test
+        public void shouldHandleNumericAdditionWithNull() {
+            // Nothing coerces to 0 when added to a number
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing plus 42", 0);
+            Expression a = new Expression(ctx);
+            // Make sure we have the right expression
+            assertEquals("nothing plus 42", ctx.getText());
+            assertEquals(42d, execute(a));
+
+            // Now swap the order
+            ctx = ParseHelper.getExpression("shout 42 plus nothing", 0);
+            assertEquals("42 plus nothing", ctx.getText());
+            a = new Expression(ctx);
+            assertEquals(42d, execute(a));
+        }
+
+        @Test
+        public void shouldHandleStringAdditionWithMysterious() {
+            // String <plus> Mysterious => Convert the mysterious to "mysterious"
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout mysterious plus \" ways\"", 0);
+            // Make sure we have the right expression
+            assertEquals("mysterious plus \" ways\"", ctx.getText());
+            Expression a = new Expression(ctx);
+            assertEquals("mysterious ways", execute(a));
+        }
+
+        @Disabled("Spec is vague, so not worth worrying about")
+        @Test
+        public void shouldHandleNumericAdditionWithMysterious() {
+            // Spec is vague on this, so using Satriani as a reference
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout mysterious plus 16");
+            Expression a = new Expression(ctx);
+            assertEquals("mysterious16", execute(a));
+        }
+
+        @Test
+        public void shouldHandleSimpleSubtraction() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 - 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(-3d, answer);
+        }
+
+        @Test
+        public void shouldHandleSubtractionWithAliases() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 minus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(-3d, answer);
+
+            ctx = ParseHelper.getExpression("shout 8 without 5", 0);
+            a = new Expression(ctx);
+            answer = (double) execute(a);
+            assertEquals(3d, answer);
+        }
+
+        @Test
+        public void shouldHandleSimpleMultiplication() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 * 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(18d, answer);
+        }
+
+        @Test
+        public void shouldHandleMultiplicationWithAliases() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 times 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(18d, answer);
+
+            ctx = ParseHelper.getExpression("shout 8 of 5", 0);
+            a = new Expression(ctx);
+            answer = (double) execute(a);
+            assertEquals(40d, answer);
+        }
+
+        @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
+        @Test
+        public void shouldHandleSimpleDivision() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 24/6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(4, answer);
+        }
+
+        @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
+        @Test
+        public void shouldHandleDivisionWithAliases() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 over 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            double answer = (double) execute(a);
+            assertEquals(0.5, answer);
+
+            ctx = ParseHelper.getExpression("shout 40 between 5", 0);
+            a = new Expression(ctx);
+            answer = (double) execute(a);
+            assertEquals(5d, answer);
+        }
     }
 
-    @Test
-    public void shouldHandleAdditionWithAliases() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 plus 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(9d, answer);
+    @Nested
+    @DisplayName("Logical Operations")
+    class LogicalOperations {
+        @Test
+        public void shouldHandleAndingBooleans() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout true and true", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            boolean answer = (boolean) execute(a);
+            assertEquals(true, answer);
 
-        ctx = ParseHelper.getExpression("shout 8 with 5", 0);
-        a = new Expression(ctx);
-        answer = (double) execute(a);
-        assertEquals(13d, answer);
+            ctx = ParseHelper.getExpression("shout true and false", 0);
+            a = new Expression(ctx);
+            assertNull(a.getValue());
+            answer = (boolean) execute(a);
+            assertEquals(false, answer);
+        }
     }
 
-    @Test
-    public void shouldHandleStringAddition() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"rock\" plus \"roll\"", 0);
-        Expression e = new Expression(ctx);
-        String answer = (String) execute(e);
-        assertEquals("rockroll", answer);
-    }
+    @Nested
+    @DisplayName("Comparisons")
+    class Comparisons {
+        @Test
+        public void shouldHandleComparisonOfNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 1 is 2", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldFormatNumbersCorrectlyOnStringAddition() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 99 plus \" red balloons\"", 0);
-        Expression e = new Expression(ctx);
-        String answer = (String) execute(e);
-        assertEquals("99 red balloons", answer);
+            ctx = ParseHelper.getExpression("shout 1 is 1", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
+        }
 
-        ctx = ParseHelper.getExpression("say \"blink\" plus 42", 0);
-        e = new Expression(ctx);
-        answer = (String) execute(e);
-        assertEquals("blink42", answer);
-    }
+        @Test
+        public void shouldHandleComparisonOfBooleans() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say ok is right", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleStringAdditionWithNull() {
-        // Nothing coerces to "null" when added to a string (which is a bit confusing since on its own it's "")
-        // String <plus> Null => Convert the null to "null"
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing plus \" points\"", 0);
-        // Make sure we have the right expression
-        assertEquals("nothing plus \" points\"", ctx.getText());
-        Expression a = new Expression(ctx);
-        assertEquals("null points", execute(a));
+            ctx = ParseHelper.getExpression("shout right is wrong", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-        // Now swap the order
-        ctx = ParseHelper.getExpression("shout  \"points \" plus nothing", 0);
-        assertEquals("\"points \" plus nothing", ctx.getText());
-        a = new Expression(ctx);
-        assertEquals("points null", execute(a));
-    }
+        @Test
+        public void shouldHandleComparisonOfStrings() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"life\" is \"life\"", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleNumericAdditionWithNull() {
-        // Nothing coerces to 0 when added to a number
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing plus 42", 0);
-        Expression a = new Expression(ctx);
-        // Make sure we have the right expression
-        assertEquals("nothing plus 42", ctx.getText());
-        assertEquals(42d, execute(a));
+            ctx = ParseHelper.getExpression("say \"live\" is \"life\"", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-        // Now swap the order
-        ctx = ParseHelper.getExpression("shout 42 plus nothing", 0);
-        assertEquals("42 plus nothing", ctx.getText());
-        a = new Expression(ctx);
-        assertEquals(42d, execute(a));
-    }
+        @Disabled("This also fails to parse in the reference implementation")
+        @Test
+        public void shouldHandleAintComparisonOfStrings() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 123 ain’t \"all that\"", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleStringAdditionWithMysterious() {
-        // String <plus> Mysterious => Convert the mysterious to "mysterious"
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout mysterious plus \" ways\"", 0);
-        // Make sure we have the right expression
-        assertEquals("mysterious plus \" ways\"", ctx.getText());
-        Expression a = new Expression(ctx);
-        assertEquals("mysterious ways", execute(a));
-    }
+            ctx = ParseHelper.getExpression("say \"Tommy\" ain’t \"Tommy\"", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-    @Disabled("Spec is vague, so not worth worrying about")
-    @Test
-    public void shouldHandleNumericAdditionWithMysterious() {
-        // Spec is vague on this, so using Satriani as a reference
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout mysterious plus 16");
-        Expression a = new Expression(ctx);
-        assertEquals("mysterious16", execute(a));
-    }
+        @Test
+        public void shouldHandleAintComparisonOfStringsWithNoApostrophe() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"Tommy\" aint \"nobody\"", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleSimpleSubtraction() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 - 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(-3d, answer);
-    }
+            ctx = ParseHelper.getExpression("say \"Tommy\" aint \"Tommy\"", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-    @Test
-    public void shouldHandleSubtractionWithAliases() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 minus 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(-3d, answer);
+        @Test
+        public void shouldHandleContractionSComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 123's 123", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("shout 8 without 5", 0);
-        a = new Expression(ctx);
-        answer = (double) execute(a);
-        assertEquals(3d, answer);
-    }
+            ctx = ParseHelper.getExpression("say 123's 124", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-    @Test
-    public void shouldHandleSimpleMultiplication() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 * 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(18d, answer);
-    }
+        @Test
+        public void shouldHandleGreaterThanComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is greater than 10", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleMultiplicationWithAliases() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 times 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(18d, answer);
+            ctx = ParseHelper.getExpression("say 2 is stronger than 20", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("shout 8 of 5", 0);
-        a = new Expression(ctx);
-        answer = (double) execute(a);
-        assertEquals(40d, answer);
-    }
+            ctx = ParseHelper.getExpression("say 20 is stronger than 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
-    @Test
-    public void shouldHandleSimpleDivision() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 24/6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(4, answer);
-    }
+            ctx = ParseHelper.getExpression("say 20 is higher than 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
-    @Test
-    public void shouldHandleDivisionWithAliases() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 over 6", 0);
-        Expression a = new Expression(ctx);
-        assertNull(a.getValue());
-        double answer = (double) execute(a);
-        assertEquals(0.5, answer);
+            ctx = ParseHelper.getExpression("say 20 is bigger than 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
+        }
 
-        ctx = ParseHelper.getExpression("shout 40 between 5", 0);
-        a = new Expression(ctx);
-        answer = (double) execute(a);
-        assertEquals(5d, answer);
-    }
+        @Test
+        public void shouldReturnFalseForGreaterThanComparisonOfEqualThings() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is greater than 5", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-    @Test
-    public void shouldHandleComparisonOfNumbers() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 1 is 2", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
+        @Test
+        public void shouldHandleGreaterThanOrEqualComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is as great as 10", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("shout 1 is 1", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 2 is as strong as 20", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleComparisonOfBooleans() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say ok is right", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 20 is as strong as 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("shout right is wrong", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 20 is as high as 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleComparisonOfStrings() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"life\" is \"life\"", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 20 is as big as 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say \"live\" is \"life\"", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
+            // Equality cases
 
-    @Disabled("This also fails to parse in the reference implementation")
-    @Test
-    public void shouldHandleAintComparisonOfStrings() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 123 ain’t \"all that\"", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 5 is as great as 5", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say \"Tommy\" ain’t \"Tommy\"", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 2 is as strong as 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleAintComparisonOfStringsWithNoApostrophe() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"Tommy\" aint \"nobody\"", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 6 is as high as 6", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say \"Tommy\" aint \"Tommy\"", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 7 is as big as 7", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
+        }
 
-    @Test
-    public void shouldHandleContractionSComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 123's 123", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+        @Test
+        public void shouldHandleLessThanComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 15 is less than 10", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 123's 124", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 22 is lower than 20", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleGreaterThanComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is greater than 10", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 2 is weaker than 22", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 2 is stronger than 20", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 20 is smaller than 22", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
+        }
 
-        ctx = ParseHelper.getExpression("say 20 is stronger than 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+        @Test
+        public void shouldReturnFalseForLessThanComparisonOfEqualThings() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is less than 5", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-        ctx = ParseHelper.getExpression("say 20 is higher than 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+        @Test
+        public void shouldHandleLessThanOrEqualComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 15 is as low as 10", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 20 is bigger than 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 22 is as little as 20", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldReturnFalseForGreaterThanComparisonOfEqualThings() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is greater than 5", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
+            ctx = ParseHelper.getExpression("say 2 is as weak as 22", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-    @Test
-    public void shouldHandleGreaterThanOrEqualComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is as great as 10", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 20 is as small as 22", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 2 is as strong as 20", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
+            // Equality cases
+            ctx = ParseHelper.getExpression("say 15 is as low as 15", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 20 is as strong as 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 22 is as little as 22", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 20 is as high as 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 2 is as weak as 2", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 20 is as big as 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say 3 is as small as 3", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
+        }
 
-        // Equality cases
+        /*
+       "02" < "10" is true because the lexicographical comparison between 0 and 1 shows that the first string is less than the second string.
+         */
+        @Test
+        public void shouldHandleLexographicalComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"02\" is less than \"10\"", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
 
-        ctx = ParseHelper.getExpression("say 5 is as great as 5", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+            ctx = ParseHelper.getExpression("say \"02\" is greater than \"10\"", 0);
+            assertFalse((boolean) execute(new Expression(ctx)));
+        }
 
-        ctx = ParseHelper.getExpression("say 2 is as strong as 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
+        /* "1" is 1 evaluates to true because "1" gets converted to the number 1 */
+        @Disabled("Needs casting support")
+        @Test
+        public void shouldHandleCastingInComparison() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"1\" is 1", 0);
+            assertTrue((boolean) execute(new Expression(ctx)));
+        }
 
-        ctx = ParseHelper.getExpression("say 6 is as high as 6", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 7 is as big as 7", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-    }
-
-    @Test
-    public void shouldHandleLessThanComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 15 is less than 10", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 22 is lower than 20", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 2 is weaker than 22", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 20 is smaller than 22", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-    }
-
-    @Test
-    public void shouldReturnFalseForLessThanComparisonOfEqualThings() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 5 is less than 5", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
-
-    @Test
-    public void shouldHandleLessThanOrEqualComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say 15 is as low as 10", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 22 is as little as 20", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 2 is as weak as 22", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 20 is as small as 22", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        // Equality cases
-        ctx = ParseHelper.getExpression("say 15 is as low as 15", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 22 is as little as 22", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 2 is as weak as 2", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say 3 is as small as 3", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-    }
-
-    /*
-   "02" < "10" is true because the lexicographical comparison between 0 and 1 shows that the first string is less than the second string.
-     */
-    @Test
-    public void shouldHandleLexographicalComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"02\" is less than \"10\"", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-
-        ctx = ParseHelper.getExpression("say \"02\" is greater than \"10\"", 0);
-        assertFalse((boolean) execute(new Expression(ctx)));
-    }
-
-    /* "1" is 1 evaluates to true because "1" gets converted to the number 1 */
-    @Disabled("Needs casting support")
-    @Test
-    public void shouldHandleCastingInComparison() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"1\" is 1", 0);
-        assertTrue((boolean) execute(new Expression(ctx)));
-    }
-
-    /**
-     * True < 10 is an error because 10 gets coerced into True due to the comparison with a boolean and there are no allowed
-     * ordering comparisons between booleans.
-     */
-    @Test
-    public void shouldNotAllowComparisonBetweenBooleanAndNumbers() {
-        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say true is less than 10", 0);
-        assertThrows(Throwable.class, () -> execute(new Expression(ctx)));
+        /**
+         * True < 10 is an error because 10 gets coerced into True due to the comparison with a boolean and there are no allowed
+         * ordering comparisons between booleans.
+         */
+        @Test
+        public void shouldNotAllowComparisonBetweenBooleanAndNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say true is less than 10", 0);
+            assertThrows(Throwable.class, () -> execute(new Expression(ctx)));
+        }
     }
 
     /*    "2" ain't Mysterious evaluates to true because all types are non equal to mysterious, besides mysterious itself.
