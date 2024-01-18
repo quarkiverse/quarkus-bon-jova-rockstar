@@ -185,6 +185,10 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         CatchBlockCreator catchBlock = tryBlock.addCatch(ClassCastException.class);
         ResultHandle toStringed = Gizmo.toString(catchBlock, value);
         Gizmo.systemOutPrintln(catchBlock, toStringed);
+
+        // When printed on its own, null is ""
+        CatchBlockCreator nullCatchBlock = tryBlock.addCatch(NullPointerException.class);
+        Gizmo.systemOutPrintln(nullCatchBlock, nullCatchBlock.load(""));
     }
 
     @Override

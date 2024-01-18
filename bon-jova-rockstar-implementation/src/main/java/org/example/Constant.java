@@ -47,7 +47,15 @@ public class Constant {
         } else if (isBoolean(referenceHandle)) {
             return method.load(false);
         } else if (isString(referenceHandle)) {
-            return method.load("");
+            return method.load("null");
+        } else {
+            return method.loadNull();
+        }
+    }
+
+    public static ResultHandle coerceMysteriousIntoType(BytecodeCreator method, ResultHandle referenceHandle) {
+        if (isString(referenceHandle)) {
+            return method.load("mysterious");
         } else {
             return method.loadNull();
         }

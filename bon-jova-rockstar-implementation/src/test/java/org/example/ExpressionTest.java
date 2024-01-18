@@ -16,7 +16,11 @@ import rock.Rockstar;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.example.Constant.NOTHING;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*
 Note that even though we're just testing the expressions, they need to be couched in something like output statement to be
@@ -137,6 +141,11 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         ctx = ParseHelper.getExpression("shout gone");
         a = new Expression(ctx);
         assertEquals(NOTHING, a.getValue());
+
+        // The value of nothing is context-dependent, but on its own it should stay null, so that other higher-level expressions and
+        // output statements can do the right thing
+        assertEquals(null, execute(a));
+
     }
 
     @Test
@@ -181,6 +190,58 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         e = new Expression(ctx);
         answer = (String) execute(e);
         assertEquals("blink42", answer);
+    }
+
+    @Test
+    public void shouldHandleStringAdditionWithNull() {
+        // Nothing coerces to "null" when added to a string (which is a bit confusing since on its own it's "")
+        // String <plus> Null => Convert the null to "null"
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing plus \" points\"", 0);
+        // Make sure we have the right expression
+        assertEquals("nothing plus \" points\"", ctx.getText());
+        Expression a = new Expression(ctx);
+        assertEquals("null points", execute(a));
+
+        // Now swap the order
+        ctx = ParseHelper.getExpression("shout  \"points \" plus nothing", 0);
+        assertEquals("\"points \" plus nothing", ctx.getText());
+        a = new Expression(ctx);
+        assertEquals("points null", execute(a));
+    }
+
+    @Test
+    public void shouldHandleNumericAdditionWithNull() {
+        // Nothing coerces to 0 when added to a number
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout nothing plus 42", 0);
+        Expression a = new Expression(ctx);
+        // Make sure we have the right expression
+        assertEquals("nothing plus 42", ctx.getText());
+        assertEquals(42d, execute(a));
+
+        // Now swap the order
+        ctx = ParseHelper.getExpression("shout 42 plus nothing", 0);
+        assertEquals("42 plus nothing", ctx.getText());
+        a = new Expression(ctx);
+        assertEquals(42d, execute(a));
+    }
+
+    @Test
+    public void shouldHandleStringAdditionWithMysterious() {
+        // String <plus> Mysterious => Convert the mysterious to "mysterious"
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout mysterious plus \" ways\"", 0);
+        // Make sure we have the right expression
+        assertEquals("mysterious plus \" ways\"", ctx.getText());
+        Expression a = new Expression(ctx);
+        assertEquals("mysterious ways", execute(a));
+    }
+
+    @Disabled("Spec is vague, so not worth worrying about")
+    @Test
+    public void shouldHandleNumericAdditionWithMysterious() {
+        // Spec is vague on this, so using Satriani as a reference
+        Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout mysterious plus 16");
+        Expression a = new Expression(ctx);
+        assertEquals("mysterious16", execute(a));
     }
 
     @Test
@@ -483,7 +544,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     // The spec is a bit vague on this, so this is based on observation in Satriani
-    // (note that on concatenation, null is "null", but I haven't implemented that
+    @Disabled("Unspecified in spec, hard to implement")
     @Test
     public void shouldTreatNothingAsEqualToEmptyStringForComparisons() {
         Rockstar.ExpressionContext ctx = ParseHelper.getExpression("say \"\" ain't nothing", 0);
@@ -505,8 +566,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {
         try (ClassCreator creator = ClassCreator.builder()
-                .className("holder")
-                .build()) {
+                                                .className("holder")
+                                                .build()) {
             MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
 
 
@@ -522,8 +583,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForNumbers() {
         try (ClassCreator creator = ClassCreator.builder()
-                .className("holder")
-                .build()) {
+                                                .className("holder")
+                                                .build()) {
             MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
 
 
@@ -540,8 +601,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForBooleans() {
         try (ClassCreator creator = ClassCreator.builder()
-                .className("holder")
-                .build()) {
+                                                .className("holder")
+                                                .build()) {
             MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
 
 
@@ -590,12 +651,12 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
         // The auto-close on this triggers the write
         try (ClassCreator creator = ClassCreator.builder()
-                .classOutput(cl)
-                .className("com.MyTest")
-                .build()) {
+                                                .classOutput(cl)
+                                                .className("com.MyTest")
+                                                .build()) {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
-                    .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+                                          .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
             ResultHandle rh = a.getResultHandle(method, creator);
             method.returnValue(rh);
         }
@@ -603,7 +664,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         try {
             Class<?> clazz = cl.loadClass("com.MyTest");
             return clazz.getMethod("method")
-                    .invoke(null);
+                        .invoke(null);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             throw new RuntimeException("Test error: " + e);
