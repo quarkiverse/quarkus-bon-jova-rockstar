@@ -16,7 +16,7 @@ public class ConditionTest {
 
     @BeforeEach
     public void clearState() {
-        Variable.clearPronouns();
+        Variable.clearState();
     }
 
     // We can't execute a condition in isolation (we get verification errors) so the tests here are pretty trivial

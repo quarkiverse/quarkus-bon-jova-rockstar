@@ -15,7 +15,7 @@ public class AssignmentTest {
 
     @BeforeEach
     public void clearState() {
-        Variable.clearPronouns();
+        Variable.clearState();
     }
 
     @Test

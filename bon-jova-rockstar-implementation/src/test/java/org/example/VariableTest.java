@@ -20,7 +20,7 @@ public class VariableTest {
 
     @BeforeEach
     public void clearState() {
-        Variable.clearPronouns();
+        Variable.clearState();
     }
 
     @Test

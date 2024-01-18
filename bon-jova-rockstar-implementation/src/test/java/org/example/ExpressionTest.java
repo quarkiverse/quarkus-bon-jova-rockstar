@@ -16,11 +16,7 @@ import rock.Rockstar;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.example.Constant.NOTHING;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
 Note that even though we're just testing the expressions, they need to be couched in something like output statement to be
@@ -30,7 +26,7 @@ public class ExpressionTest {
 
     @BeforeEach
     public void clearState() {
-        Variable.clearPronouns();
+        Variable.clearState();
     }
 
     @Test
@@ -566,8 +562,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {
         try (ClassCreator creator = ClassCreator.builder()
-                                                .className("holder")
-                                                .build()) {
+                .className("holder")
+                .build()) {
             MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
 
 
@@ -576,15 +572,15 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
             // We can't interrogate the type directly, so read it from the string
             assertTrue(handle.toString()
-                             .contains("type='Ljava/lang/String;'"), handle.toString());
+                    .contains("type='Ljava/lang/String;'"), handle.toString());
         }
     }
 
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForNumbers() {
         try (ClassCreator creator = ClassCreator.builder()
-                                                .className("holder")
-                                                .build()) {
+                .className("holder")
+                .build()) {
             MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
 
 
@@ -593,7 +589,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
             // We can't interrogate the type directly, so read it from the string
             assertTrue(handle.toString()
-                             .contains("type='D'"), handle.toString());
+                    .contains("type='D'"), handle.toString());
 
         }
     }
@@ -601,8 +597,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForBooleans() {
         try (ClassCreator creator = ClassCreator.builder()
-                                                .className("holder")
-                                                .build()) {
+                .className("holder")
+                .build()) {
             MethodCreator main = creator.getMethodCreator("main", void.class, String[].class);
 
 
@@ -611,7 +607,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
             // We can't interrogate the type directly, so read it from the string
             assertTrue(handle.toString()
-                             .contains("type='Z'"), handle.toString());
+                    .contains("type='Z'"), handle.toString());
 
         }
     }
@@ -632,17 +628,17 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         System.out.println(ctx.getText());
         DynamicClassLoader cl = new DynamicClassLoader();
         try (ClassCreator creator = ClassCreator.builder()
-                                                .classOutput(cl)
-                                                .className("com.MyTest")
-                                                .build()) {
+                .classOutput(cl)
+                .className("com.MyTest")
+                .build()) {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
-                                          .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+                    .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
             ResultHandle handle = new Expression(ctx).getResultHandle(method, creator);
 
             // We can't really know the return type of a function, so go with Object
             assertTrue(handle.toString()
-                             .contains("type='Ljava/lang/Object;'"), handle.toString());
+                    .contains("type='Ljava/lang/Object;'"), handle.toString());
         }
     }
 
@@ -651,12 +647,12 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
         // The auto-close on this triggers the write
         try (ClassCreator creator = ClassCreator.builder()
-                                                .classOutput(cl)
-                                                .className("com.MyTest")
-                                                .build()) {
+                .classOutput(cl)
+                .className("com.MyTest")
+                .build()) {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
-                                          .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+                    .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
             ResultHandle rh = a.getResultHandle(method, creator);
             method.returnValue(rh);
         }
@@ -664,8 +660,9 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         try {
             Class<?> clazz = cl.loadClass("com.MyTest");
             return clazz.getMethod("method")
-                        .invoke(null);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    .invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
             e.printStackTrace();
             throw new RuntimeException("Test error: " + e);
         }

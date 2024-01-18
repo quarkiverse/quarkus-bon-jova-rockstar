@@ -48,8 +48,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         ResultHandle formatterInstance = clinit.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
                 clinit.load("#.#########"));
         formatter = creator.getFieldCreator("formatter", DecimalFormat.class)
-                           .setModifiers(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + ACC_FINAL)
-                           .getFieldDescriptor();
+                .setModifiers(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + ACC_FINAL)
+                .getFieldDescriptor();
         clinit.writeStaticField(formatter, formatterInstance);
         clinit.returnVoid();
 
@@ -70,7 +70,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
         // Take advantage of the toString format of ResultHandle
         return value.toString()
-                    .contains("type='D'");
+                .contains("type='D'");
     }
 
     public static boolean isBoolean(ResultHandle value) {
@@ -78,7 +78,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
         // Take advantage of the toString format of ResultHandle
         return value.toString()
-                    .contains("type='Z'");
+                .contains("type='Z'");
     }
 
     public static boolean isString(ResultHandle value) {
@@ -86,7 +86,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
         // Take advantage of the toString format of ResultHandle
         return value.toString()
-                    .contains("type='Ljava/lang/String;'");
+                .contains("type='Ljava/lang/String;'");
     }
 
     public static boolean isNull(ResultHandle value) {
@@ -94,13 +94,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
         // Take advantage of the toString format of ResultHandle
         return value.toString()
-                    .contains("owner=null");
+                .contains("owner=null");
     }
 
     // Ensure we don't get cross-talk between programs for the statics
     @Override
     public void enterProgram(Rockstar.ProgramContext ctx) {
-        Variable.clearPronouns();
+        Variable.clearState();
         Input.setStdIn();
 
     }
@@ -124,8 +124,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterIncrementStmt(Rockstar.IncrementStmtContext ctx) {
 
         int count = ctx.ups()
-                       .KW_UP()
-                       .size();
+                .KW_UP()
+                .size();
 
         for (int i = 0; i < count; i++) {
 
@@ -152,8 +152,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterDecrementStmt(Rockstar.DecrementStmtContext ctx) {
 
         int count = ctx.downs()
-                       .KW_DOWN()
-                       .size();
+                .KW_DOWN()
+                .size();
 
         for (int i = 0; i < count; i++) {
             Variable variable = new Variable(ctx.variable());
@@ -241,7 +241,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             throw new RuntimeException("Could not understand loop " + ctx.getText());
         }
         BytecodeCreator loop = currentCreator.whileLoop(fun)
-                                             .block();
+                .block();
         enterBlock(loop);
     }
 
@@ -273,7 +273,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // A function creator in Gizmo is like a lambda, which is not really what we want, so use methods
         // TODO the scope of these should be local, not global
         List<Rockstar.VariableContext> variableContexts = ctx.paramList()
-                                                             .variable();
+                .variable();
         final MethodCreator fun;
 
         // The spec says all functions must take at least one argument
@@ -290,13 +290,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
 
         List<Variable> variables = variableContexts.stream()
-                                                   .map(vctx -> new Variable(vctx, Object.class))
-                                                   .collect(Collectors.toList());
+                .map(vctx -> new Variable(vctx, Object.class))
+                .collect(Collectors.toList());
 
         fun.setParameterNames(variables.stream()
-                                       .map(Variable::getVariableName)
-                                       .collect(Collectors.toList())
-                                       .toArray(new String[]{}));
+                .map(Variable::getVariableName)
+                .collect(Collectors.toList())
+                .toArray(new String[]{}));
         int i = 0;
         for (Variable v : variables) {
             // TODO this is all wrong, should be a scoped thing, not a global var

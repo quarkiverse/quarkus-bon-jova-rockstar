@@ -73,7 +73,7 @@ public class Variable {
                 .toLowerCase();
     }
 
-    public static void clearPronouns() {
+    public static void clearState() {
         mostRecentVariableName = null;
         variables.clear();
         variableTypes.clear();
