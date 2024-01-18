@@ -16,11 +16,7 @@ import rock.Rockstar;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.example.Constant.NOTHING;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
 Note that even though we're just testing the expressions, they need to be couched in something like output statement to be
@@ -233,53 +229,6 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         assertEquals(40d, answer);
     }
 
-    // This is a whole section of implementation, but handle some simple cases
-    @Nested
-    @DisplayName("Types of operations on types")
-    class TypeTests {
-        @Test
-        public void shouldInferASuitableTypeForMultiplicationOfTwoNumbers() {
-            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 times 6", 0);
-            Expression a = new Expression(ctx);
-            assertNull(a.getValue());
-            assertEquals(double.class, a.getValueClass());
-        }
-
-        // String <times> Number => String gets repeated <Number> times
-        @Test
-        public void shouldInferASuitableTypeForMultiplicationOfANumberAndAString() {
-            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\" times 6", 0);
-            Expression a = new Expression(ctx);
-            assertNull(a.getValue());
-            assertEquals(String.class, a.getValueClass());
-        }
-
-        @Test
-        public void shouldInferASuitableTypeForSubtractionOfTwoNumbers() {
-            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 minus 6", 0);
-            Expression a = new Expression(ctx);
-            assertNull(a.getValue());
-            assertEquals(double.class, a.getValueClass());
-        }
-
-        @Test
-        public void shouldInferASuitableTypeForAdditionOfTwoNumbers() {
-            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 plus 6", 0);
-            Expression a = new Expression(ctx);
-            assertNull(a.getValue());
-            assertEquals(double.class, a.getValueClass());
-        }
-
-        // String <times> Number => String gets repeated <Number> times
-        @Test
-        public void shouldInferASuitableTypeForAdditionOfANumberAndAString() {
-            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\" plus 6", 0);
-            Expression a = new Expression(ctx);
-            assertNull(a.getValue());
-            assertEquals(String.class, a.getValueClass());
-        }
-    }
-
     @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
     @Test
     public void shouldHandleSimpleDivision() {
@@ -465,7 +414,6 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         assertTrue((boolean) execute(new Expression(ctx)));
     }
 
-
     /*
    "02" < "10" is true because the lexicographical comparison between 0 and 1 shows that the first string is less than the second string.
      */
@@ -554,13 +502,12 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         assertTrue((boolean) execute(new Expression(ctx)));
     }
 
-
     @Test
     public void shouldCreateResultHandlesOfTheCorrectTypeForStrings() {
         MethodCreator main;
         try (ClassCreator creator = ClassCreator.builder()
-                                                .className("holder")
-                                                .build()) {
+                .className("holder")
+                .build()) {
             main = creator.getMethodCreator("main", void.class, String[].class);
         }
 
@@ -569,7 +516,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
         // We can't interrogate the type directly, so read it from the string
         assertTrue(handle.toString()
-                         .contains("type='Ljava/lang/String;'"), handle.toString());
+                .contains("type='Ljava/lang/String;'"), handle.toString());
 
     }
 
@@ -577,8 +524,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     public void shouldCreateResultHandlesOfTheCorrectTypeForNumbers() {
         MethodCreator main;
         try (ClassCreator creator = ClassCreator.builder()
-                                                .className("holder")
-                                                .build()) {
+                .className("holder")
+                .build()) {
             main = creator.getMethodCreator("main", void.class, String[].class);
         }
 
@@ -587,7 +534,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
         // We can't interrogate the type directly, so read it from the string
         assertTrue(handle.toString()
-                         .contains("type='D'"), handle.toString());
+                .contains("type='D'"), handle.toString());
 
     }
 
@@ -595,8 +542,8 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     public void shouldCreateResultHandlesOfTheCorrectTypeForBooleans() {
         MethodCreator main;
         try (ClassCreator creator = ClassCreator.builder()
-                                                .className("holder")
-                                                .build()) {
+                .className("holder")
+                .build()) {
             main = creator.getMethodCreator("main", void.class, String[].class);
         }
 
@@ -605,7 +552,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
         // We can't interrogate the type directly, so read it from the string
         assertTrue(handle.toString()
-                         .contains("type='Z'"), handle.toString());
+                .contains("type='Z'"), handle.toString());
 
     }
 
@@ -614,12 +561,12 @@ empty , silent , and silence are aliases for the empty string ( "" ).
 
         // The auto-close on this triggers the write
         try (ClassCreator creator = ClassCreator.builder()
-                                                .classOutput(cl)
-                                                .className("com.MyTest")
-                                                .build()) {
+                .classOutput(cl)
+                .className("com.MyTest")
+                .build()) {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
-                                          .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+                    .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
             ResultHandle rh = a.getResultHandle(method);
             method.returnValue(rh);
         }
@@ -627,9 +574,57 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         try {
             Class<?> clazz = cl.loadClass("com.MyTest");
             return clazz.getMethod("method")
-                        .invoke(null);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    .invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
             throw new RuntimeException("Test error: " + e);
+        }
+    }
+
+    // This is a whole section of implementation, but handle some simple cases
+    @Nested
+    @DisplayName("Types of operations on types")
+    class TypeTests {
+        @Test
+        public void shouldInferASuitableTypeForMultiplicationOfTwoNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 times 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(double.class, a.getValueClass());
+        }
+
+        // String <times> Number => String gets repeated <Number> times
+        @Test
+        public void shouldInferASuitableTypeForMultiplicationOfANumberAndAString() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\" times 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(String.class, a.getValueClass());
+        }
+
+        @Test
+        public void shouldInferASuitableTypeForSubtractionOfTwoNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 minus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(double.class, a.getValueClass());
+        }
+
+        @Test
+        public void shouldInferASuitableTypeForAdditionOfTwoNumbers() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout 3 plus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(double.class, a.getValueClass());
+        }
+
+        // String <times> Number => String gets repeated <Number> times
+        @Test
+        public void shouldInferASuitableTypeForAdditionOfANumberAndAString() {
+            Rockstar.ExpressionContext ctx = ParseHelper.getExpression("shout \"hello\" plus 6", 0);
+            Expression a = new Expression(ctx);
+            assertNull(a.getValue());
+            assertEquals(String.class, a.getValueClass());
         }
     }
 }

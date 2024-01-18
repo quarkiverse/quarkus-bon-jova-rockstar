@@ -4,9 +4,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -26,7 +24,8 @@ public class RockstarResource {
             // We support both "hello-world" and "hello-world.rock" as 'programName'.
             String output = runClassCapturingSystemOut(FilenameUtils.removeExtension(programName), args.toArray(new String[0]));
             return Response.ok().entity(output).build();
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 IllegalAccessException e) {
             return Response.status(NOT_FOUND).entity(e).build();
         }
     }

@@ -846,7 +846,8 @@ names in Rockstar.)
 
             // Get the captured output as a string
             return outputStream.toString();
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException |
+                 IOException e) {
             throw new RuntimeException(e);
         } finally {
             // Restore the original System.out

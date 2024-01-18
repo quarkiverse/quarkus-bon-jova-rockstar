@@ -199,8 +199,8 @@ names in Rockstar.)
     @Test
     public void shouldRoundTripValuesThroughWritingAndReading() {
         ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
+                .className("holder")
+                .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         Rockstar.VariableContext ctx = ParseHelper.getVariable("johnny is \"nice\"");
@@ -226,8 +226,8 @@ names in Rockstar.)
     @Test
     public void shouldCreateAndReuseFields() {
         ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
+                .className("holder")
+                .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         Rockstar.VariableContext ctx = ParseHelper.getVariable("fred is 5");
@@ -248,8 +248,8 @@ names in Rockstar.)
     @Test
     public void shouldGenerateAJavaCompliantVariableName() {
         ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
+                .className("holder")
+                .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         Rockstar.VariableContext ctx = ParseHelper.getVariable("My thing is 6");

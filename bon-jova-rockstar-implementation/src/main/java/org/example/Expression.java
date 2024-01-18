@@ -24,12 +24,6 @@ public class Expression {
     private Expression rhe;
     private Operation operation;
 
-    private enum Operation {
-        ADD, SUBTRACT, MULTIPLY, EQUALITY_CHECK, INEQUALITY_CHECK, GREATER_THAN_CHECK,
-        LESS_THAN_CHECK, GREATER_OR_EQUAL_THAN_CHECK, LESS_OR_EQUAL_THAN_CHECK, DIVIDE
-    }
-
-
     public Expression(Rockstar.ExpressionContext ctx) {
         if (ctx != null) {
             Rockstar.LiteralContext literal = ctx.literal();
@@ -117,6 +111,19 @@ public class Expression {
         }
     }
 
+    private static AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
+                                                       ResultHandle lrh, ResultHandle rrh) {
+        ResultHandle equalityCheck = method.invokeInterfaceMethod(
+                MethodDescriptor.ofMethod("java/lang/Comparable", "compareTo", "I", "Ljava/lang/Object;"),
+                lrh, rrh);
+        BranchResult result = comparison.doCheck(equalityCheck);
+        AssignableResultHandle answer = method.createVariable("Z");
+        BytecodeCreator trueBranch = result.trueBranch();
+        trueBranch.assign(answer, method.load(true));
+        result.falseBranch()
+                .assign(answer, method.load(false));
+        return answer;
+    }
 
     public Object getValue() {
         return value;
@@ -243,9 +250,9 @@ public class Expression {
             AssignableResultHandle answer = scope.createVariable("Z");
             BranchResult br = method.ifReferencesEqual(lrh, rrh);
             br.trueBranch()
-              .assign(answer, scope.load(true));
+                    .assign(answer, scope.load(true));
             br.falseBranch()
-              .assign(answer, scope.load(false));
+                    .assign(answer, scope.load(false));
             return answer;
         }
     }
@@ -254,17 +261,8 @@ public class Expression {
         return value == Constant.NOTHING;
     }
 
-    private static AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
-                                                       ResultHandle lrh, ResultHandle rrh) {
-        ResultHandle equalityCheck = method.invokeInterfaceMethod(
-                MethodDescriptor.ofMethod("java/lang/Comparable", "compareTo", "I", "Ljava/lang/Object;"),
-                lrh, rrh);
-        BranchResult result = comparison.doCheck(equalityCheck);
-        AssignableResultHandle answer = method.createVariable("Z");
-        BytecodeCreator trueBranch = result.trueBranch();
-        trueBranch.assign(answer, method.load(true));
-        result.falseBranch()
-              .assign(answer, method.load(false));
-        return answer;
+    private enum Operation {
+        ADD, SUBTRACT, MULTIPLY, EQUALITY_CHECK, INEQUALITY_CHECK, GREATER_THAN_CHECK,
+        LESS_THAN_CHECK, GREATER_OR_EQUAL_THAN_CHECK, LESS_OR_EQUAL_THAN_CHECK, DIVIDE
     }
 }

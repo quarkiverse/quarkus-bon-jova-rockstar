@@ -11,9 +11,8 @@ public class Input {
     private static int argIndex;
     private final String originalName;
     private final Class<?> variableClass;
-
-    private Expression expression;
     private final Variable variable;
+    private Expression expression;
 
     public Input(Rockstar.InputStmtContext ctx) {
 

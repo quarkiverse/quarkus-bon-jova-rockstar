@@ -12,12 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Variable {
+    private static final Map<String, FieldDescriptor> variables = new HashMap<>();
+    private static final Map<String, Class> variableTypes = new HashMap<>();
     // Because this is static, we could get cross-talk between programs, but that's a relatively low risk; we manage it by explicitly
     // clearing statics
     private static String mostRecentVariableName = null;
-    private static final Map<String, FieldDescriptor> variables = new HashMap<>();
-    private static final Map<String, Class> variableTypes = new HashMap<>();
-
     private final String variableName;
     private Class variableClass;
 
@@ -65,14 +64,6 @@ public class Variable {
         }
     }
 
-    public Class<?> getVariableClass() {
-        return variableClass;
-    }
-    
-    public String getVariableName() {
-        return variableName;
-    }
-
     /**
      * This is useful for things like variable names in bytecode, where spaces are not ok
      */
@@ -80,6 +71,20 @@ public class Variable {
         return variableName
                 .replaceAll(" +", "__") // use two underscores to reduce the chance of a clash with variable names in the program
                 .toLowerCase();
+    }
+
+    public static void clearPronouns() {
+        mostRecentVariableName = null;
+        variables.clear();
+        variableTypes.clear();
+    }
+
+    public Class<?> getVariableClass() {
+        return variableClass;
+    }
+
+    public String getVariableName() {
+        return variableName;
     }
 
     /*
@@ -91,13 +96,6 @@ public class Variable {
             mostRecentVariableName = variableName;
         }
     }
-
-    public static void clearPronouns() {
-        mostRecentVariableName = null;
-        variables.clear();
-        variableTypes.clear();
-    }
-
 
     public ResultHandle read(BytecodeCreator method) {
         if (variables.containsKey(variableName)) {
@@ -124,8 +122,8 @@ public class Variable {
 
             // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
             field = creator.getFieldCreator(variableName, variableClass)
-                           .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
-                           .getFieldDescriptor();
+                    .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
+                    .getFieldDescriptor();
             variables.put(variableName, field);
         } else {
             field = variables.get(variableName);

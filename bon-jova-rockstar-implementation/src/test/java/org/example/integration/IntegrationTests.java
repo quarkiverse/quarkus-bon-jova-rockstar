@@ -23,8 +23,8 @@ public class IntegrationTests {
 
     private String getFileContents(String name) throws URISyntaxException, IOException {
         Path filePath = Path.of(this.getClass()
-                                    .getResource(name)
-                                    .toURI());
+                .getResource(name)
+                .toURI());
 
         return Files.readString(filePath);
     }

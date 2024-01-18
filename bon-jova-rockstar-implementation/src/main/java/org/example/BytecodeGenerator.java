@@ -17,9 +17,9 @@ public class BytecodeGenerator {
 
     public void generateBytecode(InputStream stream, String name, ClassOutput classOutput) throws IOException {
         try (ClassCreator creator = ClassCreator.builder()
-                                                .classOutput(classOutput)
-                                                .className(name)
-                                                .build()) {
+                .classOutput(classOutput)
+                .className(name)
+                .build()) {
 
 
             CharStream input = CharStreams.fromStream(stream);

@@ -92,5 +92,7 @@ public class CapturingListener extends RockstarBaseListener {
         return ifCondition;
     }
 
-    public Rockstar.InputStmtContext getInput() {return input;}
+    public Rockstar.InputStmtContext getInput() {
+        return input;
+    }
 }

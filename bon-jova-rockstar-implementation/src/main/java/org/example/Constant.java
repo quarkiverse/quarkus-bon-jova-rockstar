@@ -19,19 +19,19 @@ public class Constant {
 
         if (constant != null) {
             if (constant
-                        .CONSTANT_TRUE() != null) {
+                    .CONSTANT_TRUE() != null) {
                 value = true;
                 valueClass = boolean.class;
             } else if (constant
-                               .CONSTANT_FALSE() != null) {
+                    .CONSTANT_FALSE() != null) {
                 value = false;
                 valueClass = boolean.class;
             } else if (constant
-                               .CONSTANT_EMPTY() != null) {
+                    .CONSTANT_EMPTY() != null) {
                 value = "";
                 valueClass = String.class;
             } else if (constant
-                               .CONSTANT_NULL() != null) {
+                    .CONSTANT_NULL() != null) {
                 value = NOTHING;
                 valueClass = Nothing.class;
             } else if (constant.CONSTANT_UNDEFINED() != null) {
@@ -39,15 +39,6 @@ public class Constant {
                 valueClass = null;
             }
         }
-    }
-
-
-    public Object getValue() {
-        return value;
-    }
-
-    public Class<?> getValueClass() {
-        return valueClass;
     }
 
     public static ResultHandle coerceNothingIntoType(BytecodeCreator method, ResultHandle referenceHandle) {
@@ -60,5 +51,13 @@ public class Constant {
         } else {
             return method.loadNull();
         }
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public Class<?> getValueClass() {
+        return valueClass;
     }
 }

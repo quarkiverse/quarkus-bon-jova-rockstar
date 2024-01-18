@@ -11,9 +11,8 @@ public class Assignment {
     private final String originalName;
     private final Object value;
     private final Class<?> variableClass;
-
-    private Expression expression;
     private final Variable variable;
+    private Expression expression;
 
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
 
@@ -39,7 +38,7 @@ public class Assignment {
             } else {
                 if (ctx.poeticStringLiteral() != null) {
                     value = ctx.poeticStringLiteral()
-                               .getText();
+                            .getText();
                     variableClass = String.class;
 
                 } else if (ctx.poeticNumberLiteral() != null) {

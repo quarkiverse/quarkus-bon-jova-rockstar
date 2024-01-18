@@ -60,7 +60,7 @@ public class FileLauncher {
 
     private static String getBasename(File file) {
         return file.getName()
-                   .replace(DOT_CLASS, "");
+                .replace(DOT_CLASS, "");
     }
 
     public static String compileAndLaunch(String filename) throws IOException {

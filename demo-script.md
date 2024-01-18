@@ -7,6 +7,7 @@ Simple static void main
 ## Quarkus
 
 Let’s run it on Quarkus
+
 - extra steps to invoke .rock programs
 
 ### Unit tests

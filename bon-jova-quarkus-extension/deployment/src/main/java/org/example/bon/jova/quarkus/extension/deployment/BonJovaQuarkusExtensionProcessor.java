@@ -1,8 +1,8 @@
 package org.example.bon.jova.quarkus.extension.deployment;
 
+import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.bootstrap.model.ApplicationModel;
 import io.quarkus.bootstrap.workspace.SourceDir;
-import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.IsDevelopment;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
@@ -13,23 +13,20 @@ import io.quarkus.deployment.pkg.builditem.CurateOutcomeBuildItem;
 import io.quarkus.devui.spi.page.CardPageBuildItem;
 import io.quarkus.devui.spi.page.Page;
 import org.example.RockFileCompiler;
+import org.example.bon.jova.quarkus.extension.runtime.RockstarResource;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.example.RockFileCompiler.DOT_CLASS;
 import static org.example.RockFileCompiler.DOT_ROCK;
-
-import org.example.bon.jova.quarkus.extension.runtime.RockstarResource;
 
 class BonJovaQuarkusExtensionProcessor {
 

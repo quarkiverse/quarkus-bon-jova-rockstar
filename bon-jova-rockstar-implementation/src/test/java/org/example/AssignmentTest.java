@@ -261,8 +261,8 @@ public class AssignmentTest {
         Assignment a = new Assignment(ctx);
 
         ClassCreator creator = ClassCreator.builder()
-                                           .className("holder")
-                                           .build();
+                .className("holder")
+                .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         a.toCode(creator, method);

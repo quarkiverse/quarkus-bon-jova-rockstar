@@ -5,9 +5,8 @@ import rock.Rockstar;
 import java.util.stream.Collectors;
 
 public class PoeticNumberLiteral {
-    private final Class<?> variableClass;
-
     final double value;
+    private final Class<?> variableClass;
 
     public PoeticNumberLiteral(Rockstar.PoeticNumberLiteralContext ctx) {
         // A poetic number literal begins with a variable name, followed by the keyword is , or the aliases are , was or were .
@@ -23,7 +22,7 @@ public class PoeticNumberLiteral {
 
         // This is a complex way of handling the decimal point; the antlr listener mechanism may be simpler
         if (ctx.poeticNumberLiteralDecimalSeparator() != null && ctx.poeticNumberLiteralDecimalSeparator()
-                                                                    .size() > 0) {
+                .size() > 0) {
 
             Rockstar.PoeticNumberLiteralDecimalSeparatorContext dot = ctx.poeticNumberLiteralDecimalSeparator(0);
 
@@ -58,8 +57,8 @@ public class PoeticNumberLiteral {
     private static String wordToNumber(Rockstar.PoeticNumberLiteralWordContext word) {
         // Ignore apostrophes; because they can be in the middle of the word this is hard to do in the grammar
         int length = word.getText()
-                         .replaceAll("'", "")
-                         .length();
+                .replaceAll("'", "")
+                .length();
         return String.valueOf(Math.floorMod(length, 10));
     }
 

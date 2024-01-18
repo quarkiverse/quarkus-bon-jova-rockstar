@@ -33,13 +33,13 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
         String resp = new DevModeClient().getHttpResponse();
 
         assertThat(resp).containsIgnoringCase("ready")
-                        .containsIgnoringCase("application");
+                .containsIgnoringCase("application");
 
         // There's no json endpoints, so nothing else to check
     }
 
     @Disabled("The tests currently run twice on startup, which makes the continuous testing utils very upset, so it throws an exception " +
-              "when we ask for test status")
+            "when we ask for test status")
     @Test
     public void testThatTheTestsPassed() throws MavenInvocationException, IOException {
         //we also check continuous testing
@@ -101,18 +101,18 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
     public ContinuousTestingMavenTestUtils.TestStatus waitForNextCompletion() {
         try {
             Awaitility.waitAtMost(2, TimeUnit.MINUTES)
-                      .pollInterval(200, TimeUnit.MILLISECONDS)
-                      .until(() -> {
-                          ContinuousTestingMavenTestUtils.TestStatus ts = getTestStatus();
-                          // the real implementation is much more sophisticated about waiting sure we wait for the next run, and
-                          //  subtle race conditions
-                          // Check if it's running, and also check if it's never run (ie we got in before the first run)
-                          if (ts.getRunning() > 0 || (ts.getTotalTestsPassed() < 0 && ts.getTotalTestsFailed() < 0 && ts.getTotalTestsSkipped() < 0)) {
-                              return false;
-                          } else {
-                              return true;
-                          }
-                      });
+                    .pollInterval(200, TimeUnit.MILLISECONDS)
+                    .until(() -> {
+                        ContinuousTestingMavenTestUtils.TestStatus ts = getTestStatus();
+                        // the real implementation is much more sophisticated about waiting sure we wait for the next run, and
+                        //  subtle race conditions
+                        // Check if it's running, and also check if it's never run (ie we got in before the first run)
+                        if (ts.getRunning() > 0 || (ts.getTotalTestsPassed() < 0 && ts.getTotalTestsFailed() < 0 && ts.getTotalTestsSkipped() < 0)) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    });
             return getTestStatus();
         } catch (Exception e) {
             ContinuousTestingMavenTestUtils.TestStatus ts;

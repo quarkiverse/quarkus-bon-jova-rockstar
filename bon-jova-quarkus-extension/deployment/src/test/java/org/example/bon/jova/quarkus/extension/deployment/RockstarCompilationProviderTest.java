@@ -38,38 +38,6 @@ class RockstarCompilationProviderTest {
         outputFiles.forEach(File::delete);
     }
 
-    @Test
-    void handledExtensionsShouldSpecifyRockExtension() throws IOException {
-        var expectedHandledExtensions = Set.of(".rock");
-        try (var compilationProvider = new RockstarCompilationProvider()) {
-            assertEquals(expectedHandledExtensions, compilationProvider.handledExtensions());
-        }
-    }
-
-    @Test
-    void getProviderKeyShouldReturnTheRightProvider() throws IOException {
-        var expectedProviderKey = "rockstar";
-
-        try (var compilationProvider = new RockstarCompilationProvider()) {
-            assertEquals(expectedProviderKey, compilationProvider.getProviderKey());
-        }
-    }
-
-    @Test
-    void compileShouldProduceClassFiles() throws IOException {
-        compile(sourceFiles, new File(outputDirectory));
-        outputFiles.forEach(outputFile -> assertTrue(outputFile.exists(), outputFile + " does not exist"));
-    }
-
-    @Test
-    void getSourcePathShouldReturnClassFilePath() throws IOException {
-        var classFilePath = Path.of(".");
-        try (var compilationProvider = new RockstarCompilationProvider()) {
-            var sourcePath = compilationProvider.getSourcePath(Path.of("."), null, null);
-            assertEquals(classFilePath, sourcePath);
-        }
-    }
-
     private static void compile(Set<File> files, File outputDirectory) throws IOException {
         try (var compilationProvider = new RockstarCompilationProvider()) {
             compilationProvider.compile(files,
@@ -99,6 +67,38 @@ class RockstarCompilationProviderTest {
         var classesDir = new File("src/test/resources/classes");
         if (classesDir.exists()) {
             FileUtils.cleanDirectory(classesDir);
+        }
+    }
+
+    @Test
+    void handledExtensionsShouldSpecifyRockExtension() throws IOException {
+        var expectedHandledExtensions = Set.of(".rock");
+        try (var compilationProvider = new RockstarCompilationProvider()) {
+            assertEquals(expectedHandledExtensions, compilationProvider.handledExtensions());
+        }
+    }
+
+    @Test
+    void getProviderKeyShouldReturnTheRightProvider() throws IOException {
+        var expectedProviderKey = "rockstar";
+
+        try (var compilationProvider = new RockstarCompilationProvider()) {
+            assertEquals(expectedProviderKey, compilationProvider.getProviderKey());
+        }
+    }
+
+    @Test
+    void compileShouldProduceClassFiles() throws IOException {
+        compile(sourceFiles, new File(outputDirectory));
+        outputFiles.forEach(outputFile -> assertTrue(outputFile.exists(), outputFile + " does not exist"));
+    }
+
+    @Test
+    void getSourcePathShouldReturnClassFilePath() throws IOException {
+        var classFilePath = Path.of(".");
+        try (var compilationProvider = new RockstarCompilationProvider()) {
+            var sourcePath = compilationProvider.getSourcePath(Path.of("."), null, null);
+            assertEquals(classFilePath, sourcePath);
         }
     }
 }

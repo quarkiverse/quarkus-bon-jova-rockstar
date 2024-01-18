@@ -38,9 +38,9 @@ public class BonJovaQuarkusExtensionTest {
             .setArchiveProducer(() ->
                     ShrinkWrap.create(JavaArchive.class)
 
-                              .addAsResource(
-                                      asset,
-                                      "src/main/java/hello_world.rock"));
+                            .addAsResource(
+                                    asset,
+                                    "src/main/java/hello_world.rock"));
 
 
     /* Ideally we wouldn't create any rockstar classes in target/classes, but I can't quite figure out how to change the output directory
@@ -54,30 +54,30 @@ public class BonJovaQuarkusExtensionTest {
     @Test
     void testRockstarEndpoint() {
         RestAssured.when()
-                   .get("/rockstar/hello_world.rock")
-                   .then()
-                   .statusCode(200)
-                   .and()
-                   .body(containsString("Hello World"));
+                .get("/rockstar/hello_world.rock")
+                .then()
+                .statusCode(200)
+                .and()
+                .body(containsString("Hello World"));
     }
 
     @Test
     void testRockstarEndpointForFileThatDoesNotExist() {
         RestAssured.when()
-                   .get("/rockstar/nonexistent.rock")
-                   .then()
-                   .statusCode(404);
+                .get("/rockstar/nonexistent.rock")
+                .then()
+                .statusCode(404);
     }
 
     @Test
     void testRockstarProgramWithArguments() {
         RestAssured.when()
-                   .get("/rockstar/hello_hanno_hello_holly.rock?arg=Hanno&arg=Holly")
-                   .then()
-                   .statusCode(200)
-                   .and()
-                   .body(containsString("Hello Hanno"))
-                   .and()
-                   .body(containsString("Hello Holly"));
+                .get("/rockstar/hello_hanno_hello_holly.rock?arg=Hanno&arg=Holly")
+                .then()
+                .statusCode(200)
+                .and()
+                .body(containsString("Hello Hanno"))
+                .and()
+                .body(containsString("Hello Holly"));
     }
 }

@@ -1,5 +1,5 @@
-import { LitElement, html, css} from 'lit';
-import { rockFiles } from 'build-time-data';
+import {html, LitElement} from 'lit';
+import {rockFiles} from 'build-time-data';
 
 /**
  * This component shows the Rockstar endpoints.
@@ -27,4 +27,5 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
         }
     }
 }
+
 customElements.define('qwc-bon-jova-rockstar-endpoints', QwcBonJovaRockstarEndpoints);

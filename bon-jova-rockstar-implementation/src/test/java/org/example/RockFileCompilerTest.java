@@ -25,7 +25,7 @@ public class RockFileCompilerTest {
     @Test
     public void shouldCreateAClassFile() throws IOException {
         InputStream stream = this.getClass()
-                                 .getResourceAsStream("/hello-world.rock");
+                .getResourceAsStream("/hello-world.rock");
         RockFileCompiler compiler = new RockFileCompiler();
         File outFile = createTempClassFile();
         compiler.compile(stream, outFile);
@@ -35,7 +35,7 @@ public class RockFileCompilerTest {
     @Test
     public void shouldCreateARecognizedJavaClassFile() throws IOException {
         InputStream stream = this.getClass()
-                                 .getResourceAsStream("/hello-world.rock");
+                .getResourceAsStream("/hello-world.rock");
         RockFileCompiler compiler = new RockFileCompiler();
         File outFile = createTempClassFile();
         compiler.compile(stream, outFile);

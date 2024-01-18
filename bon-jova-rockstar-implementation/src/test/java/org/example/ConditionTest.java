@@ -20,7 +20,7 @@ public class ConditionTest {
     }
 
     // We can't execute a condition in isolation (we get verification errors) so the tests here are pretty trivial
-   
+
     @Test
     public void shouldDetectElse() {
         Rockstar.IfStmtContext ctx = ParseHelper.getIf("""                

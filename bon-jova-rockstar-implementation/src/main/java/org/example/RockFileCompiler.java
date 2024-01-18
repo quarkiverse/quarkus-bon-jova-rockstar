@@ -24,13 +24,13 @@ public class RockFileCompiler {
         }
     }
 
+    private static String getBasename(File file) {
+        return file.getName()
+                .replace(DOT_CLASS, "");
+    }
+
     public void compile(InputStream stream, File outFile) throws IOException {
         ClassFileWriter cl = new ClassFileWriter(outFile);
         new BytecodeGenerator().generateBytecode(stream, getBasename(outFile), cl);
-    }
-
-    private static String getBasename(File file) {
-        return file.getName()
-                   .replace(DOT_CLASS, "");
     }
 }

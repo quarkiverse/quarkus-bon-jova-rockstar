@@ -32,13 +32,13 @@ public class RockstarCompilationProvider implements CompilationProvider {
 
         // Ensure the directory we're going to write into exists
         context.getOutputDirectory()
-               .mkdirs();
+                .mkdirs();
 
         final var compiler = new RockFileCompiler();
 
         for (var file : files) {
             final var outFile = new File(context.getOutputDirectory()
-                                                .getPath(),
+                    .getPath(),
                     FilenameUtils.getBaseName(file.getName()) + DOT_CLASS);
 
             try {

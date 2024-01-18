@@ -22,21 +22,16 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
 public class BytecodeGeneratingListener extends RockstarBaseListener {
 
-    private MethodCreator main;
-
-    private BytecodeCreator currentCreator;
     private final ClassCreator creator;
-
     private final FieldDescriptor formatter;
-
-    // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
-    private BytecodeCreator targetScopeForJumps;
-
     private final Stack<BytecodeCreator> blocks = new Stack<>();
-
     // For some constructs, we may want to create a scope but not switch to it until the next statement list; this stack is a convenient
     // place to store them
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
+    private MethodCreator main;
+    private BytecodeCreator currentCreator;
+    // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
+    private BytecodeCreator targetScopeForJumps;
 
 
     public BytecodeGeneratingListener(ClassCreator creator) {
@@ -47,8 +42,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         ResultHandle formatterInstance = clinit.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
                 clinit.load("#.#########"));
         formatter = creator.getFieldCreator("formatter", DecimalFormat.class)
-                           .setModifiers(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + ACC_FINAL)
-                           .getFieldDescriptor();
+                .setModifiers(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + ACC_FINAL)
+                .getFieldDescriptor();
         clinit.writeStaticField(formatter, formatterInstance);
         clinit.returnVoid();
 
@@ -61,6 +56,40 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         this.creator = creator;
 
+    }
+
+    // It would be nice to get rid of this, but when we get an expression, we don't always know what the type of thing in the result
+    // handle is
+    public static boolean isNumber(ResultHandle value) {
+        // ResultHandle knows the type, but it's private
+        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
+        // Take advantage of the toString format of ResultHandle
+        return value.toString()
+                .contains("type='D'");
+    }
+
+    public static boolean isBoolean(ResultHandle value) {
+        // ResultHandle knows the type, but it's private
+        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
+        // Take advantage of the toString format of ResultHandle
+        return value.toString()
+                .contains("type='Z'");
+    }
+
+    public static boolean isString(ResultHandle value) {
+        // ResultHandle knows the type, but it's private
+        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
+        // Take advantage of the toString format of ResultHandle
+        return value.toString()
+                .contains("type='Ljava/lang/String;'");
+    }
+
+    public static boolean isNull(ResultHandle value) {
+        // ResultHandle knows the type, but it's private
+        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
+        // Take advantage of the toString format of ResultHandle
+        return value.toString()
+                .contains("owner=null");
     }
 
     // Ensure we don't get cross-talk between programs for the statics
@@ -90,8 +119,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterIncrementStmt(Rockstar.IncrementStmtContext ctx) {
 
         int count = ctx.ups()
-                       .KW_UP()
-                       .size();
+                .KW_UP()
+                .size();
 
         for (int i = 0; i < count; i++) {
 
@@ -118,8 +147,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterDecrementStmt(Rockstar.DecrementStmtContext ctx) {
 
         int count = ctx.downs()
-                       .KW_DOWN()
-                       .size();
+                .KW_DOWN()
+                .size();
 
         for (int i = 0; i < count; i++) {
             Variable variable = new Variable(ctx.variable());
@@ -200,7 +229,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             throw new RuntimeException("Could not understand loop " + ctx.getText());
         }
         BytecodeCreator loop = currentCreator.whileLoop(fun)
-                                             .block();
+                .block();
         enterBlock(loop);
     }
 
@@ -253,40 +282,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     private void enterBlock(BytecodeCreator blockCreator) {
         currentCreator = blockCreator;
         blocks.push(blockCreator);
-    }
-
-    // It would be nice to get rid of this, but when we get an expression, we don't always know what the type of thing in the result
-    // handle is
-    public static boolean isNumber(ResultHandle value) {
-        // ResultHandle knows the type, but it's private
-        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
-        // Take advantage of the toString format of ResultHandle
-        return value.toString()
-                    .contains("type='D'");
-    }
-
-    public static boolean isBoolean(ResultHandle value) {
-        // ResultHandle knows the type, but it's private
-        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
-        // Take advantage of the toString format of ResultHandle
-        return value.toString()
-                    .contains("type='Z'");
-    }
-
-    public static boolean isString(ResultHandle value) {
-        // ResultHandle knows the type, but it's private
-        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
-        // Take advantage of the toString format of ResultHandle
-        return value.toString()
-                    .contains("type='Ljava/lang/String;'");
-    }
-
-    public static boolean isNull(ResultHandle value) {
-        // ResultHandle knows the type, but it's private
-        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
-        // Take advantage of the toString format of ResultHandle
-        return value.toString()
-                    .contains("owner=null");
     }
 
 }

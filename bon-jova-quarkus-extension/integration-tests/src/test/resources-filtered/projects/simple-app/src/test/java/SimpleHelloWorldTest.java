@@ -26,14 +26,14 @@ class SimpleHelloWorldTest {
 
         // Find the class using reflection, since the test will not have it at compile-time
         Class clazz = this.getClass()
-                          .getClassLoader()
-                          .loadClass("simple_hello_world");
+                .getClassLoader()
+                .loadClass("simple_hello_world");
 
         Method meth = clazz.getMethod("main", String[].class);
         meth.invoke(null, (Object) null);
 
         assertTrue(testOut.toString()
-                          .contains("This is A Hello World"));
+                .contains("This is A Hello World"));
     }
 
     @AfterEach
