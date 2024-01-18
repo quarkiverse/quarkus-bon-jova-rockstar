@@ -1,8 +1,9 @@
 import {LitElement, html, css} from 'lit';
 import {rockFiles} from 'build-time-data';
-import '@vaadin/grid';
 import {columnBodyRenderer} from '@vaadin/grid/lit.js'
+import '@vaadin/grid';
 import 'qui-ide-link';
+import 'qui-badge';
 
 /**
  * This component shows the Rockstar endpoints.
@@ -65,9 +66,20 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
     }
 
     _rockScoreRenderer(rockFile) {
+        let level = this._getLevel(rockFile.rockScore);
         return html`
-            ${rockFile.rockScore}/100
+            <qui-badge level="${level}">${rockFile.rockScore}/100</qui-badge>
         `;
+    }
+
+    _getLevel(score){
+        let level = "error";
+        if (score >= 66 && score < 100){
+            level = "warning";
+        } else if(score === 100){
+            level = "success";
+        }
+        return level;
     }
 }
 
