@@ -9,6 +9,11 @@ import 'qui-ide-link';
  */
 export class QwcBonJovaRockstarEndpoints extends LitElement {
     static styles = css`
+        .bonjova {
+            height: 100%;
+            padding-bottom: 10px;
+        }
+        
         a {
             color: var(--lumo-primary-text-color);
             text-decoration: none;
@@ -23,7 +28,7 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
     render() {
         if (this._rockFiles) {
             return html`
-                <vaadin-grid .items="${this._rockFiles}">
+                <vaadin-grid .items="${this._rockFiles}" class="bonjova" theme="no-border">
                     <vaadin-grid-column header="Name" 
                                         ${columnBodyRenderer(this._nameRenderer, [])} 
                                         auto-width 
@@ -37,7 +42,8 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
                     <vaadin-grid-column header="Rock Score"
                                         ${columnBodyRenderer(this._rockScoreRenderer, [])}
                                         auto-width
-                                        resizable>
+                                        flex-grow="0"
+                                        frozen-to-end>
                     </vaadin-grid-column>
                 </vaadin-grid>
             `;
