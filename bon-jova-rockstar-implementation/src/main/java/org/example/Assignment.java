@@ -89,6 +89,8 @@ public class Assignment {
                 rh = method.load((double) value);
             } else if (boolean.class.equals(variableClass)) {
                 rh = method.load((boolean) value);
+            } else if (Nothing.class.equals(variableClass)) {
+                rh = method.loadNull();
             } else {
                 throw new RuntimeException("Internal error: unknown type " + value);
             }

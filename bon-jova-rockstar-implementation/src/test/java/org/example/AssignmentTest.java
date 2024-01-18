@@ -256,19 +256,31 @@ public class AssignmentTest {
     }
 
     @Test
+    public void shouldHandleNull() {
+        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is nothing");
+        Assignment a = new Assignment(ctx);
+
+        toCode(a);
+        // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's
+        // awfully close to just writing the code down twice, so just be happy if we get here without explosions
+    }
+
+    @Test
     public void shouldWriteToClass() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"hello\"\nEverything is my thing");
         Assignment a = new Assignment(ctx);
+        toCode(a);
+        // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's
+        // awfully close to just writing the code down twice, so just be happy if we get here without explosions
+    }
 
+    private static void toCode(Assignment a) {
         ClassCreator creator = ClassCreator.builder()
                 .className("holder")
                 .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
         a.toCode(creator, method);
-        // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's
-        // awfully close to just writing the code down twice, so just be happy if we get here without explosions
-
     }
 
 }

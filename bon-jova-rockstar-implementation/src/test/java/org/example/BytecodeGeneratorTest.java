@@ -139,7 +139,27 @@ names in Rockstar.)
         String output = compileAndLaunch(program);
 
         assertEquals("764\n", output);
+    }
 
+    @Test
+    public void shouldHandleNothingInAVariable() {
+        String program = """
+                My world is nothing 
+                Shout my world
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("\n", output);
+    }
+
+    @Test
+    public void shouldHandleNothingInALiteral() {
+        String program = """
+                Shout nothing
+                                            """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("\n", output);
     }
 
     @Test

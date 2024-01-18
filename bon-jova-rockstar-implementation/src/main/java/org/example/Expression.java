@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.example.BytecodeGeneratingListener.isNull;
 import static org.example.BytecodeGeneratingListener.isNumber;
+import static org.example.Constant.coerceMysteriousIntoType;
 import static org.example.Constant.coerceNothingIntoType;
 
 public class Expression {
@@ -75,6 +76,8 @@ public class Expression {
             } else if (ctx.op != null) {
                 lhe = new Expression(ctx.lhe);
                 rhe = new Expression(ctx.rhe);
+                // Best guess if we can't work out the exact value class
+                valueClass = Object.class;
 
                 if (ctx.KW_ADD() != null || "+".equals(ctx.op.getText())) {
                     operation = Operation.ADD;
@@ -107,10 +110,10 @@ public class Expression {
                 function = functionCall.functionName.getText();
 
                 params = functionCall.argList()
-                                     .expression()
-                                     .stream()
-                                     .map(Expression::new)
-                                     .collect(Collectors.toList());
+                        .expression()
+                        .stream()
+                        .map(Expression::new)
+                        .collect(Collectors.toList());
                 valueClass = Object.class;
             } else if (literal != null) {
                 Literal l = new Literal(literal);
@@ -154,8 +157,8 @@ public class Expression {
     public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator) {
         if (function != null) {
             List<ResultHandle> args = params.stream()
-                                            .map(v -> v.getResultHandle(method, classCreator))
-                                            .collect(Collectors.toList());
+                    .map(v -> v.getResultHandle(method, classCreator))
+                    .collect(Collectors.toList());
             Class[] paramClasses = new Class[params.size()];
             Arrays.fill(paramClasses, Object.class);
 
@@ -179,10 +182,17 @@ public class Expression {
                 rrh = coerceNothingIntoType(method, lrh);
             }
 
+            if (lhe.isMysterious()) {
+                lrh = coerceMysteriousIntoType(method, rrh);
+            }
+            if (rhe.isMysterious()) {
+                rrh = coerceMysteriousIntoType(method, lrh);
+            }
+
             switch (operation) {
                 case ADD -> {
 
-                    return doOperation(method, lrh, rrh, (bc, a, b) -> {// Handle subtraction by multiplying by -1 and adding
+                    return doOperation(method, lrh, rrh, (bc, a, b) -> {
                         return bc.add(a, b);
                     }, (bc, a, b) -> {
                         ResultHandle lsrh = stringify(bc, a);
@@ -191,8 +201,6 @@ public class Expression {
                                 MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"),
                                 lsrh, rsrh);
                     });
-
-
                 }
                 case SUBTRACT -> {
 
@@ -337,6 +345,10 @@ public class Expression {
 
     public boolean isNothing() {
         return value == Constant.NOTHING;
+    }
+
+    public boolean isMysterious() {
+        return valueClass == null;
     }
 
     private enum Operation {
