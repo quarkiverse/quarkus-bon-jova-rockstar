@@ -206,7 +206,8 @@ names in Rockstar.)
         Rockstar.VariableContext ctx = ParseHelper.getVariable("johnny is \"nice\"");
         // The class here needs to match the class of what we load into the result handle
         Variable variable = new Variable(ctx, String.class);
-        ResultHandle writtenValue = method.load("whatever");
+        String className = "soundcheck";
+        ResultHandle writtenValue = method.load(className);
         // We need to initialise the field before trying to write to it (yuck, clunk)
         // TODO should we maybe try and streamline that in the variable class, or is this the logical flow?
         // TODO we now definitely have enough information for the variable to do its own field initialisation

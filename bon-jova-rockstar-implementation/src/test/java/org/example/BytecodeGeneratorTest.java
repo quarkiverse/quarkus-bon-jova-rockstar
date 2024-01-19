@@ -1251,9 +1251,10 @@ names in Rockstar.)
         DynamicClassLoader loader = new DynamicClassLoader();
 
         try {
-            new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), "whatever",
+            String className = "soundcheck";
+            new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), className,
                     loader);
-            Class<?> clazz = loader.findClass("whatever");
+            Class<?> clazz = loader.findClass(className);
             Method main = clazz.getMethod("main", String[].class);
 
             // Capture stdout since that's what the test will validate
