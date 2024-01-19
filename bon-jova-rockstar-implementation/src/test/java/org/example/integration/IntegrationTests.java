@@ -1,6 +1,5 @@
 package org.example.integration;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IntegrationTests {
 
-    @Disabled("Causing InputTest to fail, for ... some reason?")
     @Test
     public void shouldRun99BottlesOfBeer() throws IOException, URISyntaxException {
         String output = compileAndLaunch("/99-bottles.rock");
@@ -21,7 +19,6 @@ public class IntegrationTests {
         assertEquals(expected, output);
     }
 
-    @Disabled("a lot closer to working, but not quite working because of a problem with Nothing")
     @Test
     public void shouldRunFizzBuzz() throws IOException, URISyntaxException {
         String output = compileAndLaunch("/fizzbuzz.rock");

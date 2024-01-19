@@ -66,7 +66,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterProgram(Rockstar.ProgramContext ctx) {
         Variable.clearState();
-        Input.setStdIn();
+        Input.resetStdIn();
 
         main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);

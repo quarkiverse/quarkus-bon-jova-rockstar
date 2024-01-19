@@ -1247,11 +1247,11 @@ names in Rockstar.)
     private String compileAndLaunch(String program, String... args) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;
+        String className = "soundcheck";
 
-        DynamicClassLoader loader = new DynamicClassLoader();
+        DynamicClassLoader loader = new DynamicClassLoader(className);
 
         try {
-            String className = "soundcheck";
             new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), className,
                     loader);
             Class<?> clazz = loader.findClass(className);

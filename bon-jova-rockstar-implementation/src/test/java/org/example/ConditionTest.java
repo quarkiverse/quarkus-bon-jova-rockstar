@@ -23,7 +23,7 @@ public class ConditionTest {
 
     @Test
     public void shouldDetectElse() {
-        Rockstar.IfStmtContext ctx = ParseHelper.getIf("""                
+        Rockstar.IfStmtContext ctx = new ParseHelper().getIf("""                
                 If true is right
                 Say "he is ok"
                 Else say "no way"
@@ -31,7 +31,7 @@ public class ConditionTest {
         Condition condition = new Condition(ctx);
         assertTrue(condition.hasElse());
 
-        ctx = ParseHelper.getIf("""                
+        ctx = new ParseHelper().getIf("""                
                 If true is right
                 Say "he is ok"
                 """);

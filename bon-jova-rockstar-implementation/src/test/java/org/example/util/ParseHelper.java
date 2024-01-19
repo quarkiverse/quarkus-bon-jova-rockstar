@@ -19,43 +19,43 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ParseHelper {
 
-    public static Rockstar.AssignmentStmtContext getAssignment(String program) {
+    public Rockstar.AssignmentStmtContext getAssignment(String program) {
         return (Rockstar.AssignmentStmtContext) getGrammarElement(program, CapturingListener::getAssignmentStatement);
     }
 
-    public static Rockstar.PoeticNumberLiteralContext getPoeticNumberLiteral(String program) {
+    public Rockstar.PoeticNumberLiteralContext getPoeticNumberLiteral(String program) {
         return (Rockstar.PoeticNumberLiteralContext) getGrammarElement(program, CapturingListener::getPoeticNumberLiteral);
     }
 
-    public static Rockstar.ExpressionContext getExpression(String program) {
+    public Rockstar.ExpressionContext getExpression(String program) {
         return (Rockstar.ExpressionContext) getGrammarElement(program, CapturingListener::getExpression);
     }
 
-    public static Rockstar.ExpressionContext getExpression(String program, int expressionPosition) {
+    public Rockstar.ExpressionContext getExpression(String program, int expressionPosition) {
         return (Rockstar.ExpressionContext) getGrammarElement(program, (CapturingListener l) -> l.getExpression(expressionPosition));
     }
 
-    public static Rockstar.LiteralContext getLiteral(String program) {
+    public Rockstar.LiteralContext getLiteral(String program) {
         return (Rockstar.LiteralContext) getGrammarElement(program, CapturingListener::getLiteral);
     }
 
-    public static Rockstar.ConstantContext getConstant(String program) {
+    public Rockstar.ConstantContext getConstant(String program) {
         return (Rockstar.ConstantContext) getGrammarElement(program, CapturingListener::getConstant);
     }
 
-    public static Rockstar.VariableContext getVariable(String program) {
+    public Rockstar.VariableContext getVariable(String program) {
         return (Rockstar.VariableContext) getGrammarElement(program, CapturingListener::getVariable);
     }
 
-    public static Rockstar.IfStmtContext getIf(String program) {
+    public Rockstar.IfStmtContext getIf(String program) {
         return (Rockstar.IfStmtContext) getGrammarElement(program, CapturingListener::getIf);
     }
 
-    public static Rockstar.InputStmtContext getInput(String program) {
+    public Rockstar.InputStmtContext getInput(String program) {
         return (Rockstar.InputStmtContext) getGrammarElement(program, CapturingListener::getInput);
     }
 
-    private static RuleContext getGrammarElement(String program, Function<CapturingListener,
+    private RuleContext getGrammarElement(String program, Function<CapturingListener,
             RuleContext> getter) {
 /*
 Rather than mocking the syntax tree, which will be hard work and not necessarily reliable,

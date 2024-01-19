@@ -16,16 +16,16 @@ public class ConstantTest {
      */
     @Test
     public void shouldParseEmptyStringAliases() {
-        Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is silence");
+        Rockstar.ConstantContext ctx = new ParseHelper().getConstant("life is silence");
         Constant a = new Constant(ctx);
         assertEquals("", a.getValue());
         assertEquals(String.class, a.getValueClass());
 
-        ctx = ParseHelper.getConstant("life is silent");
+        ctx = new ParseHelper().getConstant("life is silent");
         a = new Constant(ctx);
         assertEquals("", a.getValue());
 
-        ctx = ParseHelper.getConstant("life is empty");
+        ctx = new ParseHelper().getConstant("life is empty");
         a = new Constant(ctx);
         assertEquals("", a.getValue());
     }
@@ -33,40 +33,40 @@ public class ConstantTest {
 
     @Test
     public void shouldParseBooleanConstantsForTrueCase() {
-        Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is true");
+        Rockstar.ConstantContext ctx = new ParseHelper().getConstant("life is true");
         Constant a = new Constant(ctx);
         assertEquals(true, a.getValue());
         assertEquals(boolean.class, a.getValueClass());
 
-        ctx = ParseHelper.getConstant("life is right");
+        ctx = new ParseHelper().getConstant("life is right");
         a = new Constant(ctx);
         assertEquals(true, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is ok");
+        ctx = new ParseHelper().getConstant("life is ok");
         a = new Constant(ctx);
         assertEquals(true, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is yes");
+        ctx = new ParseHelper().getConstant("life is yes");
         a = new Constant(ctx);
         assertEquals(true, a.getValue());
     }
 
     @Test
     public void shouldParseBooleanConstantsForFalseCase() {
-        Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is false");
+        Rockstar.ConstantContext ctx = new ParseHelper().getConstant("life is false");
         Constant a = new Constant(ctx);
         assertEquals(false, a.getValue());
         assertEquals(boolean.class, a.getValueClass());
 
-        ctx = ParseHelper.getConstant("life is lies");
+        ctx = new ParseHelper().getConstant("life is lies");
         a = new Constant(ctx);
         assertEquals(false, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is wrong");
+        ctx = new ParseHelper().getConstant("life is wrong");
         a = new Constant(ctx);
         assertEquals(false, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is no");
+        ctx = new ParseHelper().getConstant("life is no");
         a = new Constant(ctx);
         assertEquals(false, a.getValue());
     }
@@ -77,26 +77,26 @@ public class ConstantTest {
      */
     @Test
     public void shouldParseUndefinedConstants() {
-        Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is mysterious");
+        Rockstar.ConstantContext ctx = new ParseHelper().getConstant("life is mysterious");
         Constant a = new Constant(ctx);
         assertNull(a.getValue());
     }
 
     @Test
     public void shouldParseNullConstants() {
-        Rockstar.ConstantContext ctx = ParseHelper.getConstant("life is nothing");
+        Rockstar.ConstantContext ctx = new ParseHelper().getConstant("life is nothing");
         Constant a = new Constant(ctx);
         assertEquals(NOTHING, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is nobody");
+        ctx = new ParseHelper().getConstant("life is nobody");
         a = new Constant(ctx);
         assertEquals(NOTHING, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is nowhere");
+        ctx = new ParseHelper().getConstant("life is nowhere");
         a = new Constant(ctx);
         assertEquals(NOTHING, a.getValue());
 
-        ctx = ParseHelper.getConstant("life is gone");
+        ctx = new ParseHelper().getConstant("life is gone");
         a = new Constant(ctx);
         assertEquals(NOTHING, a.getValue());
     }
