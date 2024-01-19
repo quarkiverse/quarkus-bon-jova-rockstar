@@ -33,7 +33,7 @@ class SimpleHelloWorldTest {
         meth.invoke(null, (Object) null);
 
         assertTrue(testOut.toString()
-                .contains("This is A Hello World"));
+                .contains("This is A Hello World"), "Deliberate failure for testing tests (usually)");
     }
 
     @AfterEach
