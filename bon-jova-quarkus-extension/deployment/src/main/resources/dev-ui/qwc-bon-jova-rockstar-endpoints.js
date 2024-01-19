@@ -23,17 +23,36 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
             color: var(--lumo-primary-text-color);
             text-decoration: none;
         }
+        
+        .cardGrid {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            gap: 20px;
+            padding-left: 5px;
+            padding-right: 10px;
+        }
+        
+        .detailCard {
+            min-width: 400px;
+        }
 
         .codeBlock {
-            display:flex;
             gap: 10px;
             flex-direction: column;
             padding-left: 10px;
             padding-right: 10px;
+            min-height: 300px;
         }
         
         .rockScoreChart {
-            height: 350px;
+            height: 300px;
+        }
+
+        echarts-gauge-grade {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     `;
 
@@ -106,19 +125,27 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
     _expandedRowRenderer(rockFile) {
         let level = this._getLevel(rockFile.rockScore);
         return html`
-            <h3>Program Contents</h3>
-            <div class="codeBlock">
-                <qui-code-block mode="java"
-                                content="${rockFile.contents}">
-                </qui-code-block>
-            </div>
-            <h3>Rock Score</h3>
-            <div class="rockScoreChart">
-                <echarts-gauge-grade
-                        title="Rock Score 🎸"
-                        percentage="${rockFile.rockScore}"
-                        sectionColors="--lumo-${level}-color">
-                </echarts-gauge-grade>
+            <div class="cardGrid">
+                <qui-card class="detailCard" title="Program Contents">
+                    <div slot="content">
+                        <div class="codeBlock">
+                            <qui-code-block mode="java"
+                                            content="${rockFile.contents}">
+                            </qui-code-block>
+                        </div>
+                    </div>
+                </qui-card>
+                <qui-card class="detailCard" title="Rock Score">
+                    <div slot="content">
+                        <div class="rockScoreChart">
+                            <echarts-gauge-grade
+                                    title="Rock Score 🎸"
+                                    percentage="${rockFile.rockScore}"
+                                    sectionColors="--lumo-${level}-color">
+                            </echarts-gauge-grade>
+                        </div>
+                    </div>
+                </qui-card>
             </div>
         `;
     }
