@@ -1,5 +1,6 @@
 package org.example;
 
+import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.CatchBlockCreator;
@@ -35,6 +36,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     // For some constructs, we may want to create a scope but not switch to it until the next statement list; this stack is a convenient
     // place to store them
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
+    private static final MethodDescriptor STRING_CONCAT = MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;");
     private BytecodeCreator currentCreator;
     // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
     private BytecodeCreator targetScopeForJumps;
@@ -135,21 +137,55 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .KW_UP()
                 .size();
 
+        ResultHandle one = currentCreator.load(1d);
+
         for (int i = 0; i < count; i++) {
 
             Variable variable = new Variable(ctx.variable());
             ResultHandle value = variable.read(currentCreator);
-            ResultHandle incremented;
-            try {
-                // This is ugly, but the result handle does not expose the method to get the type publicly, so we need trial and error
-                // (or to track it ourselves)
-                incremented = currentCreator.add(value, currentCreator.load((double) 1));
-            } catch (RuntimeException ee) {
-                // This must be a string
-                ResultHandle constant = currentCreator.load("1");
-                incremented = currentCreator.invokeVirtualMethod(
-                        MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"), value,
-                        constant);
+
+            // This intermediate variable is useful to give a bit of flexibility about types
+            AssignableResultHandle incremented = currentCreator.createVariable(Object.class);
+            // TODO have this be a method on the Nothing object and store nulls as Nothings
+            // TODO on mysterious, this will pass when it should fail
+
+            // See if we can assign the value to a Double - if we can, it is either a number, or null
+            TryBlock tryBlock = currentCreator.tryBlock();
+            {
+                AssignableResultHandle casted = tryBlock.createVariable(Double.class);
+                tryBlock.assign(casted, tryBlock.checkCast(value, Double.class));
+                MethodDescriptor toDouble = MethodDescriptor.ofMethod("java/lang/Double", "doubleValue", double.class);
+                ResultHandle primitive = tryBlock.invokeVirtualMethod(toDouble, casted);
+
+                ResultHandle added = tryBlock.add(primitive, one);
+                tryBlock.assign(incremented, added);
+                variable.write(tryBlock, incremented);
+            }
+
+            // Casting a null to a Double works, casting to a double gives an NPE
+            CatchBlockCreator nullCase = tryBlock.addCatch(NullPointerException.class);
+            {
+                AssignableResultHandle coerced = currentCreator.createVariable(double.class);
+                //  We could call   nullCase.assign(coerced, coerceNothingIntoType(nullCase, one)); but it is barely necessary, we know we're going to end up with 1.0
+                nullCase.assign(coerced, nullCase.load(0d));
+                ResultHandle addedCoerced = nullCase.add(coerced, one);
+                nullCase.assign(incremented, addedCoerced);
+            }
+
+            if (!isNumber(value)) {
+                // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
+                CatchBlockCreator stringCase = tryBlock.addCatch(ClassCastException.class);
+                {
+                    // This must be a string
+                    // TODO unless it is a boolean ...
+                    ResultHandle constant = stringCase.load("1");
+                    AssignableResultHandle castToString = stringCase.createVariable(String.class);
+                    stringCase.assign(castToString, stringCase.checkCast(value, String.class));
+                    ResultHandle concat = stringCase.invokeVirtualMethod(
+                            STRING_CONCAT, castToString,
+                            constant);
+                    stringCase.assign(incremented, concat);
+                }
             }
 
             variable.write(currentCreator, incremented);
@@ -163,10 +199,52 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .KW_DOWN()
                 .size();
 
+        ResultHandle minusOne = currentCreator.load(-1d);
+
         for (int i = 0; i < count; i++) {
+
             Variable variable = new Variable(ctx.variable());
             ResultHandle value = variable.read(currentCreator);
-            ResultHandle incremented = currentCreator.add(value, currentCreator.load((double) -1));
+
+            // This intermediate variable is useful to give a bit of flexibility about types
+            AssignableResultHandle incremented = currentCreator.createVariable(Object.class);
+            // TODO have this be a method on the Nothing object and store nulls as Nothings
+            // TODO on mysterious, this will pass when it should fail
+
+            // See if we can assign the value to a Double - if we can, it is either a number, or null
+            TryBlock tryBlock = currentCreator.tryBlock();
+            {
+                AssignableResultHandle casted = tryBlock.createVariable(Double.class);
+                tryBlock.assign(casted, tryBlock.checkCast(value, Double.class));
+                MethodDescriptor toDouble = MethodDescriptor.ofMethod("java/lang/Double", "doubleValue", double.class);
+                ResultHandle primitive = tryBlock.invokeVirtualMethod(toDouble, casted);
+
+                ResultHandle added = tryBlock.add(primitive, minusOne);
+                tryBlock.assign(incremented, added);
+                variable.write(tryBlock, incremented);
+            }
+
+            // Casting a null to a Double works, casting to a double gives an NPE
+            CatchBlockCreator nullCase = tryBlock.addCatch(NullPointerException.class);
+            {
+                AssignableResultHandle coerced = currentCreator.createVariable(double.class);
+                //  We could call   nullCase.assign(coerced, coerceNothingIntoType(nullCase, one)); but it is barely necessary, we know we're going to end up with 1.0
+                nullCase.assign(coerced, nullCase.load(0d));
+                ResultHandle addedCoerced = nullCase.add(coerced, minusOne);
+                nullCase.assign(incremented, addedCoerced);
+            }
+
+            if (!isNumber(value)) {
+                // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
+                CatchBlockCreator stringCase = tryBlock.addCatch(ClassCastException.class);
+                {
+                    // This must be a string
+                    // TODO unless it is a boolean ...
+                    // We can't decrement a string, and the types go a bit weird, so just use a string NaN
+                    stringCase.assign(incremented, stringCase.load("NaN"));
+                }
+            }
+
             variable.write(currentCreator, incremented);
         }
     }

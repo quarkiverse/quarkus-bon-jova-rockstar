@@ -175,19 +175,20 @@ public class AssignmentTest {
     public void shouldParseNullConstants() {
         Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is nothing");
         Assignment a = new Assignment(ctx);
-        assertEquals(Nothing.class, a.getVariableClass());
+        Class<Object> expectedNothingClass = Object.class; // The right answer here isn't totally obvious, but for now we are going with Object
+        assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is nobody");
-        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is nowhere");
-        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
 
         ctx = ParseHelper.getAssignment("My thing is gone");
-        assertEquals(Nothing.class, a.getVariableClass());
+        assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
     }
 

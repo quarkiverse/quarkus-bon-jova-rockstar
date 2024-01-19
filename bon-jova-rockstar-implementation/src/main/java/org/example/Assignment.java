@@ -7,6 +7,8 @@ import io.quarkus.gizmo.ResultHandle;
 import org.example.grammar.PoeticNumberLiteral;
 import rock.Rockstar;
 
+import static org.example.Constant.NOTHING;
+
 public class Assignment {
     private final String originalName;
     private final Object value;
@@ -15,8 +17,6 @@ public class Assignment {
     private Expression expression;
 
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
-
-
         if (ctx.expression() != null) {
             expression = new Expression(ctx.expression());
             value = expression.getValue();
@@ -89,7 +89,7 @@ public class Assignment {
                 rh = method.load((double) value);
             } else if (boolean.class.equals(variableClass)) {
                 rh = method.load((boolean) value);
-            } else if (Nothing.class.equals(variableClass)) {
+            } else if (value == NOTHING) { // We can't check the type, because Nothings are stored as objects in case they get coerced
                 rh = method.loadNull();
             } else {
                 throw new RuntimeException("Internal error: unknown type " + value);
