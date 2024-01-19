@@ -15,7 +15,7 @@ import static org.example.BytecodeGeneratingListener.isString;
 
 public class Constant {
 
-    public static final Nothing NOTHING = new Nothing();
+    public static final Object NOTHING = new Nothing(); // TODO this should be the inner class
 
     private Class<?> valueClass;
     private Object value;
@@ -38,7 +38,7 @@ public class Constant {
             } else if (constant
                     .CONSTANT_NULL() != null) {
                 value = NOTHING;
-                valueClass = Nothing.class;
+                valueClass = Object.class; // This can't be Nothing, because the value that is currently nothing might become a double or a string
             } else if (constant.CONSTANT_UNDEFINED() != null) {
                 value = null;
                 valueClass = null;

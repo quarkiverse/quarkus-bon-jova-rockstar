@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import static org.example.BytecodeGeneratingListener.isNumber;
 import static org.example.BytecodeGeneratingListener.isObject;
+import static org.example.Constant.NOTHING;
 import static org.example.Constant.coerceMysteriousIntoType;
 import static org.example.Constant.coerceNothingIntoType;
 
@@ -205,7 +206,7 @@ public class Expression {
             answer = method.load((boolean) value);
         } else if (valueClass == null) {
             answer = method.loadNull();
-        } else if (valueClass == Nothing.class) {
+        } else if (value == NOTHING) {
             answer = method.loadNull();
         } else {
             throw new RuntimeException("Confused expression: Could not interpret type " + valueClass);
@@ -344,9 +345,6 @@ public class Expression {
         // First, check for nulls on both sides
         ResultHandle lrh = coerceAwayNothing(method, unsafelrh, unsaferrh);
         ResultHandle rrh = coerceAwayNothing(method, unsaferrh, unsafelrh);
-
-//        ResultHandle lrh = unsafelrh;
-//        ResultHandle rrh = unsaferrh;
 
         AssignableResultHandle answer = method.createVariable(Object.class);
         // We want to do a special toString on numbers, to avoid tacking decimals onto integers

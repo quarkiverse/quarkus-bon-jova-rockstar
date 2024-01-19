@@ -534,6 +534,43 @@ names in Rockstar.)
         assertEquals("hello11\n", output);
     }
 
+    @Test
+    public void shouldHandleDecrementForStringCase() {
+        String program = """
+                My world is "hello"
+                Knock my world down
+                Knock my world down
+                Say my world
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("NaN\n", output);
+    }
+
+    @Test
+    public void shouldHandleIncrementStartingWithNull() {
+        String program = """
+                Desire is large
+                My world is nothing
+                Until my world is Desire,
+                Build my world up
+                shout my world
+                """;
+        assertEquals("1\n2\n3\n4\n5\n", compileAndLaunch(program));
+    }
+
+    @Test
+    public void shouldHandleDecrementStartingWithNull() {
+        String program = """
+                Desire is -5
+                My world is nothing
+                Until my world is Desire,
+                Knock my world down
+                shout my world
+                """;
+        assertEquals("-1\n-2\n-3\n-4\n-5\n", compileAndLaunch(program));
+    }
+
     // No need for decrement for a string, it's NaN in Satriani
 
     // Rockstar supports the infix arithmetic operators +, -, * and /
