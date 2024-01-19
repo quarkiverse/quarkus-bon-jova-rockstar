@@ -17,7 +17,6 @@ public class RockFileCompiler {
         }
         try (InputStream stream = new FileInputStream(fileName)) {
             File outFile = new File(fileName.replace(DOT_ROCK, DOT_CLASS));
-            System.out.println("Compiling " + fileName + " to " + outFile);
             new RockFileCompiler().compile(stream, outFile);
         } catch (IOException e) {
             throw new RuntimeException(e);

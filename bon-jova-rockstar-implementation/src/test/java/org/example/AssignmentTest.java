@@ -20,7 +20,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldParseVariableNameWithSimpleVariableAssignment() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Thing is 6");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("Thing is 6");
         Assignment a = new Assignment(ctx);
         // Variable names should be normalised to lower case
         String name = "thing";
@@ -29,7 +29,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldParseVariableNameWithCommonVariableAssignment() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is 6");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is 6");
         Assignment a = new Assignment(ctx);
         // Variable names should be normalised to lower case
         String name = "my__thing";
@@ -38,7 +38,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldParseVariableNameWithProperVariableAssignment() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Doctor Feelgood is 6");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("Doctor Feelgood is 6");
         Assignment a = new Assignment(ctx);
         // Variable names should be normalised to lower case
         assertEquals("doctor__feelgood", a.getVariableName());
@@ -46,7 +46,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldParseIntegerLiterals() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is 5");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is 5");
         Assignment a = new Assignment(ctx);
         // The number should be stored as a double, even though it was entered as an integer
         assertEquals(5d, a.getValue());
@@ -56,7 +56,7 @@ public class AssignmentTest {
     /* Numbers in Rockstar are double-precision floating point numbers, stored according to the IEEE 754 standard.*/
     @Test
     public void shouldParseFloatingPointLiterals() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is 3.141");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is 3.141");
         Assignment a = new Assignment(ctx);
         assertEquals(3.141, a.getValue());
         assertEquals(double.class, a.getVariableClass());
@@ -64,7 +64,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldParseStringLiterals() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"Yes hello\"");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is \"Yes hello\"");
         Assignment a = new Assignment(ctx);
         assertEquals("Yes hello", a.getValue());
         assertEquals(String.class, a.getVariableClass());
@@ -75,23 +75,23 @@ public class AssignmentTest {
      */
     @Test
     public void shouldParseEmptyStringAliases() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is silence");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is silence");
         Assignment a = new Assignment(ctx);
         assertEquals("", a.getValue());
         assertEquals(String.class, a.getVariableClass());
 
-        ctx = ParseHelper.getAssignment("My thing is silent");
+        ctx = new ParseHelper().getAssignment("My thing is silent");
         a = new Assignment(ctx);
         assertEquals("", a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is empty");
+        ctx = new ParseHelper().getAssignment("My thing is empty");
         a = new Assignment(ctx);
         assertEquals("", a.getValue());
     }
 
     @Test
     public void shouldParseIntegerPoeticNumberLiterals() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is a big bad monster");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is a big bad monster");
         Assignment a = new Assignment(ctx);
         assertEquals(1337d, a.getValue());
         assertEquals(double.class, a.getVariableClass());
@@ -103,56 +103,56 @@ public class AssignmentTest {
      */
     @Test
     public void shouldParsePoeticStringLiterals() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing says cannot buy love");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing says cannot buy love");
         Assignment a = new Assignment(ctx);
         assertEquals("cannot buy love", a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing say why");
+        ctx = new ParseHelper().getAssignment("My thing say why");
         a = new Assignment(ctx);
         assertEquals("why", a.getValue());
         assertEquals(String.class, a.getVariableClass());
 
-        ctx = ParseHelper.getAssignment("My thing said still cannot buy love");
+        ctx = new ParseHelper().getAssignment("My thing said still cannot buy love");
         a = new Assignment(ctx);
         assertEquals("still cannot buy love", a.getValue());
     }
 
     @Test
     public void shouldParseBooleanLiteralsForTrueCase() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is true");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is true");
         Assignment a = new Assignment(ctx);
         assertEquals(true, a.getValue());
         assertEquals(boolean.class, a.getVariableClass());
 
-        ctx = ParseHelper.getAssignment("My thing is right");
+        ctx = new ParseHelper().getAssignment("My thing is right");
         a = new Assignment(ctx);
         assertEquals(true, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is ok");
+        ctx = new ParseHelper().getAssignment("My thing is ok");
         a = new Assignment(ctx);
         assertEquals(true, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is yes");
+        ctx = new ParseHelper().getAssignment("My thing is yes");
         a = new Assignment(ctx);
         assertEquals(true, a.getValue());
     }
 
     @Test
     public void shouldParseBooleanLiteralsForFalseCase() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is false");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is false");
         Assignment a = new Assignment(ctx);
         assertEquals(false, a.getValue());
         assertEquals(boolean.class, a.getVariableClass());
 
-        ctx = ParseHelper.getAssignment("My thing is lies");
+        ctx = new ParseHelper().getAssignment("My thing is lies");
         a = new Assignment(ctx);
         assertEquals(false, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is wrong");
+        ctx = new ParseHelper().getAssignment("My thing is wrong");
         a = new Assignment(ctx);
         assertEquals(false, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is no");
+        ctx = new ParseHelper().getAssignment("My thing is no");
         a = new Assignment(ctx);
         assertEquals(false, a.getValue());
     }
@@ -162,7 +162,7 @@ public class AssignmentTest {
      */
     @Test
     public void shouldParseUndefinedConstants() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is mysterious");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is mysterious");
         Assignment a = new Assignment(ctx);
         assertNull(a.getValue());
     }
@@ -173,59 +173,59 @@ public class AssignmentTest {
   */
     @Test
     public void shouldParseNullConstants() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is nothing");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is nothing");
         Assignment a = new Assignment(ctx);
         Class<Object> expectedNothingClass = Object.class; // The right answer here isn't totally obvious, but for now we are going with Object
         assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is nobody");
+        ctx = new ParseHelper().getAssignment("My thing is nobody");
         assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is nowhere");
+        ctx = new ParseHelper().getAssignment("My thing is nowhere");
         assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
 
-        ctx = ParseHelper.getAssignment("My thing is gone");
+        ctx = new ParseHelper().getAssignment("My thing is gone");
         assertEquals(expectedNothingClass, a.getVariableClass());
         assertEquals(NOTHING, a.getValue());
     }
 
     @Test
     public void shouldHandleAssignmentUsingPut() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put 123 into X");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("Put 123 into X");
         Assignment a = new Assignment(ctx);
         assertEquals(123d, a.getValue());
     }
 
     @Test
     public void shouldHandleAssignmentToSimpleVariablesUsingApostrophe() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Janie's got a gun");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("Janie's got a gun");
         assertEquals(313d, new Assignment(ctx).getValue());
 
-        ctx = ParseHelper.getAssignment("Union's been on strike");
+        ctx = new ParseHelper().getAssignment("Union's been on strike");
         assertEquals(426d, new Assignment(ctx).getValue());
 
-        ctx = ParseHelper.getAssignment("We're here to see the show");
+        ctx = new ParseHelper().getAssignment("We're here to see the show");
         assertEquals(42334d, new Assignment(ctx).getValue());
     }
 
     @Test
     public void shouldHandleAssignmentToCommonVariablesUsingApostrophe() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("The fire's burning");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("The fire's burning");
         assertEquals(7d, new Assignment(ctx).getValue());
     }
 
     @Test
     public void shouldHandleAssignmentToProperVariablesUsingApostrophe() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Doctor Feelgood's mad");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("Doctor Feelgood's mad");
         assertEquals(3d, new Assignment(ctx).getValue());
     }
 
     @Test
     public void shouldHandleAssignmentOfConstantsUsingPut() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("Put lies into X");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("Put lies into X");
         Assignment a = new Assignment(ctx);
         assertEquals(false, a.getValue());
     }
@@ -237,7 +237,7 @@ public class AssignmentTest {
     // Validated by comparison to Satriani.
     @Test
     public void shouldInterpretAssignmentToVariablesAsPoeticNumberLiterals() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"hello\"\nEverything is my thing");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is \"hello\"\nEverything is my thing");
         Assignment a = new Assignment(ctx);
         assertEquals(25d, a.getValue());
         assertEquals(double.class, a.getVariableClass());
@@ -250,7 +250,7 @@ public class AssignmentTest {
         String program = """
                 Put 5 of 6 into my hands
                 """;
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment(program);
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment(program);
         Assignment a = new Assignment(ctx);
         assertEquals(double.class, a.getVariableClass());
 
@@ -258,7 +258,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldHandleNull() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is nothing");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is nothing");
         Assignment a = new Assignment(ctx);
 
         toCode(a);
@@ -268,7 +268,7 @@ public class AssignmentTest {
 
     @Test
     public void shouldWriteToClass() {
-        Rockstar.AssignmentStmtContext ctx = ParseHelper.getAssignment("My thing is \"hello\"\nEverything is my thing");
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is \"hello\"\nEverything is my thing");
         Assignment a = new Assignment(ctx);
         toCode(a);
         // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's

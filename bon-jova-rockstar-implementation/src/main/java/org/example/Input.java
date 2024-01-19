@@ -12,7 +12,6 @@ public class Input {
     private final String originalName;
     private final Class<?> variableClass;
     private final Variable variable;
-    private Expression expression;
 
     public Input(Rockstar.InputStmtContext ctx) {
 
@@ -26,7 +25,7 @@ public class Input {
         argIndex++;
     }
 
-    public static void setStdIn() {
+    public static void resetStdIn() {
         argIndex = -1;
     }
 

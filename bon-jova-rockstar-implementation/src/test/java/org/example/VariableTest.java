@@ -25,7 +25,7 @@ public class VariableTest {
 
     @Test
     public void shouldParseIntegerLiteralsAsVariables() {
-        Rockstar.VariableContext ctx = ParseHelper.getVariable("my thing is 5\nshout my thing");
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable("my thing is 5\nshout my thing");
         Variable a = new Variable(ctx, double.class);
         // The 'value' is the variable name
         assertEquals("my__thing", a.getVariableName());
@@ -43,7 +43,7 @@ public class VariableTest {
                 Variable is "Hello San Francisco"
                 Shout Variable
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, String.class);
 
         assertEquals("variable", v.getVariableName());
@@ -60,7 +60,7 @@ public class VariableTest {
                 My thing is true
                 Shout my thing
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, boolean.class);
         assertEquals("my__thing", v.getVariableName());
     }
@@ -71,7 +71,7 @@ public class VariableTest {
                 My             thing is true
                 Shout my   thing
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, boolean.class);
         assertEquals("my__thing", v.getVariableName());
     }
@@ -91,7 +91,7 @@ names in Rockstar.)
                 Shout Doctor Feelgood
                 Shout Doctor FeelGOOD
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, double.class);
         assertEquals("doctor__feelgood", v.getVariableName());
     }
@@ -101,7 +101,7 @@ names in Rockstar.)
         String program = """
                 tIMe is an illusion
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("time", v.getVariableName());
     }
@@ -111,7 +111,7 @@ names in Rockstar.)
         String program = """
                 TIME is an illusion
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("time", v.getVariableName());
     }
@@ -127,7 +127,7 @@ names in Rockstar.)
                 My thing is true
                 Shout my thing
                                             """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("my__thing", v.getVariableName());
     }
@@ -140,7 +140,7 @@ names in Rockstar.)
     @Test
     public void shouldHandleVariableAssignmentToPoeticNumberLiterals() {
         String program = "Rockstar is a big bad monster";
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
 
         assertEquals("rockstar", v.getVariableName());
@@ -155,7 +155,7 @@ names in Rockstar.)
                 Put 123 into X
                 Shout X
                 """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("x", v.getVariableName());
     }
@@ -170,7 +170,7 @@ names in Rockstar.)
                 Let my balance be 1000000
                 Shout my balance
                 """;
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
         assertEquals("my__balance", v.getVariableName());
     }
@@ -183,13 +183,13 @@ names in Rockstar.)
         // the parse logic, such as assignments
 
         String program = "The message is \"pass\"";
-        Rockstar.VariableContext ctx = ParseHelper.getVariable(program);
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, defaultVariableClass);
         v.track();
 
         program = "shout it";
 
-        ctx = ParseHelper.getVariable(program);
+        ctx = new ParseHelper().getVariable(program);
         v = new Variable(ctx, defaultVariableClass);
 
         // Now go again and make sure we can interpret the pronoun
@@ -203,7 +203,7 @@ names in Rockstar.)
                 .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
-        Rockstar.VariableContext ctx = ParseHelper.getVariable("johnny is \"nice\"");
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable("johnny is \"nice\"");
         // The class here needs to match the class of what we load into the result handle
         Variable variable = new Variable(ctx, String.class);
         String className = "soundcheck";
@@ -231,14 +231,14 @@ names in Rockstar.)
                 .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
-        Rockstar.VariableContext ctx = ParseHelper.getVariable("fred is 5");
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable("fred is 5");
         Variable variable = new Variable(ctx, defaultVariableClass);
 
         FieldDescriptor field1 = variable.getField(creator, method);
         assertNotNull(field1);
 
         // Now a second variable instance with the same name should return the same field
-        ctx = ParseHelper.getVariable("fred is 8");
+        ctx = new ParseHelper().getVariable("fred is 8");
         variable = new Variable(ctx, defaultVariableClass);
 
         FieldDescriptor field2 = variable.getField(creator, method);
@@ -253,7 +253,7 @@ names in Rockstar.)
                 .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
-        Rockstar.VariableContext ctx = ParseHelper.getVariable("My thing is 6");
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable("My thing is 6");
         Variable variable = new Variable(ctx, defaultVariableClass);
 
         FieldDescriptor field = variable.getField(creator, method);
