@@ -11,6 +11,7 @@ import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TryBlock;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
 import rock.RockstarBaseListener;
@@ -28,11 +29,11 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
 public class BytecodeGeneratingListener extends RockstarBaseListener {
 
-    private final MethodCreator main;
+    private MethodCreator main;
 
     private final ClassCreator creator;
     private final FieldDescriptor formatter;
-    private final Stack<BytecodeCreator> blocks = new Stack<>();
+    private final Stack<Block> blocks = new Stack<>();
     // For some constructs, we may want to create a scope but not switch to it until the next statement list; this stack is a convenient
     // place to store them
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
@@ -42,9 +43,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     private BytecodeCreator targetScopeForJumps;
 
 
+    // Not strictly necessary, but very useful for debugging
+    record Block(ParserRuleContext ctx, BytecodeCreator scope) {
+    }
+
+
     public BytecodeGeneratingListener(ClassCreator creator) {
         super();
-
         MethodCreator clinit = creator.getMethodCreator(MethodDescriptor.CLINIT, void.class);
         clinit.setModifiers(ACC_PUBLIC + ACC_STATIC + ACC_FINAL);
         ResultHandle formatterInstance = clinit.newInstance(MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
@@ -54,15 +59,27 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .getFieldDescriptor();
         clinit.writeStaticField(formatter, formatterInstance);
         clinit.returnVoid();
+        this.creator = creator;
+    }
 
+    // Ensure we don't get cross-talk between programs for the statics
+    @Override
+    public void enterProgram(Rockstar.ProgramContext ctx) {
+        Variable.clearState();
+        Input.setStdIn();
 
         main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);
 
-        enterBlock(main);
+        enterBlock(main, ctx);
+    }
 
-        this.creator = creator;
-
+    @Override
+    public void exitProgram(Rockstar.ProgramContext ctx) {
+        while (!blocks.isEmpty()) {
+            currentCreator.returnVoid();
+            currentCreator = blocks.pop().scope;
+        }
     }
 
     // It would be nice to get rid of this, but when we get an expression, we don't always know what the type of thing in the result
@@ -97,30 +114,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // Take advantage of the toString format of ResultHandle
         return value.toString()
                 .contains("type='Ljava/lang/Object;'");
-    }
-
-    public static boolean isNull(ResultHandle value) {
-        // ResultHandle knows the type, but it's private
-        // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
-        // Take advantage of the toString format of ResultHandle
-        return value.toString()
-                .contains("owner=null");
-    }
-
-    // Ensure we don't get cross-talk between programs for the statics
-    @Override
-    public void enterProgram(Rockstar.ProgramContext ctx) {
-        Variable.clearState();
-        Input.setStdIn();
-
-    }
-
-    @Override
-    public void exitProgram(Rockstar.ProgramContext ctx) {
-        while (!blocks.isEmpty()) {
-            currentCreator.returnVoid();
-            currentCreator = blocks.pop();
-        }
     }
 
     @Override
@@ -265,7 +258,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .invokeVirtualMethod(
                         MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
                         df, casttoDouble);
-        // TODO extract the println outside the blocks?
         Gizmo.systemOutPrintln(tryBlock, formatted);
 
         CatchBlockCreator catchBlock = tryBlock.addCatch(ClassCastException.class);
@@ -311,7 +303,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         final Function<BytecodeCreator, BranchResult> fun;
 
         targetScopeForJumps = currentCreator.createScope();
-        enterBlock(targetScopeForJumps);
+        enterBlock(targetScopeForJumps, ctx);
 
         if (ctx.KW_WHILE() != null) {
             fun = (BytecodeCreator method) -> {
@@ -328,25 +320,26 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         }
         BytecodeCreator loop = currentCreator.whileLoop(fun)
                 .block();
-        enterBlock(loop);
+        enterBlock(loop, ctx);
     }
 
     @Override
     public void exitLoopStmt(Rockstar.LoopStmtContext ctx) {
-
+        // We make two blocks when we enter a while, so we need to exit two blocks on exit
+        exitBlock();
         exitBlock();
         targetScopeForJumps = null;
     }
 
     @Override
     public void enterIfStmt(Rockstar.IfStmtContext ctx) {
-
         Condition condition = new Condition(ctx);
         BranchResult code = condition.toCode(currentCreator, creator);
         if (condition.hasElse()) {
             controlScopes.push(code.falseBranch());
         }
         controlScopes.push(code.trueBranch());
+        enterBlock(currentCreator, ctx);
     }
 
     @Override
@@ -372,7 +365,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             fun = creator.getMethodCreator(ctx.functionName.getText(), Object.class, paramClasses);
         }
         fun.setModifiers(ACC_PUBLIC + ACC_STATIC);
-        enterBlock(fun);
+        enterBlock(fun, ctx);
 
 
         List<Variable> variables = variableContexts.stream()
@@ -413,7 +406,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         } else {
             scope = controlScopes.pop();
         }
-        enterBlock(scope);
+        enterBlock(scope, ctx);
     }
 
     @Override
@@ -425,12 +418,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     private void exitBlock() {
         blocks.pop();
-        currentCreator = blocks.peek();
+        currentCreator = blocks.peek().scope;
     }
 
-    private void enterBlock(BytecodeCreator blockCreator) {
+    private void enterBlock(BytecodeCreator blockCreator, ParserRuleContext ctx) {
         currentCreator = blockCreator;
-        blocks.push(blockCreator);
+        blocks.push(new Block(ctx, blockCreator));
     }
 
 }

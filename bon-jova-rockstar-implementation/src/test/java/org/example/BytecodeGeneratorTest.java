@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.util.DynamicClassLoader;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -661,212 +662,251 @@ names in Rockstar.)
         assertEquals("false\n", output);
     }
 
-    @Test
-    public void shouldHandleConditionalsForTrueCase() {
-        // Positive case
-        String program = """
-                Tommy is a big bad monster
-                If Tommy is 1337
-                Say "he is bad"
-                Say "end line"
-                """;
-        String output = compileAndLaunch(program);
+    @Nested
+    @DisplayName("Conditionals and flow control")
+    class FlowControl {
+        @Test
+        public void shouldHandleConditionalsForTrueCase() {
+            // Positive case
+            String program = """
+                    Tommy is a big bad monster
+                    If Tommy is 1337
+                    Say "he is bad"
+                    Say "end line"
+                    """;
+            String output = compileAndLaunch(program);
 
-        assertEquals("he is bad\nend line\n", output);
-    }
+            assertEquals("he is bad\nend line\n", output);
+        }
 
-    @Test
-    public void shouldHandleConditionalsForAintCheck() {
-        // Positive case
-        String program = """
-                Tommy is a big bad monster
-                If Tommy ain't 1337
-                Say "main case"
-                Else
-                Say "else case"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleConditionalsForAintCheck() {
+            // Positive case
+            String program = """
+                    Tommy is a big bad monster
+                    If Tommy ain't 1337
+                    Say "main case"
+                    Else
+                    Say "else case"
+                    """;
+            String output = compileAndLaunch(program);
 
-        assertEquals("else case\n", output);
-    }
+            assertEquals("else case\n", output);
+        }
 
-    @Test
-    public void shouldHandleConditionalsForFalseCase() {
-        // Negative case
-        String program = """
-                 Tommy is a big bad monster
-                 If Tommy is 133333373737777
-                 Say "he is very bad"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleConditionalsForFalseCase() {
+            // Negative case
+            String program = """
+                     Tommy is a big bad monster
+                     If Tommy is 133333373737777
+                     Say "he is very bad"
+                    """;
+            String output = compileAndLaunch(program);
 
-        assertEquals("", output);
-    }
+            assertEquals("", output);
+        }
 
 
-    @Test
-    public void shouldHandleIfElseConditionalsForTrueBranch() {
-        String program = """
-                Tommy is a big bad monster
-                If Tommy is 1337
-                Say "he is bad"
-                Say "this is still the true branch"
-                Else
-                Say "he is good"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleIfElseConditionalsForTrueBranch() {
+            String program = """
+                    Tommy is a big bad monster
+                    If Tommy is 1337
+                    Say "he is bad"
+                    Say "this is still the true branch"
+                    Else
+                    Say "he is good"
+                    """;
+            String output = compileAndLaunch(program);
 
-        assertEquals("he is bad\nthis is still the true branch\n", output);
-    }
+            assertEquals("he is bad\nthis is still the true branch\n", output);
+        }
 
-    @Test
-    public void shouldHandleIfElseConditionalsForFalseBranch() {
-        String program = """
-                Tommy is a big bad monster
-                If Tommy is 13337737373337
-                Say "this is the true branch"
-                Else
-                Say "this is the false branch"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleIfElseConditionalsForFalseBranch() {
+            String program = """
+                    Tommy is a big bad monster
+                    If Tommy is 13337737373337
+                    Say "this is the true branch"
+                    Else
+                    Say "this is the false branch"
+                    """;
+            String output = compileAndLaunch(program);
 
-        assertEquals("this is the false branch\n", output);
-    }
+            assertEquals("this is the false branch\n", output);
+        }
 
-    @Test
-    public void shouldHandleWhileLoops() {
-        String program = """
-                Tommy was shy
-                While Tommy ain't 0,
-                Knock Tommy down
-                Say Tommy
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleConsecutiveConditionals() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back 0
+                                    
+                    My world is nothing
+                    Fire is ice
+                                    
+                    If Midnight taking my world, Fire is nothing
+                    Shout "FizzBuzz!"
+                                    
+                    If Midnight taking my world, Fire is nothing
+                    Shout "Fizz!"
+                    """;
 
-        String expected = """
-                2
-                1
-                0
-                """;
-        assertEquals(expected, output);
-    }
+            assertEquals("FizzBuzz!\nFizz!\n", compileAndLaunch(program));
+        }
 
-    @Test
-    public void shouldHandleUntilLoops() {
-        String program = """
-                Tommy was nice
-                Until Tommy is 0,
-                Knock Tommy down
-                Say Tommy
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleWhileLoops() {
+            String program = """
+                    Tommy was shy
+                    While Tommy ain't 0,
+                    Knock Tommy down
+                    Say Tommy
+                    """;
+            String output = compileAndLaunch(program);
 
-        String expected = """
-                3
-                2
-                1
-                0
-                """;
-        assertEquals(expected, output);
-    }
+            String expected = """
+                    2
+                    1
+                    0
+                    """;
+            assertEquals(expected, output);
+        }
 
-    @Test
-    public void shouldHandleBreakInConditional() {
-        String program = """
-                Tommy is a big bad monster
-                If Tommy is 1337
-                Say "he is bad"
-                Break
-                Say "this is after the break"
-                Else
-                Say "he is good"
-                """;
-        String output = compileAndLaunch(program);
-        assertEquals("he is bad\n", output);
+        @Test
+        public void shouldWhileLoopsInAFunction() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    While your heart is as high as your soul
+                    Put your heart without your soul into your heart
 
-        program = """
-                Tommy is a big bad monster
-                If Tommy is 1337
-                Say "he is bad"
-                Break it down
-                Say "this is after the break"
-                Else
-                Say "he is good"
-                """;
-        output = compileAndLaunch(program);
-        assertEquals("he is bad\n", output);
-    }
+                    Give back your heart
 
-    @Test
-    public void shouldHandleBreakInWhileLoops() {
-        String program = """
-                Tommy was shy
-                While Tommy ain't 0,
-                Say Tommy
-                Say "before the break"
-                Knock Tommy down
-                Break it down
-                Say "after the break"
-                """;
-        String output = compileAndLaunch(program);
+                    My world is "got this far"
+                    Whisper my world
+                                    """;
 
-        assertEquals("3\nbefore the break\n", output);
-    }
+            assertEquals("got this far\n", compileAndLaunch(program));
+        }
 
-    @Test
-    public void shouldHandleContinueInWhileLoops() {
-        String program = """
-                Tommy was shy
-                While Tommy ain't 0,
-                Say Tommy
-                Say "before the break"
-                Knock Tommy down
-                Take it to the top
-                Say "after the break"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleUntilLoops() {
+            String program = """
+                    Tommy was nice
+                    Until Tommy is 0,
+                    Knock Tommy down
+                    Say Tommy
+                    """;
+            String output = compileAndLaunch(program);
 
-        String expected = """
-                3
-                before the break
-                2
-                before the break
-                1
-                before the break
-                """;
-        assertEquals(expected, output);
-    }
+            String expected = """
+                    3
+                    2
+                    1
+                    0
+                    """;
+            assertEquals(expected, output);
+        }
 
-    @Test
-    public void shouldHandleContinueInIfs() {
-        String program = """
-                Tommy was shy
-                If Tommy ain't 0,
-                Say Tommy
-                Say "before the break"
-                Knock Tommy down
-                Take it to the top
-                Say "after the break\"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleBreakInConditional() {
+            String program = """
+                    Tommy is a big bad monster
+                    If Tommy is 1337
+                    Say "he is bad"
+                    Break
+                    Say "this is after the break"
+                    Else
+                    Say "he is good"
+                    """;
+            String output = compileAndLaunch(program);
+            assertEquals("he is bad\n", output);
 
-        String expected = """
-                3
-                before the break
-                                """;
-        assertEquals(expected, output);
-    }
+            program = """
+                    Tommy is a big bad monster
+                    If Tommy is 1337
+                    Say "he is bad"
+                    Break it down
+                    Say "this is after the break"
+                    Else
+                    Say "he is good"
+                    """;
+            output = compileAndLaunch(program);
+            assertEquals("he is bad\n", output);
+        }
 
-    @Test
-    public void shouldHandleLooseContinues() {
-        String program = """
-                Say "before the continue"
-                Take it to the top
-                Say "after the continue"
-                """;
-        String output = compileAndLaunch(program);
+        @Test
+        public void shouldHandleBreakInWhileLoops() {
+            String program = """
+                    Tommy was shy
+                    While Tommy ain't 0,
+                    Say Tommy
+                    Say "before the break"
+                    Knock Tommy down
+                    Break it down
+                    Say "after the break"
+                    """;
+            String output = compileAndLaunch(program);
 
-        assertEquals("before the continue\n", output);
+            assertEquals("3\nbefore the break\n", output);
+        }
+
+        @Test
+        public void shouldHandleContinueInWhileLoops() {
+            String program = """
+                    Tommy was shy
+                    While Tommy ain't 0,
+                    Say Tommy
+                    Say "before the break"
+                    Knock Tommy down
+                    Take it to the top
+                    Say "after the break"
+                    """;
+            String output = compileAndLaunch(program);
+
+            String expected = """
+                    3
+                    before the break
+                    2
+                    before the break
+                    1
+                    before the break
+                    """;
+            assertEquals(expected, output);
+        }
+
+        @Test
+        public void shouldHandleContinueInIfs() {
+            String program = """
+                    Tommy was shy
+                    If Tommy ain't 0,
+                    Say Tommy
+                    Say "before the break"
+                    Knock Tommy down
+                    Take it to the top
+                    Say "after the break\"
+                    """;
+            String output = compileAndLaunch(program);
+
+            String expected = """
+                    3
+                    before the break
+                                    """;
+            assertEquals(expected, output);
+        }
+
+        @Test
+        public void shouldHandleLooseContinues() {
+            String program = """
+                    Say "before the continue"
+                    Take it to the top
+                    Say "after the continue"
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("before the continue\n", output);
+        }
     }
 
     @Test
