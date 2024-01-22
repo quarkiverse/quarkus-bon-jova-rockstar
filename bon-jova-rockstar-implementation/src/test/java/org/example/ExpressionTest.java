@@ -318,6 +318,17 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     @Nested
     @DisplayName("Logical Operations")
     class LogicalOperations {
+
+        @Test
+        public void shouldHandleNegatingBooleans() {
+            // Tests the disjunction
+            Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout not ok", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout not wrong", 0);
+            assertEquals(true, (boolean) execute(new Expression(ctx)));
+        }
+
         @Test
         public void shouldHandleAndingBooleans() {
             // Tests the conjunction
