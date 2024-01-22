@@ -4,10 +4,9 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
-import org.example.util.DynamicClassLoader;
+import io.quarkus.gizmo.TestClassLoader;
 import org.example.util.ParseHelper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
@@ -20,7 +19,8 @@ public class InputTest {
 
     @BeforeEach
     public void clearState() throws InterruptedException {
-        Input.resetStdIn();
+        Input.clearState();
+        Variable.clearState();
     }
 
     @Test
@@ -31,7 +31,6 @@ public class InputTest {
         assertEquals(name, a.getVariableName());
     }
 
-    @Disabled("Fails in CI, for very strange classloading reasons; the synthetic class tries to load the synthetuc class from the integration tests, and then, unsurprisingly, fails")
     @Test
     public void shouldSetValueBasedOnStdIn() {
         String first = "first";
@@ -61,7 +60,7 @@ public class InputTest {
     }
 
     private Object execute(Input a, String[] args) {
-        DynamicClassLoader cl = new DynamicClassLoader("com.InputRock");
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
 
         // The auto-close on this triggers the write
         String className = "com.InputRock";

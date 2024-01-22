@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.util.DynamicClassLoader;
+import io.quarkus.gizmo.TestClassLoader;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -1247,14 +1247,14 @@ names in Rockstar.)
     private String compileAndLaunch(String program, String... args) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;
-        String className = "soundcheck";
+        String className = "rock.soundcheck";
 
-        DynamicClassLoader loader = new DynamicClassLoader(className);
+        TestClassLoader loader = new TestClassLoader(this.getClass().getClassLoader().getParent());
 
         try {
             new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), className,
                     loader);
-            Class<?> clazz = loader.findClass(className);
+            Class<?> clazz = loader.loadClass(className);
             Method main = clazz.getMethod("main", String[].class);
 
             // Capture stdout since that's what the test will validate
