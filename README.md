@@ -111,7 +111,7 @@ Some of these may work but have not been validated with tests.
 - [X] Conjunction
 - [X] Disjunction
 - [X] Joint denial
-- [ ] Negation
+- [X] Negation
 
 ## ✓ Input and output
 

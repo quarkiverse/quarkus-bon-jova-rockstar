@@ -42,6 +42,8 @@ public class Expression {
 
     private Operation operation;
 
+    private UnaryOperation unaryOperation;
+
     public Expression(Rockstar.VariableContext ctx) {
         text = ctx.getText();
         variable = new Variable(ctx);
@@ -151,6 +153,15 @@ public class Expression {
                 }
                 operation = Operation.JOINT_DENIAL;
             }
+        } else if (ctx.KW_NOT() != null) {
+            rhe = new Expression(ctx.rhe);
+            // Best guess if we can't work out the exact value class
+            valueClass = Object.class;
+            if (rhe.getValueClass() == boolean.class) {
+                valueClass = boolean.class;
+            }
+            unaryOperation = UnaryOperation.NEGATION;
+
         } else if (functionCall != null) {
             function = functionCall.functionName.getText();
 
@@ -201,6 +212,8 @@ public class Expression {
             return getHandleForFunction(method, classCreator);
         } else if (operation != null) {
             return getHandleForOperation(method, classCreator);
+        } else if (unaryOperation != null) {
+            return getHandleForUnaryOperation(method, classCreator);
         } else if (variable != null) {
             return getHandleForVariable(method);
         } else {
@@ -229,6 +242,32 @@ public class Expression {
 
     private ResultHandle getHandleForVariable(BytecodeCreator method) {
         return variable.read(method);
+    }
+
+    private ResultHandle getHandleForUnaryOperation(BytecodeCreator method, ClassCreator classCreator) {
+        ResultHandle rrh = rhe.getResultHandle(method, classCreator);
+
+        // Do type coercion of rockstar nulls (which are a special type, not null)
+        // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
+
+        if (rhe.isNothing()) {
+            rrh = coerceNothingIntoType(method, method.load(true));
+        }
+
+
+        if (rhe.isMysterious()) {
+            rrh = coerceMysteriousIntoType(method, method.load(true));
+        }
+
+        switch (unaryOperation) {
+            case NEGATION -> {
+                AssignableResultHandle answer = method.createVariable(boolean.class);
+                method.assign(answer, method.load(false));
+                method.ifFalse(rrh).trueBranch().assign(answer, method.load(true));
+                return answer;
+            }
+            default -> throw new RuntimeException("Unsupported operation " + operation);
+        }
     }
 
     private ResultHandle getHandleForOperation(BytecodeCreator method, ClassCreator classCreator) {
@@ -499,7 +538,11 @@ public class Expression {
     }
 
     private enum Operation {
-        ADD, SUBTRACT, MULTIPLY, CONJUNCTION, DISJUNCTION, JOINT_DENIAL, NEGATION, EQUALITY_CHECK, INEQUALITY_CHECK, GREATER_THAN_CHECK,
+        ADD, SUBTRACT, MULTIPLY, CONJUNCTION, DISJUNCTION, JOINT_DENIAL, EQUALITY_CHECK, INEQUALITY_CHECK, GREATER_THAN_CHECK,
         LESS_THAN_CHECK, GREATER_OR_EQUAL_THAN_CHECK, LESS_OR_EQUAL_THAN_CHECK, DIVIDE
+    }
+
+    private enum UnaryOperation {
+        NEGATION
     }
 }
