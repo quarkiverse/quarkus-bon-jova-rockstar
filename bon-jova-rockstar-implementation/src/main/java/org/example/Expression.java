@@ -137,6 +137,16 @@ public class Expression {
                     valueClass = boolean.class;
                 }
                 operation = Operation.CONJUNCTION;
+            } else if (ctx.KW_OR() != null) {
+                if (lhe.getValueClass() == boolean.class && rhe.getValueClass() == boolean.class) {
+                    valueClass = boolean.class;
+                }
+                operation = Operation.DISJUNCTION;
+            } else if (ctx.KW_NOR() != null) {
+                if (lhe.getValueClass() == boolean.class && rhe.getValueClass() == boolean.class) {
+                    valueClass = boolean.class;
+                }
+                operation = Operation.JOINT_DENIAL;
             }
         } else if (functionCall != null) {
             function = functionCall.functionName.getText();
@@ -284,7 +294,29 @@ public class Expression {
                 check2.trueBranch().assign(answer, method.load(true));
 
                 return answer;
+            }
+            case DISJUNCTION -> {
+                // To implement the short circuit, we need several operations
+                AssignableResultHandle answer = method.createVariable(boolean.class);
+                method.assign(answer, method.load(false));
+                BranchResult check1 = method.ifTrue(lrh);
+                check1.trueBranch().assign(answer, method.load(true));
+                BranchResult check2 = check1.falseBranch().ifTrue(rrh);
+                check2.trueBranch().assign(answer, method.load(true));
 
+                return answer;
+            }
+            case JOINT_DENIAL -> {
+                // See https://stackoverflow.com/questions/17052001/binary-expression-in-asm-compiler/17053797#17053797
+                // To implement the short circuit, we need several operations
+                AssignableResultHandle answer = method.createVariable(boolean.class);
+                method.assign(answer, method.load(false));
+                BranchResult check1 = method.ifFalse(lrh);
+                BytecodeCreator next = check1.trueBranch();
+                BranchResult check2 = next.ifFalse(rrh);
+                check2.trueBranch().assign(answer, method.load(true));
+
+                return answer;
             }
             case EQUALITY_CHECK -> {
                 return doEqualityCheck(method, lrh, rrh);
@@ -448,7 +480,7 @@ public class Expression {
     }
 
     private enum Operation {
-        ADD, SUBTRACT, MULTIPLY, CONJUNCTION, EQUALITY_CHECK, INEQUALITY_CHECK, GREATER_THAN_CHECK,
+        ADD, SUBTRACT, MULTIPLY, CONJUNCTION, DISJUNCTION, JOINT_DENIAL, NEGATION, EQUALITY_CHECK, INEQUALITY_CHECK, GREATER_THAN_CHECK,
         LESS_THAN_CHECK, GREATER_OR_EQUAL_THAN_CHECK, LESS_OR_EQUAL_THAN_CHECK, DIVIDE
     }
 }

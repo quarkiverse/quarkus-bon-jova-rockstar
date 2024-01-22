@@ -112,8 +112,8 @@ Some of these may work but have not been validated with tests.
 - [X] Equality tests
 - [X] Comparisons to mysterious and null
 - [X] Conjunction
-- [ ] Disjunction
-- [ ] Joint denial
+- [X] Disjunction
+- [X] Joint denial
 - [ ] Negation
 
 ## ✓ Input and output

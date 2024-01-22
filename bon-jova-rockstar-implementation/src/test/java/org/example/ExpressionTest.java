@@ -322,6 +322,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     class LogicalOperations {
         @Test
         public void shouldHandleAndingBooleans() {
+            // Tests the conjunction
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout true and true", 0);
             Expression a = new Expression(ctx);
             assertNull(a.getValue());
@@ -334,7 +335,40 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             answer = (boolean) execute(a);
             assertEquals(false, answer);
         }
+
+        @Test
+        public void shouldHandleOringBooleans() {
+            // Tests the disjunction
+            Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout true or true", 0);
+            assertEquals(true, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout false or false", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout true or false", 0);
+            assertEquals(true, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout false or true", 0);
+            assertEquals(true, (boolean) execute(new Expression(ctx)));
+        }
+
+        @Test
+        public void shouldHandleNoringBooleans() {
+            // Tests the disjunction
+            Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout true nor true", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout false nor false", 0);
+            assertEquals(true, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout true nor false", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+
+            ctx = new ParseHelper().getExpression("shout false nor true", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+        }
     }
+
 
     @Nested
     @DisplayName("Comparisons")
