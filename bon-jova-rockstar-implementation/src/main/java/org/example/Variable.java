@@ -116,7 +116,6 @@ public class Variable {
     public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method) {
         FieldDescriptor field;
         if (!variables.containsKey(variableName)) {
-
             // Variables are global in scope, so need to be stored at the class level (either as static or instance variables)
             field = creator.getFieldCreator(variableName, variableClass)
                     .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
@@ -124,6 +123,9 @@ public class Variable {
             variables.put(variableName, field);
         } else {
             field = variables.get(variableName);
+            if (!creator.getClassName().equals(field.getDeclaringClass())) {
+                throw new RuntimeException("Internal error: Attempting to use a field on class " + field.getDeclaringClass() + " from " + creator.getClassName());
+            }
         }
         return field;
     }
