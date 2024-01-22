@@ -3,7 +3,7 @@ package org.example;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
-import org.example.util.DynamicClassLoader;
+import io.quarkus.gizmo.TestClassLoader;
 import org.example.util.ParseHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -654,7 +654,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
                 """;
 
         Rockstar.ExpressionContext ctx = new ParseHelper().getExpression(program, 1);
-        DynamicClassLoader cl = new DynamicClassLoader("com.MyTest");
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
         try (ClassCreator creator = ClassCreator.builder()
                 .classOutput(cl)
                 .className("com.MyTest")
@@ -671,7 +671,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
     }
 
     private Object execute(Expression a) {
-        DynamicClassLoader cl = new DynamicClassLoader("com.MyTest");
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
 
         // The auto-close on this triggers the write
         try (ClassCreator creator = ClassCreator.builder()

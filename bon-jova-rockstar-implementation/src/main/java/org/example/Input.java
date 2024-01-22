@@ -25,8 +25,10 @@ public class Input {
         argIndex++;
     }
 
-    public static void resetStdIn() {
+    public static void clearState() {
         argIndex = -1;
+        // Since we use variables, clear its state as well
+        Variable.clearState();
     }
 
     public String getVariableName() {

@@ -112,13 +112,12 @@ public class Variable {
         method.writeStaticField(field, value);
     }
 
-    // TODO if we use local variables we can drop passing the class creator
     // TODO would it be nicer to store our own class?
     public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method) {
         FieldDescriptor field;
         if (!variables.containsKey(variableName)) {
 
-            // It's not strictly necessary to use a field rather than a local variable, but I wasn't sure how to do local variables
+            // Variables are global in scope, so need to be stored at the class level (either as static or instance variables)
             field = creator.getFieldCreator(variableName, variableClass)
                     .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                     .getFieldDescriptor();
