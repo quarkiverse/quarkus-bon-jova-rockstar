@@ -13,6 +13,7 @@ import io.quarkus.deployment.pkg.builditem.CurateOutcomeBuildItem;
 import io.quarkus.devui.spi.page.CardPageBuildItem;
 import io.quarkus.devui.spi.page.Page;
 import org.example.RockFileCompiler;
+import org.example.bon.jova.quarkus.extension.deployment.rockscore.RockScoreCalculator;
 import org.example.bon.jova.quarkus.extension.runtime.RockstarResource;
 
 import java.io.File;
@@ -133,30 +134,32 @@ class BonJovaQuarkusExtensionProcessor {
     }
 
     private List<RockFileViewModel> generateRockFiles() {
+        var rockScoreCalculator = setupRockScoreCalculator();
+
         try (var stream = Files.list(Path.of("src/main/rockstar"))) {
             return stream.map(path -> {
                 var fileName = path.getFileName().toString();
                 String contents;
                 try {
-                    contents = Files.readAllLines(path).stream().collect(Collectors.joining(System.lineSeparator()));
+                    contents = String.join(System.lineSeparator(), Files.readAllLines(path));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
-                return new RockFileViewModel(fileName, contents, generateRestUrl(fileName), calculateRockScore(contents));
+                return new RockFileViewModel(fileName, contents, generateRestUrl(fileName),
+                        rockScoreCalculator.calculateRockScore(contents));
             }).toList();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String generateRestUrl(String rockFileName) {
-        return "/rockstar/" + rockFileName;
+    private RockScoreCalculator setupRockScoreCalculator() {
+        return new RockScoreCalculator();
     }
 
-    private int calculateRockScore(String contents) {
-        // TODO: calculate a more sophisticated rock store
-        return Math.min(100, contents.length());
+    private String generateRestUrl(String rockFileName) {
+        return "/rockstar/" + rockFileName;
     }
 
     record RockFileViewModel(String name, String contents, String restUrl, int rockScore) {
