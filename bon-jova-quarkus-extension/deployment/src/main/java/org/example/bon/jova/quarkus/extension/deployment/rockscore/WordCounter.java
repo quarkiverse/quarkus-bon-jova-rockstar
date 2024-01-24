@@ -12,11 +12,14 @@ class WordCounter {
     private static Map<String, Integer> wordCounts;
     static final String WORD_SPLITTER = "\\s|-|%s".formatted(System.lineSeparator()); // split by space, dash or newline
 
+    private WordCounter() {
+    }
+
     public static Map<String, Integer> countWords(Path inputFilesDirectory) {
         return countWords(inputFilesDirectory, false);
     }
 
-    static Map<String, Integer> countWords(Path inputFilesDirectory, boolean logResults) {
+    private static Map<String, Integer> countWords(Path inputFilesDirectory, boolean logResults) {
         if (wordCounts == null) {
             wordCounts = new HashMap<>();
 
