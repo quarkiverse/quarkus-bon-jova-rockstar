@@ -155,7 +155,7 @@ class BonJovaQuarkusExtensionProcessor {
     }
 
     private RockScoreCalculator setupRockScoreCalculator() {
-        return new RockScoreCalculator();
+        return new RockScoreCalculator(Path.of("../bon-jova-quarkus-extension/deployment/src/main/resources/rockscore/lyrics"));
     }
 
     private String generateRestUrl(String rockFileName) {
