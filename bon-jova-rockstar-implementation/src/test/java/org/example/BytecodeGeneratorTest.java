@@ -351,6 +351,18 @@ names in Rockstar.)
     }
 
     @Test
+    public void shouldIgnoreLogicalOperatorsInAssignment() {
+        String program = """
+                Anticipation is ok
+                Fear is wrong
+                Hope is anticipation and fear
+                Say hope
+                """;
+        assertEquals("234\n", compileAndLaunch(program));
+// Surprise! Satriani says 234 for this, rather than a logical operation
+    }
+
+    @Test
     public void shouldHandleStringLiteralPronounReferences() {
         String program = """
                 The message is "pass"

@@ -43,7 +43,6 @@ Some of these may work but have not been validated with tests.
 
 - [ ] Enforcement of the file extension and encoding
 - [X] Comments
-- [ ] The `with` keyword for parameters
 
 ## ✓ Variables and constants
 
@@ -106,9 +105,8 @@ Some of these may work but have not been validated with tests.
 - [ ] List operations
 - [ ] Operator precedence
 
-## Comparison and logical operations
+## ✓ Comparison and logical operations
 
-- [ ] Assignment using comparison and other operators
 - [X] Equality tests
 - [X] Comparisons to mysterious and null
 - [X] Conjunction
@@ -127,4 +125,5 @@ Some of these may work but have not been validated with tests.
 - [X] Loops
 - [X] Blocks, break, and continue
 - [X] Functions
+- [X] The `with` keyword for parameters
 

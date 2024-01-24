@@ -367,6 +367,15 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             ctx = new ParseHelper().getExpression("shout false nor true", 0);
             assertEquals(false, (boolean) execute(new Expression(ctx)));
         }
+
+        // false and 1 over 0 is false and does not produce an error for dividing by zero.
+        @Disabled("needs division support")
+        @Test
+        public void shouldShortCircuitLogicalOperations() {
+            // Tests the disjunction
+            Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout false and 1 over 0", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+        }
     }
 
 
