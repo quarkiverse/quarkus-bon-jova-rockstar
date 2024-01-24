@@ -43,6 +43,15 @@ public class IntegrationTests {
     }
 
 
+    @Disabled("Not yet working")
+    @Test
+    public void shouldRunOneBillionRowChallenge() throws IOException, URISyntaxException {
+        String input = getFileContents("/1brc.input");
+        String output = compileAndLaunch("/1brc.rock", input);
+        String expected = getFileContents("/1brc.output");
+        assertEquals(expected, output);
+    }
+
     private String getFileContents(String name) throws URISyntaxException, IOException {
         Path filePath = Path.of(this.getClass()
                 .getResource(name)

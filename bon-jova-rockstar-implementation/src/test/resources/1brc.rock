@@ -1,0 +1,89 @@
+(Steps: parse the file into rows, aggregate into towns, go through each town and aggregate, print output)
+
+(Utility function for rounding to one decimal place)
+doRound takes num
+    let num be num * 10
+    turn round num
+    let num be num / 10
+    return num
+
+(Step 1: Read lines from stdin and put them into a lines array)
+push lines (initialise the array)
+listen to stdin (listen to the input, which we choose to call stdin)
+while stdin
+    push stdin into lines
+    listen to stdin
+
+(Step 2: Sort the lines into an array of results for each station)
+
+push stations (initialise the array)
+push stationList (initialise the array outside the while scope)
+delimiter is ";"
+let line be pop lines
+while line
+    split line into segments with delimiter
+    let stationName be segments at 0
+    let stationResults be stations at stationName
+    if not stationResults
+            push stationName into stationList (we only do this if first time we have seen this station)
+
+    let temperature be segments at 1
+    push temperature into stationResults (this always leaves us with a mysterious at element 0, and I don't know why)
+    let stations at stationName be stationResults
+    pop lines into line
+
+(Now sort the station names, using a bubble sort)
+i is 0
+let length be stationList (using an array in a scalar context gives its length)
+while i is less than length
+    j is 0
+    let maxj be length minus i
+    while j is less than maxj
+        let aa be stationList at j
+        let bb be stationList at j + 1
+        if aa is greater than bb
+            let stationList at j be bb
+            let stationList at j + 1 be aa
+
+        build j up
+
+    build i up
+
+
+(Now go through each station and aggregate the array; we cannot use a function very easily to iterate because pop removes elements)
+
+let name be pop stationList (we cannot iterate over the array of results since it is most like a map, with non-numeric indexes, so we iterate over the array of names)
+let results be "{"
+while name
+    let readings be stations at name
+    total is 0
+    min is 300000
+    max is -300000
+    pop readings into temperature
+    pop readings into temperature (do it again because there is a leading mysterious)
+    count is 0
+    while temperature
+        cast temperature
+        build count up
+        if temperature is less than min
+            let min be temperature
+
+        if temperature is greater than max
+            let max be temperature
+
+        let total be total + temperature
+        pop readings into temperature
+
+    if count is greater than 0
+        let mean be total over count
+
+    let roundedMean be doRound taking mean
+    let formatted be min + "/" + roundedMean + "/" + max
+    let results be results plus name, "=" plus formatted
+    if stationList at 0 (if this is not the last entry)
+         let results be results plus ", "
+
+    let name be pop stationList
+
+    let results be results plus "}"
+    say results
