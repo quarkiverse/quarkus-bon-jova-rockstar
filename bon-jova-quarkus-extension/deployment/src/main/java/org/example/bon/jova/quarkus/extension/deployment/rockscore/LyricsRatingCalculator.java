@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -12,7 +13,7 @@ class LyricsRatingCalculator {
     private Map<String, Integer> wordCounts;
 
     // cached variable that store deterministic values
-    private static SongLyricsRating maxLyricsRatingOfThe80s;
+    private static Map<Path, SongLyricsRating> maxLyricsRatingOfThe80s = new HashMap<>();
 
     LyricsRatingCalculator(Map<String, Integer> wordCounts) {
         this.wordCounts = wordCounts;
@@ -37,19 +38,19 @@ class LyricsRatingCalculator {
     }
 
     public SongLyricsRating calculateMaxLyricsRating(Path lyricsDir) {
-        if (maxLyricsRatingOfThe80s == null) {
+        if (!maxLyricsRatingOfThe80s.containsKey(lyricsDir)) {
             try (Stream<Path> paths = Files.walk(lyricsDir)) {
-                maxLyricsRatingOfThe80s = paths.filter(Files::isRegularFile)
+                maxLyricsRatingOfThe80s.put(lyricsDir, paths.filter(Files::isRegularFile)
                         .filter(path -> path.toString().endsWith(".txt"))
                         .map(this::toSongLyricsRating)
                         .max(Comparator.comparingInt(SongLyricsRating::lyricsRating))
-                        .orElse(new SongLyricsRating("No song found", 0));
+                        .orElse(new SongLyricsRating("No song found", 0)));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        return maxLyricsRatingOfThe80s;
+        return maxLyricsRatingOfThe80s.get(lyricsDir);
     }
 
     private SongLyricsRating toSongLyricsRating(Path path) {
