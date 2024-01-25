@@ -1,7 +1,6 @@
 package org.example;
 
 import io.quarkus.gizmo.TestClassLoader;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -649,19 +648,32 @@ names in Rockstar.)
         assertEquals("20\n", output);
     }
 
-    @Disabled("Division not working")
     @Test
     public void shouldHandleDivisionWithVariablesAndPut() {
 
         String program = """
-                My heart is full
+                My heart is so full
                 The moon is aflame
-                My heart over the moon
+                Let my heart be my heart over the moon
                 Whisper my heart
                 """;
         String output = compileAndLaunch(program);
 
         assertEquals("4\n", output);
+    }
+
+    @Test
+    public void shouldHandleDivisionThatResultsInRepeatingDecimals() {
+
+        String program = """
+                My heart is full
+                The moon is aflame
+                Let my heart be my heart over the moon
+                Whisper my heart
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("0.6666667\n", output);
     }
 
     @Test

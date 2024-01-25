@@ -12,7 +12,7 @@ expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
           | lhe=expression ws op=(KW_ADD|KW_SUBTRACT) ws rhe=expression
           | lhe=expression ws op=(PLUS_SIGN|HYPHEN) ws rhe=expression
-          | lhe=expression ws op=(ASTERISK|SLASH) ws rhe=expression
+          | lhe=expression ws* op=(ASTERISK|SLASH) ws* rhe=expression
           | lhe=expression ws comparisionOp ws rhe=expression
           | lhe=expression contractedComparisionOp ws rhe=expression
           | lhe=expression ws op=(KW_AND|KW_OR|KW_NOR) ws rhe=expression

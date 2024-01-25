@@ -5,12 +5,15 @@ import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.CatchBlockCreator;
 import io.quarkus.gizmo.ClassCreator;
+import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TryBlock;
 import rock.Rockstar;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -280,8 +283,24 @@ public class Expression {
                 });
             }
             case DIVIDE -> {
-                //  return method.divide(lhe.getResultHandle(method), rhe.getResultHandle(method));
-                throw new RuntimeException("Unsupported operation: divided we fall, and all that");
+                // Needs Gizmo 1.8, which is not yet accessible in Quarkus extensions
+//                return doOperation(method, lrh, rrh, (bc, a, b) -> bc.divide(a, b), (bc, a, b) -> {
+//                    bc.throwException(IllegalArgumentException.class, "Divided we fall: Division of strings is not possible.");
+//                    return bc.loadNull();
+//                });
+
+                // So in the interim, do a work around
+                MethodDescriptor constructor = MethodDescriptor.ofConstructor(BigDecimal.class, double.class);
+                MethodDescriptor divide = MethodDescriptor.ofMethod(BigDecimal.class, "divide", BigDecimal.class, BigDecimal.class, MathContext.class);
+                MethodDescriptor toDouble = MethodDescriptor.ofMethod(BigDecimal.class, "doubleValue", double.class);
+
+                FieldDescriptor mathContext = FieldDescriptor.of(MathContext.class, "DECIMAL32", MathContext.class);
+
+                ResultHandle lbd = method.newInstance(constructor, lrh);
+                ResultHandle rbd = method.newInstance(constructor, rrh);
+                ResultHandle answer = method.invokeVirtualMethod(divide, lbd, rbd, method.readStaticField(mathContext));
+                ResultHandle doubleAnswer = method.invokeVirtualMethod(toDouble, answer);
+                return doubleAnswer;
             }
             case CONJUNCTION -> {
                 // See https://stackoverflow.com/questions/17052001/binary-expression-in-asm-compiler/17053797#17053797

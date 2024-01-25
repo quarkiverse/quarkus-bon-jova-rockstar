@@ -291,7 +291,6 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             assertEquals(40d, answer);
         }
 
-        @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
         @Test
         public void shouldHandleSimpleDivision() {
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout 24/6", 0);
@@ -301,7 +300,6 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             assertEquals(4, answer);
         }
 
-        @Disabled("See https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23")
         @Test
         public void shouldHandleDivisionWithAliases() {
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout 3 over 6", 0);
@@ -313,7 +311,7 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             ctx = new ParseHelper().getExpression("shout 40 between 5", 0);
             a = new Expression(ctx);
             answer = (double) execute(a);
-            assertEquals(5d, answer);
+            assertEquals(8d, answer);
         }
     }
 
@@ -340,16 +338,16 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         public void shouldHandleOringBooleans() {
             // Tests the disjunction
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout true or true", 0);
-            assertEquals(true, (boolean) execute(new Expression(ctx)));
+            assertEquals(true, execute(new Expression(ctx)));
 
             ctx = new ParseHelper().getExpression("shout false or false", 0);
-            assertEquals(false, (boolean) execute(new Expression(ctx)));
+            assertEquals(false, execute(new Expression(ctx)));
 
             ctx = new ParseHelper().getExpression("shout true or false", 0);
-            assertEquals(true, (boolean) execute(new Expression(ctx)));
+            assertEquals(true, execute(new Expression(ctx)));
 
             ctx = new ParseHelper().getExpression("shout false or true", 0);
-            assertEquals(true, (boolean) execute(new Expression(ctx)));
+            assertEquals(true, execute(new Expression(ctx)));
         }
 
         @Test
@@ -369,11 +367,20 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         }
 
         // false and 1 over 0 is false and does not produce an error for dividing by zero.
-        @Disabled("needs division support")
+        @Disabled("short circuits still not working properly (or even short circuiting")
         @Test
         public void shouldShortCircuitLogicalOperations() {
-            // Tests the disjunction
+            // Tests the conjunction
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout false and 1 over 0", 0);
+            assertEquals(false, (boolean) execute(new Expression(ctx)));
+
+            // Tests the disjunction
+            ctx = new ParseHelper().getExpression("shout true or 1 over 0", 0);
+            assertEquals(true, (boolean) execute(new Expression(ctx)));
+
+
+            // Tests the joint denial
+            ctx = new ParseHelper().getExpression("shout true nor 1 over 0", 0);
             assertEquals(false, (boolean) execute(new Expression(ctx)));
         }
     }
