@@ -16,7 +16,7 @@ class LyricsRatingCalculatorTest {
 
     @BeforeAll
     static void setUp() {
-        wordCounts = WordCounter.countWords(LYRICS_DIR);
+        wordCounts = WordCounter.countWords(LYRICS_DIR, true);
     }
 
     @Test
