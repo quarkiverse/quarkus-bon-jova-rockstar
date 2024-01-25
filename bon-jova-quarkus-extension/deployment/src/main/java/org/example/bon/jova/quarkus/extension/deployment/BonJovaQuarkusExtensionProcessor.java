@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -155,7 +156,14 @@ class BonJovaQuarkusExtensionProcessor {
     }
 
     private RockScoreCalculator setupRockScoreCalculator() {
-        return new RockScoreCalculator(Path.of("../bon-jova-quarkus-extension/deployment/src/main/resources/rockscore/lyrics"));
+        var properties = new Properties();
+        try (var inputStream = BonJovaQuarkusExtensionProcessor.class.getClassLoader().getResourceAsStream("application.properties")) {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        var extensionBasePath = properties.getProperty("extensionBasePath");
+        return new RockScoreCalculator(Path.of(extensionBasePath, "deployment/src/main/resources/rockscore/lyrics"));
     }
 
     private String generateRestUrl(String rockFileName) {

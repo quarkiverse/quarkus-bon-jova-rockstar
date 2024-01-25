@@ -39,7 +39,6 @@ class LyricsRatingCalculator {
 
     public SongLyricsRating calculateMaxLyricsRating(Path lyricsDir) {
         if (!maxLyricsRatingOfThe80s.containsKey(lyricsDir)) {
-            System.out.println("Calculating max lyrics rating for " + lyricsDir.toAbsolutePath());
             try (Stream<Path> paths = Files.walk(lyricsDir)) {
                 maxLyricsRatingOfThe80s.put(lyricsDir, paths.filter(Files::isRegularFile)
                         .filter(path -> path.toString().endsWith(".txt"))

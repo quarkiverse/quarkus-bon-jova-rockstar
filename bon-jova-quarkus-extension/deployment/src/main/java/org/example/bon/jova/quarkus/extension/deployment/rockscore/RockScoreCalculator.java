@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public class RockScoreCalculator {
     private final LyricsRatingCalculator lyricsRatingCalculator;
-    private Path lyricsDir = Path.of("../bon-jova-quarkus-extension/deployment/src/main/resources/rockscore/lyrics");
+    private Path lyricsDir;
 
     public RockScoreCalculator(Path lyricsDir) {
         this.lyricsDir = lyricsDir;
