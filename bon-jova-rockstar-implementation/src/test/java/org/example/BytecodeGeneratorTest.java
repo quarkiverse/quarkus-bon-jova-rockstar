@@ -402,6 +402,20 @@ names in Rockstar.)
     }
 
     @Test
+    public void shouldHandleRoundingOnPronounReferences() {
+        String program = """
+                My heart is on fire. Aflame with desire.
+                Turn it up.
+                Shout it.
+                """;
+        String output = compileAndLaunch(program);
+
+        assertEquals("25\n", output);
+
+    }
+
+
+    @Test
     public void shouldHandleIncrementForSimpleCase() {
         String program = """
                 My world is 0

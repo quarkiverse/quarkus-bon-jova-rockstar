@@ -6,7 +6,7 @@ program: (NL|ws)* (statementList | functionDeclaration)* ws*;
 
 statementList: statement+;
 
-statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
@@ -32,6 +32,10 @@ assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws (KW_IS|KW_WAS_WERE))
               | KW_LET ws variable ws KW_BE ws expression
               | KW_PUT ws expression ws KW_INTO ws variable
               | variable ws (KW_SAYS | KW_SAY) WS poeticStringLiteral
+;
+
+roundingStmt: KW_TURN ws variable ws (KW_ROUND | KW_UP | KW_DOWN)
+            | KW_TURN ws (KW_ROUND | KW_UP | KW_DOWN) ws variable
 ;
 
 comparisionOp: KW_IS

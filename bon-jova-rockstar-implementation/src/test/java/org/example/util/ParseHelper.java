@@ -55,29 +55,20 @@ public class ParseHelper {
         return (Rockstar.InputStmtContext) getGrammarElement(program, CapturingListener::getInput);
     }
 
+    public RoundingAndAssignmentPair getRounding(String program) throws IOException {
+        CapturingListener listener = getCapturingListener(program);
+        return new RoundingAndAssignmentPair(listener.getAssignmentStatement(), listener.getRounding());
+    }
+
     private RuleContext getGrammarElement(String program, Function<CapturingListener,
             RuleContext> getter) {
 /*
 Rather than mocking the syntax tree, which will be hard work and not necessarily reliable,
 drive a parse to extract the thing we want.
  */
-        InputStream stream = new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8));
 
         try {
-            CharStream input = CharStreams.fromStream(stream);
-
-            RockstarLexer lexer = new RockstarLexer(input);
-
-
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            Rockstar parser = new Rockstar(tokens);
-
-            ParseTree tree = parser.program(); // this method is whatever we call our root rule
-            CapturingListener listener = new CapturingListener();
-
-            // Walk the tree so our listener can generate bytecode
-            ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk(listener, tree);
+            CapturingListener listener = getCapturingListener(program);
 
             RuleContext answer = getter.apply(listener);
             if (answer == null) {
@@ -87,5 +78,24 @@ drive a parse to extract the thing we want.
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static CapturingListener getCapturingListener(String program) throws IOException {
+        InputStream stream = new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8));
+        CharStream input = CharStreams.fromStream(stream);
+
+        RockstarLexer lexer = new RockstarLexer(input);
+
+
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        Rockstar parser = new Rockstar(tokens);
+
+        ParseTree tree = parser.program(); // this method is whatever we call our root rule
+        CapturingListener listener = new CapturingListener();
+
+        // Walk the tree so our listener can generate bytecode
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.walk(listener, tree);
+        return listener;
     }
 }
