@@ -96,8 +96,7 @@ Some of these may work but have not been validated with tests.
 
 - [X] Incrementing and decrementing
 - [X] Arithmetic
-  operators, [except division](https://github.com/holly-cummins/bon-jova-rockstar-implementation/issues/23)
-- [ ] Division
+  operators
 - [X] Aliases for arithmetic operators
 - [ ] Compound assignment using `let`
 - [ ] Rounding
