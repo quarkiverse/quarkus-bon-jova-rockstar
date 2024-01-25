@@ -98,7 +98,7 @@ KW_UP: U P;
 KW_KNOCK: K N O C K;
 KW_DOWN: D O W N;
 
-KW_GIVE: G I V E;
+KW_GIVE: G I V E | S E N D | R E T U R N;
 KW_BACK: B A C K;
 
 KW_CONTINUE: C O N T I N U E

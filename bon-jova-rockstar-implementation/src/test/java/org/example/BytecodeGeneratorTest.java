@@ -982,6 +982,66 @@ names in Rockstar.)
         }
 
         @Test
+        public void shouldHandleReturnInFunction() {
+            String program = """
+                    Midnight takes your heart
+                    Return your heart
+                                           
+                    Ice is "nice"
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice\n", output);
+        }
+
+        @Test
+        public void shouldHandleSendInFunction() {
+            String program = """
+                    Midnight takes your heart
+                    Send back your heart
+                                           
+                    Ice is "nice"
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice\n", output);
+        }
+
+        @Test
+        public void shouldHandleGiveWithoutBackInFunction() {
+            String program = """
+                    Midnight takes your heart
+                    Give your heart
+                                           
+                    Ice is "nice"
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice\n", output);
+        }
+
+        @Test
+        public void shouldHandleTrailingBackInFunction() {
+            String program = """
+                    Midnight takes your heart
+                    Give your heart back
+                                           
+                    Ice is "nice"
+                    Say Midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice\n", output);
+        }
+
+        @Test
         public void shouldHandleOperationsInSingleArgumentFunctionsOnStrings() {
             String program = """
                     Midnight takes your heart
