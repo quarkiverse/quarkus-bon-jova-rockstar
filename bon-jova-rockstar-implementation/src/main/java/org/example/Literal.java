@@ -1,5 +1,7 @@
 package org.example;
 
+import io.quarkus.gizmo.MethodCreator;
+import io.quarkus.gizmo.ResultHandle;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
 
@@ -38,5 +40,20 @@ public class Literal {
 
     public Class<?> getValueClass() {
         return valueClass;
+    }
+
+    public ResultHandle getResultHandle(MethodCreator method) {
+        // This code is duplicated in Expression and assignment; we should check if it can be consolidated
+        Object value = getValue();
+
+        if (String.class.equals(valueClass)) {
+            return method.load((String) value);
+        } else if (double.class.equals(valueClass)) {
+            return method.load((double) value);
+        } else if (boolean.class.equals(valueClass)) {
+            return method.load((boolean) value);
+        } else {
+            throw new RuntimeException("Internal error: unknown type " + value);
+        }
     }
 }

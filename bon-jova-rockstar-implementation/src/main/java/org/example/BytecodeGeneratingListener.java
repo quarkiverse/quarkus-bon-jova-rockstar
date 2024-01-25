@@ -243,6 +243,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
+    public void enterRoundingStmt(Rockstar.RoundingStmtContext ctx) {
+        Rounding rounding = new Rounding(ctx);
+        rounding.toCode(currentCreator);
+    }
+
+    @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
         Expression expression = new Expression(ctx.expression());
         ResultHandle value = expression.getResultHandle(currentCreator, creator);

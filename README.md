@@ -99,8 +99,8 @@ Some of these may work but have not been validated with tests.
   operators
 - [X] Aliases for arithmetic operators
 - [ ] Compound assignment using `let`
-- [ ] Rounding
-- [ ] Rounding with pronouns
+- [X] Rounding
+- [X] Rounding with pronouns
 - [ ] List operations
 - [ ] Operator precedence
 

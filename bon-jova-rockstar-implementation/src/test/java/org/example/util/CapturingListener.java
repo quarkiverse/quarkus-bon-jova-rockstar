@@ -20,6 +20,8 @@ public class CapturingListener extends RockstarBaseListener {
     private Rockstar.IfStmtContext ifCondition;
     private Rockstar.InputStmtContext input;
 
+    private Rockstar.RoundingStmtContext rounding;
+
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext assignmentStatement) {
         this.assignmentStatement = assignmentStatement;
@@ -64,6 +66,11 @@ public class CapturingListener extends RockstarBaseListener {
         return assignmentStatement;
     }
 
+    @Override
+    public void enterRoundingStmt(Rockstar.RoundingStmtContext ctx) {
+        this.rounding = ctx;
+    }
+
     public Rockstar.PoeticNumberLiteralContext getPoeticNumberLiteral() {
         return poeticNumberLiteral;
     }
@@ -94,5 +101,9 @@ public class CapturingListener extends RockstarBaseListener {
 
     public Rockstar.InputStmtContext getInput() {
         return input;
+    }
+
+    public Rockstar.RoundingStmtContext getRounding() {
+        return rounding;
     }
 }

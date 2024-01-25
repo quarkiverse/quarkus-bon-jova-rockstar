@@ -128,6 +128,9 @@ KW_AND: A N D;
 KW_OR: O R;
 KW_NOR: N O R;
 
+KW_TURN: T U R N;
+KW_ROUND: R O U N D | A R O U N D;
+
 PROPER_NOUN: [A-Z][A-Z|a-z]*;
 WORD: [a-z|A-Z]+;
 
