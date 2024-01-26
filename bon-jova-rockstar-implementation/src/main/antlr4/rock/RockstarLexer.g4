@@ -131,6 +131,11 @@ KW_NOR: N O R;
 KW_TURN: T U R N;
 KW_ROUND: R O U N D | A R O U N D;
 
+KW_ROCK: R O C K | P U S H;
+KW_ROLL: R O L L | P O P;
+KW_AT: A T;
+
+
 PROPER_NOUN: [A-Z][A-Z|a-z]*;
 WORD: [a-z|A-Z]+;
 

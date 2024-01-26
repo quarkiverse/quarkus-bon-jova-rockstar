@@ -60,6 +60,10 @@ public class ParseHelper {
         return new RoundingAndAssignmentPair(listener.getAssignmentStatement(), listener.getRounding());
     }
 
+    public Rockstar.ArrayStmtContext getArray(String program) {
+        return (Rockstar.ArrayStmtContext) getGrammarElement(program, CapturingListener::getArray);
+    }
+
     private RuleContext getGrammarElement(String program, Function<CapturingListener,
             RuleContext> getter) {
 /*

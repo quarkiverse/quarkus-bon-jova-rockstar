@@ -88,7 +88,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         // ResultHandle knows the type, but it's private
         // Doing an instanceof check on a primitive tends to blow up, and it clutters the output code, so cheat
         // Take advantage of the toString format of ResultHandle
-        return value.toString()
+        String string = value.toString();
+        return string
                 .contains("type='D'");
     }
 
@@ -249,21 +250,27 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
+    public void enterArrayStmt(Rockstar.ArrayStmtContext ctx) {
+        Array a = new Array(ctx);
+        a.toCode(currentCreator, creator);
+    }
+
+    @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
         Expression expression = new Expression(ctx.expression());
-        ResultHandle value = expression.getResultHandle(currentCreator, creator);
+        ResultHandle value = expression.getResultHandle(currentCreator, creator, Expression.Context.SCALAR);
 
         // TODO refactor this conditional formatting into a class-level method?
         // We want to do a special toString on numbers, to avoid tacking decimals onto integers
         TryBlock tryBlock = currentCreator.tryBlock();
-        ResultHandle casttoDouble = tryBlock.checkCast(value, Double.class);
+        ResultHandle castToDouble = tryBlock.checkCast(value, Double.class);
 
         ResultHandle df = tryBlock.readStaticField(formatter);
 
         ResultHandle formatted = tryBlock
                 .invokeVirtualMethod(
                         MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
-                        df, casttoDouble);
+                        df, castToDouble);
         Gizmo.systemOutPrintln(tryBlock, formatted);
 
         CatchBlockCreator catchBlock = tryBlock.addCatch(ClassCastException.class);

@@ -34,6 +34,8 @@ public class Expression {
     private Class<?> valueClass;
     private Object value;
     private Variable variable;
+    private Array arrayAccess;
+    private Expression arrayAccessIndex;
 
     private Expression lhe;
     private Expression rhe;
@@ -43,6 +45,9 @@ public class Expression {
     private Operation operation;
 
     private UnaryOperation unaryOperation;
+
+    enum Context {SCALAR, NORMAL}
+
 
     public Expression(Rockstar.VariableContext ctx) {
         text = ctx.getText();
@@ -170,6 +175,13 @@ public class Expression {
                     .collect(Collectors.toList());
 
             valueClass = Object.class;
+        } else if (ctx.KW_AT() != null) {
+            variable = new Variable(variableContext, Array.TYPE_CLASS);
+            value = variable.getVariableName();
+            valueClass = variable.getVariableClass();
+            arrayAccess = new Array(variable);
+            // TODO need to support using variables to access the array
+            arrayAccessIndex = new Expression(ctx.expression(0));
         } else if (literal != null) {
             Literal l = new Literal(literal);
             value = l.getValue();
@@ -208,14 +220,20 @@ public class Expression {
     }
 
     public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator) {
+        return getResultHandle(method, classCreator, Context.NORMAL);
+    }
+
+    public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator, Context context) {
         if (function != null) {
             return getHandleForFunction(method, classCreator);
         } else if (operation != null) {
             return getHandleForOperation(method, classCreator);
         } else if (unaryOperation != null) {
             return getHandleForUnaryOperation(method, classCreator);
+        } else if (arrayAccess != null) {
+            return getHandleForArray(method, classCreator);
         } else if (variable != null) {
-            return getHandleForVariable(method);
+            return getHandleForVariable(method, context);
         } else {
             // This is a literal
             return getHandleForLiteral(method);
@@ -240,8 +258,16 @@ public class Expression {
         return answer;
     }
 
-    private ResultHandle getHandleForVariable(BytecodeCreator method) {
-        return variable.read(method);
+    private ResultHandle getHandleForArray(BytecodeCreator method, ClassCreator creator) {
+        return arrayAccess.read(arrayAccessIndex, method, creator);
+    }
+
+    private ResultHandle getHandleForVariable(BytecodeCreator method, Context context) {
+        if (valueClass != Array.TYPE_CLASS || context == Context.NORMAL) {
+            return variable.read(method);
+        } else {
+            return Array.toScalarContext(variable, method);
+        }
     }
 
     private ResultHandle getHandleForUnaryOperation(BytecodeCreator method, ClassCreator classCreator) {
@@ -271,8 +297,8 @@ public class Expression {
     }
 
     private ResultHandle getHandleForOperation(BytecodeCreator method, ClassCreator classCreator) {
-        ResultHandle lrh = lhe.getResultHandle(method, classCreator);
-        ResultHandle rrh = rhe.getResultHandle(method, classCreator);
+        ResultHandle lrh = lhe.getResultHandle(method, classCreator, Context.SCALAR);
+        ResultHandle rrh = rhe.getResultHandle(method, classCreator, Context.SCALAR);
 
         // Do type coercion of rockstar nulls (which are a special type, not null)
         // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
@@ -437,7 +463,6 @@ public class Expression {
         ResultHandle rrh = coerceAwayNothing(method, unsaferrh, unsafelrh);
 
         AssignableResultHandle answer = method.createVariable(Object.class);
-        // We want to do a special toString on numbers, to avoid tacking decimals onto integers
         TryBlock tryBlock = method.tryBlock();
         ResultHandle castlrh = tryBlock.checkCast(lrh, Double.class);
         ResultHandle castrrh = tryBlock.checkCast(rrh, Double.class);
@@ -459,7 +484,7 @@ public class Expression {
         return answer;
     }
 
-    private static ResultHandle coerceAwayNothing(BytecodeCreator method, ResultHandle handle, ResultHandle referenceHandle) {
+    static ResultHandle coerceAwayNothing(BytecodeCreator method, ResultHandle handle, ResultHandle referenceHandle) {
         AssignableResultHandle answer = method.createVariable(Object.class);
         BranchResult nullCheck = method.ifNull(handle);
         BytecodeCreator trueBranch = nullCheck.trueBranch();
