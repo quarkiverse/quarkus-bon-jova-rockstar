@@ -1342,6 +1342,133 @@ names in Rockstar.)
         }
     }
 
+    @Nested
+    class Arrays {
+        @Test
+        public void shouldInitialiseAnArrayWithRock() {
+            String program = """
+                    Rock the array
+                    Say the array
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("0\n", output);
+        }
+
+        @Test
+        public void shouldOutputArrayLength() {
+            String program = """
+                    Rock 1, 2, 3, 4, 8 into arr
+                    Say arr
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("5\n", output);
+        }
+
+        // Returning an array in a scalar context will return the current length of the array
+        @Test
+        public void shouldUseLengthOfArrayInAScalarContext() {
+            String program = """
+                    rock 5, 4, 2 into me
+                    say me
+                    say me times 2
+                    say me plus 8
+                                        """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("3\n6\n11\n", output);
+        }
+
+        @Test
+        public void shouldUseLengthOfArrayWhenConcatenatingToStrings() {
+            String program = """
+                    rock 1, 3 into arr
+                    say arr + "length"
+                                        """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("2length\n", output);
+        }
+
+        @Test
+        public void shouldUseLengthOfArrayInAScalarContextEvenIfArrayIsWrappedInAVariable() {
+            String program = """
+                    rock 5, 4, 2 into me
+                    let you be me
+                    say you times 2
+                    say you plus 8
+                                        """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("6\n11\n", output);
+        }
+
+        @Test
+        public void shouldIncreaseLengthWhenAppendingToArray() {
+            String program = """
+                    rock arr
+                    rock 1 into arr
+                    rock 5 into arr
+                    rock 8 into arr
+                    say arr
+                                                            """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("3\n", output);
+        }
+
+        @Test
+        public void shouldPutContentInRightPlaceWhenAppendingToArray() {
+            String program = """
+                    rock arr
+                    rock 1 into arr
+                    rock 5 into arr
+                    rock 8 into arr
+                    say arr at 1
+                    say arr at 2
+                    say arr at 0
+                                                            """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("5\n8\n1\n", output);
+        }
+
+        @Test
+        public void shouldBeAbleToAccessArrayUsingExpressions() {
+            String program = """
+                    rock arr
+                    rock 1 into arr
+                    rock 5 into arr
+                    rock 8 into arr
+                    fred is 1
+                    jane is 0
+                    say arr at 1 + 1
+                    say arr at jane
+                    say arr at fred
+                                                            """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("8\n1\n5\n", output);
+        }
+
+        @Test
+        public void shouldBeAbleToAccessArrayUsingNothingExpressions() {
+            String program = """
+                    rock arr
+                    rock 1 into arr
+                    rock 5 into arr
+                    rock 8 into arr
+                    say arr at nothing
+                    jane is nothing
+                    say arr at jane
+                                                            """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("1\n1\n", output);
+        }
+    }
+
     private String compileAndLaunch(String program, String... args) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;

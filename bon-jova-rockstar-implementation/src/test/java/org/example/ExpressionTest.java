@@ -731,32 +731,6 @@ empty , silent , and silence are aliases for the empty string ( "" ).
         }
     }
 
-    private Object execute(Expression a) {
-        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
-
-        // The auto-close on this triggers the write
-        try (ClassCreator creator = ClassCreator.builder()
-                .classOutput(cl)
-                .className("com.MyTest")
-                .build()) {
-
-            MethodCreator method = creator.getMethodCreator("method", Object.class)
-                    .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.getResultHandle(method, creator);
-            method.returnValue(rh);
-        }
-
-        try {
-            Class<?> clazz = cl.loadClass("com.MyTest");
-            return clazz.getMethod("method")
-                    .invoke(null);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                 InvocationTargetException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Test error: " + e);
-        }
-    }
-
     // This is a whole section of implementation, but handle some simple cases
     @Nested
     @DisplayName("Types of operations on types")
@@ -801,6 +775,32 @@ empty , silent , and silence are aliases for the empty string ( "" ).
             Expression a = new Expression(ctx);
             assertNull(a.getValue());
             assertEquals(String.class, a.getValueClass());
+        }
+    }
+
+    private Object execute(Expression a) {
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
+
+        // The auto-close on this triggers the write
+        try (ClassCreator creator = ClassCreator.builder()
+                .classOutput(cl)
+                .className("com.MyTest")
+                .build()) {
+
+            MethodCreator method = creator.getMethodCreator("method", Object.class)
+                    .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+            ResultHandle rh = a.getResultHandle(method, creator);
+            method.returnValue(rh);
+        }
+
+        try {
+            Class<?> clazz = cl.loadClass("com.MyTest");
+            return clazz.getMethod("method")
+                    .invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Test error: " + e);
         }
     }
 }

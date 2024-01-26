@@ -14,9 +14,12 @@ public class Assignment {
     private final Object value;
     private final Class<?> variableClass;
     private final Variable variable;
+    private final String text;
     private Expression expression;
 
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
+        this.text = ctx.getText();
+
         if (ctx.expression() != null) {
             expression = new Expression(ctx.expression());
             value = expression.getValue();
@@ -92,7 +95,7 @@ public class Assignment {
             } else if (value == NOTHING) { // We can't check the type, because Nothings are stored as objects in case they get coerced
                 rh = method.loadNull();
             } else {
-                throw new RuntimeException("Internal error: unknown type " + value);
+                throw new RuntimeException("Internal error: unknown type " + value + " in assigment '" + text + "'");
             }
         }
 

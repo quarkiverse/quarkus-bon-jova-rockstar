@@ -6,7 +6,7 @@ program: (NL|ws)* (statementList | functionDeclaration)* ws*;
 
 statementList: statement+;
 
-statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
@@ -17,10 +17,17 @@ expression: functionCall
           | lhe=expression contractedComparisionOp ws rhe=expression
           | lhe=expression ws op=(KW_AND|KW_OR|KW_NOR) ws rhe=expression
           | KW_NOT ws rhe=expression
+          | variable ws KW_AT ws expression
           | (literal|variable|constant)
 ;
 
+list: (expression) (COMMA ws expression)*;
+
 functionCall: functionName=variable WS KW_TAKING WS argList;
+
+arrayStmt: KW_ROCK ws variable
+       | KW_ROCK ws list ws KW_INTO ws variable
+;
 
 // the second set of entries here isn't just an expression, to try and force the shortest match, rather than the longest match
 argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (literal|variable|constant|expression))*;

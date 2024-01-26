@@ -98,13 +98,16 @@ public class Variable {
     }
 
     public ResultHandle read(BytecodeCreator method) {
-        if (variables.containsKey(variableName)) {
+        if (isAlreadyDefined()) {
             return method.readStaticField(variables.get(variableName));
-
         } else {
             // This is an internal error, not a program one
             throw new RuntimeException("Moral panic: Could not find variable called " + variableName);
         }
+    }
+
+    public boolean isAlreadyDefined() {
+        return variables.containsKey(variableName);
     }
 
     public void write(BytecodeCreator method, ResultHandle value) {
@@ -115,7 +118,7 @@ public class Variable {
     // TODO would it be nicer to store our own class?
     public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method) {
         FieldDescriptor field;
-        if (!variables.containsKey(variableName)) {
+        if (!isAlreadyDefined()) {
             // Variables are global in scope, so need to be stored at the class level (either as static or instance variables)
             field = creator.getFieldCreator(variableName, variableClass)
                     .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
