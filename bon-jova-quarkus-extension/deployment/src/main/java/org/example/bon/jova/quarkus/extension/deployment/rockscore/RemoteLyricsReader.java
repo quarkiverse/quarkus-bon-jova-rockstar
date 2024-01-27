@@ -1,10 +1,14 @@
 package org.example.bon.jova.quarkus.extension.deployment.rockscore;
 
+import com.jagrosh.jlyrics.Lyrics;
+import com.jagrosh.jlyrics.LyricsClient;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.path.json.JsonPath.with;
@@ -18,7 +22,7 @@ public class RemoteLyricsReader {
         new Song("With or Without You", "U2"),
         new Song("Eye of the Tiger", "Survivor"),
         new Song("Jump", "Van Halen"),
-        new Song( "Pour Some Sugar on Me", "Def Leppard"),
+        new Song("Pour Some Sugar on Me", "Def Leppard"),
         new Song("Breaking the Law", "Judas Priest"),
         new Song("Is This Love", "Whitesnake"),
         new Song("Rock You Like a Hurricane", "Scorpions"),
@@ -112,12 +116,13 @@ public class RemoteLyricsReader {
         new Song("Sister Christian", "Night Ranger"),
         new Song("Hungry Like the Wolf", "Duran Duran")
     );
-    private static final List<Api> apis = List.of(
-            new Api("https://api.lyrics.ovh/v1/{artist}/{title}", "Paroles de la chanson(.+) par (.+)\\r\\n"));
+    private static final List<LyricsProvider> LYRICS_PROVIDERS = List.of(
+            new OvhLyricsProvider(),
+            new JLyricsProvider("MusixMatch"),
+            new JLyricsProvider("Genius"),
+            new JLyricsProvider("LyricsFreak"),
+            new JLyricsProvider("A-Z Lyrics"));
     private static final Map<String, String> cache = new HashMap<>();
-
-//    private static final LyricsClient webScraperClient = new LyricsClient("MusixMatch",
-//            Executors.newVirtualThreadPerTaskExecutor());
 
     public static List<String> readRemoteLyrics() {
         List<String> allLyrics = new ArrayList<>();
@@ -154,10 +159,10 @@ public class RemoteLyricsReader {
         }
 
         // Then try the remote APIs.
-        for (Api api : apis) {
-            Optional<String> lyrics = callApi(api, song);
+        for (LyricsProvider lyricsProvider : LYRICS_PROVIDERS) {
+            Optional<String> lyrics = lyricsProvider.provideLyrics(song);
             if (lyrics.isPresent()) {
-                System.out.println("Lyrics found for " + song + " in " + api);
+                System.out.println("Lyrics found for " + song + " in " + lyricsProvider);
                 cache.putIfAbsent(songInKebabCase, lyrics.get());
                 LyricsFileUtil.writeLyricsToFileIfAbsent(songInKebabCase, lyrics.get());
                 return lyrics;
@@ -167,22 +172,58 @@ public class RemoteLyricsReader {
         return Optional.empty();
     }
 
-    private static Optional<String> callApi(Api api, Song song) {
-        String response = with(get(api.url, song.artist, song.title).asString()).get("lyrics");
-
-        if (response == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(response.replaceAll(api.ignorePattern, ""));
-    }
-
     record Song(String title, String artist) {
         public String toKebabCase() {
-            return String.format("%s-%s", artist.toLowerCase().replaceAll("[.|/|'|\\s]", "-"), title.toLowerCase().replaceAll("[.|/|'|\\s]", "-"));
+            return String.format("%s-%s", artist.toLowerCase().replaceAll("[.|/|'|\\s|(|)|’|&]", "-"), title.toLowerCase().replaceAll("[.|/|'|\\s]", "-"));
         }
     }
 
-    record Api(String url, String ignorePattern) {
+    interface LyricsProvider {
+        Optional<String> provideLyrics(Song song);
+    }
+
+    static class OvhLyricsProvider implements LyricsProvider {
+        @Override
+        public String toString() {
+            return "lyrics.ovh";
+        }
+
+        @Override
+        public Optional<String> provideLyrics(Song song) {
+            var url = "https://api.lyrics.ovh/v1/{artist}/{title}";
+            var ignorePattern = "Paroles de la chanson(.+) par (.+)\\r\\n";
+
+            String response = with(get(url, song.artist, song.title).asString()).get("lyrics");
+
+            if (response == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(response.replaceAll(ignorePattern, ""));
+        }
+    }
+    static class JLyricsProvider implements LyricsProvider {
+        private final String source;
+        private final LyricsClient lyricsClient;
+
+        JLyricsProvider(String source) {
+            this.source = source;
+            this.lyricsClient = new LyricsClient(source);
+        }
+
+        @Override
+        public Optional<String> provideLyrics(Song song) {
+            try {
+                return Optional.ofNullable(lyricsClient.getLyrics(String.format("%s - %s", song.artist, song.title)).get())
+                                .map(Lyrics::getContent);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "JLyrics / " + source;
+        }
     }
 }
