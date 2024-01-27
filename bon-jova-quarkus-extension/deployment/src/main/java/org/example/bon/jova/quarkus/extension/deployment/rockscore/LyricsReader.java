@@ -4,6 +4,6 @@ import java.util.List;
 
 public class LyricsReader {
     public List<String> read() {
-        return RemoteLyricsReader.readRemoteLyrics();
+        return RemoteLyricsReader.readRemoteLyrics(true);
     }
 }
