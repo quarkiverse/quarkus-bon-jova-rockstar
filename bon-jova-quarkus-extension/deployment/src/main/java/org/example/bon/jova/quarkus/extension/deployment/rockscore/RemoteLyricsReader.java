@@ -7,17 +7,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
+
+import static io.restassured.path.json.JsonPath.with;
 
 public class RemoteLyricsReader {
     private static final List<Song> songsToFetch = List.of(
-        new Song("Sweet Child O' Mine", "Guns n' Roses"),
-        new Song("Back in Black", "AC/DC"),
-        new Song("Livin' on a Prayer", "Bon Jovi"),
-        new Song("Every Breath You Take", "The Police"),
-        new Song("With or Without You", "U2"),
-        new Song("Eye of the Tiger", "Survivor"),
-        new Song("Jump", "Van Halen"),
-        new Song("Pour Some Sugar on Me", "Def Leppard")
+        new Song("Sweet Child O' Mine", "Guns n' Roses")
+//        new Song("Back in Black", "AC/DC"),
+//        new Song("Livin' on a Prayer", "Bon Jovi"),
+//        new Song("Every Breath You Take", "The Police"),
+//        new Song("With or Without You", "U2"),
+//        new Song("Eye of the Tiger", "Survivor"),
+//        new Song("Jump", "Van Halen"),
+//        new Song("Pour Some Sugar on Me", "Def Leppard")
 //        new Song("Breaking the Law", "Judas Priest"),
 //        new Song("Is This Love", "Whitesnake"),
 //        new Song("Rock You Like a Hurricane", "Scorpions"),
@@ -111,8 +114,8 @@ public class RemoteLyricsReader {
 //        new Song("Sister Christian", "Night Ranger"),
 //        new Song("Hungry Like the Wolf", "Duran Duran")
     );
-    private static final List<String> apis = List.of(
-            "https://api.lyrics.ovh/v1/{artist}/{title}");
+    private static final List<Api> apis = List.of(
+            new Api("https://api.lyrics.ovh/v1/{artist}/{title}", "Paroles de la chanson(.+) par (.+)\\r\\n"));
     private static final Map<Song, String> cache = new HashMap<>();
 
 //    private static final LyricsClient webScraperClient = new LyricsClient("MusixMatch",
@@ -135,7 +138,7 @@ public class RemoteLyricsReader {
     }
 
     private static String readRemoteLyrics(Song song) {
-        for (String api : apis) {
+        for (Api api : apis) {
             Optional<String> lyrics = callApi(api, song);
             if (lyrics.isPresent()) {
                 System.out.println("Lyrics found for " + song + " in " + api);
@@ -146,10 +149,16 @@ public class RemoteLyricsReader {
         throw new RuntimeException("No lyrics found for " + song + " in " + apis.size() + " APIs");
     }
 
-    private static Optional<String> callApi(String api, Song song) {
-        return Optional.ofNullable(RestAssured.get(api, song.artist, song.title).asString());
+    private static Optional<String> callApi(Api api, Song song) {
+        String json = RestAssured.get(api.url, song.artist, song.title).asString();
+        String lyrics = with(json).get("lyrics").toString().replaceAll(api.ignorePattern, "");
+
+        return Optional.ofNullable(lyrics);
     }
 
     record Song(String title, String artist) {
+    }
+
+    record Api(String url, String ignorePattern) {
     }
 }
