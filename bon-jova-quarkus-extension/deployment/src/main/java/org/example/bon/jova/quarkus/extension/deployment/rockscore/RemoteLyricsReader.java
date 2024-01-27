@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.StructuredTaskScope;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.path.json.JsonPath.with;
@@ -127,22 +128,27 @@ public class RemoteLyricsReader {
     public static List<String> readRemoteLyrics() {
         return readRemoteLyrics(false);
     }
+
     static List<String> readRemoteLyrics(boolean logDebugOutput) {
-        List<String> allLyrics = new ArrayList<>();
+        List<StructuredTaskScope.Subtask<Optional<String>>> allLyricsResults = new ArrayList<>();
 
-        for (Song song : songsToFetch) {
-            var lyrics = readRemoteLyrics(song, logDebugOutput);
-
-            if (lyrics.isPresent()) {
-                cache.putIfAbsent(song.toKebabCase(), lyrics.get());
-                LyricsFileUtil.writeLyricsToFileIfAbsent(song.toKebabCase(), lyrics.get());
-                allLyrics.add(lyrics.get());
-            } else if (logDebugOutput) {
-                System.out.println("Lyrics not found for " + song);
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            for (Song song : songsToFetch) {
+                allLyricsResults.add(scope.fork(() -> readRemoteLyrics(song, logDebugOutput)));
             }
-        }
 
-        return allLyrics;
+            try {
+                scope.join().throwIfFailed();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            return allLyricsResults.stream()
+                    .map(StructuredTaskScope.Subtask::get)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+        }
     }
 
     private static Optional<String> readRemoteLyrics(Song song, boolean logDebugOutput) {
@@ -153,7 +159,7 @@ public class RemoteLyricsReader {
             return Optional.of(cache.get(songInKebabCase));
         }
 
-        // Then try an existing file.
+        // Then try a pre-downloaded file.
         Optional<String> lyricsFromFile = LyricsFileUtil.readLyricsFromFile(songInKebabCase);
         if (lyricsFromFile.isPresent()) {
             if (logDebugOutput) System.out.println("Lyrics found for " + song + " in file");
@@ -171,6 +177,8 @@ public class RemoteLyricsReader {
                 return lyrics;
             }
         }
+
+        if (logDebugOutput) System.out.println("Lyrics not found for " + song);
 
         return Optional.empty();
     }
