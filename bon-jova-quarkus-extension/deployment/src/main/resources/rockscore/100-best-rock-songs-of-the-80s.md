@@ -61,7 +61,7 @@
 57. "Love Bites" by Def Leppard
 58. "Crazy Train" by Ozzy Osbourne
 59. "Paradise City" by Guns N’ Roses
-60. "Stop Draggin’ My Heart Around" by Stevie Nicks and Tom Petty & The Heartbreakers
+60. "Stop Draggin’ My Heart Around" by Tom Petty & The Heartbreakers
 61. "How Soon Is Now" by The Smiths
 62. "Angel" by Aerosmith
 63. "Jack & Diane" by John Mellencamp

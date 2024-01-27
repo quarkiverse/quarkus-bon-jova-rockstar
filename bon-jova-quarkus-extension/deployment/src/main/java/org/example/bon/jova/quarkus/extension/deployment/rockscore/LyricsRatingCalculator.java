@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 class LyricsRatingCalculator {
     private Map<String, Integer> wordCounts;
 
-    // cached variable that store deterministic values
+    // cached variable that stores deterministic values
     private static Map<Path, SongLyricsRating> maxLyricsRatingOfThe80s = new HashMap<>();
 
     LyricsRatingCalculator(Map<String, Integer> wordCounts) {
