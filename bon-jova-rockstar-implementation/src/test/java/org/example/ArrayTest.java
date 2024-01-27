@@ -80,7 +80,26 @@ public class ArrayTest {
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {1d, 2d, 3d, 4d, 8d};
         assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+    }
 
+    @Test
+    public void shouldPopulateArrayOnInitialisationWithWith() {
+        String program = """
+                Rock arr with 5
+                """;
+        Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
+        Object[] contents = {5d};
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+    }
+
+    @Test
+    public void shouldPopulateArrayOnInitialisationWithWithList() {
+        String program = """
+                Rock arr with 1, 2, 3, 4, 8
+                """;
+        Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
+        Object[] contents = {1d, 2d, 3d, 4d, 8d};
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
     }
 
     @Test
