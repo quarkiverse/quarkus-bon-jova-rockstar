@@ -10,7 +10,7 @@ statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt 
 
 expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
-          | lhe=expression ws op=(KW_ADD|KW_SUBTRACT) ws rhe=expression
+          | lhe=expression ws op=(KW_ADD|KW_WITH|KW_SUBTRACT) ws rhe=expression
           | lhe=expression ws op=(PLUS_SIGN|HYPHEN) ws rhe=expression
           | lhe=expression ws* op=(ASTERISK|SLASH) ws* rhe=expression
           | lhe=expression ws comparisionOp ws rhe=expression
@@ -18,16 +18,19 @@ expression: functionCall
           | lhe=expression ws op=(KW_AND|KW_OR|KW_NOR) ws rhe=expression
           | KW_NOT ws rhe=expression
           | variable ws KW_AT ws expression
+          | KW_ROLL ws variable
           | (literal|variable|constant)
 ;
 
 list: (expression) (COMMA ws expression)*;
 
-functionCall: functionName=variable WS KW_TAKING WS argList;
-
 arrayStmt: KW_ROCK ws variable
        | KW_ROCK ws list ws KW_INTO ws variable
+       | KW_ROCK ws variable ws KW_WITH ws list
 ;
+
+functionCall: functionName=variable WS KW_TAKING WS argList;
+
 
 // the second set of entries here isn't just an expression, to try and force the shortest match, rather than the longest match
 argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (literal|variable|constant|expression))*;
@@ -162,6 +165,7 @@ allKeywords: KW_PUT
            | KW_MULTIPLY
            | KW_DIVIDE
            | KW_ADD
+           | KW_WITH
            | KW_SUBTRACT
            | KW_IS
            | KW_NOT_EQUAL

@@ -36,6 +36,7 @@ public class Expression {
     private Variable variable;
     private Array arrayAccess;
     private Expression arrayAccessIndex;
+    private boolean arrayPop = false;
 
     private Expression lhe;
     private Expression rhe;
@@ -116,7 +117,7 @@ public class Expression {
             // Best guess if we can't work out the exact value class
             valueClass = Object.class;
 
-            if (ctx.KW_ADD() != null || "+".equals(ctx.op.getText())) {
+            if (ctx.KW_ADD() != null || ctx.KW_WITH() != null || "+".equals(ctx.op.getText())) {
                 operation = Operation.ADD;
                 if (lhe.getValueClass() == double.class && rhe.getValueClass() == double.class) {
                     valueClass = double.class;
@@ -177,11 +178,16 @@ public class Expression {
             valueClass = Object.class;
         } else if (ctx.KW_AT() != null) {
             variable = new Variable(variableContext, Array.TYPE_CLASS);
-            value = variable.getVariableName();
-            valueClass = variable.getVariableClass();
+            valueClass = Object.class;
             arrayAccess = new Array(variable);
-            // TODO need to support using variables to access the array
             arrayAccessIndex = new Expression(ctx.expression(0));
+        } else if (ctx.KW_ROLL() != null) {
+            variable = new Variable(variableContext, Array.TYPE_CLASS);
+            valueClass = Object.class;
+            arrayAccess = new Array(variable);
+            // TODO clunky! should this knowledge be sent to the array in initialisation?
+            arrayPop = true;
+
         } else if (literal != null) {
             Literal l = new Literal(literal);
             value = l.getValue();
@@ -259,7 +265,12 @@ public class Expression {
     }
 
     private ResultHandle getHandleForArray(BytecodeCreator method, ClassCreator creator) {
-        return arrayAccess.read(arrayAccessIndex, method, creator);
+
+        if (!arrayPop) {
+            return arrayAccess.read(arrayAccessIndex, method, creator);
+        } else {
+            return arrayAccess.pop(method, creator);
+        }
     }
 
     private ResultHandle getHandleForVariable(BytecodeCreator method, Context context) {

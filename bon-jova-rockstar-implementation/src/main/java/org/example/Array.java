@@ -1,5 +1,7 @@
 package org.example;
 
+import io.quarkus.gizmo.AssignableResultHandle;
+import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
@@ -17,6 +19,7 @@ public class Array {
     private static final MethodDescriptor LIST_CONSTRUCTOR = MethodDescriptor.ofConstructor(ArrayList.class);
     private static final MethodDescriptor ADD_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "add", boolean.class, Object.class);
     private static final MethodDescriptor GET_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "get", Object.class, int.class);
+    private static final MethodDescriptor REMOVE_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "remove", Object.class, int.class);
     private static final MethodDescriptor LENGTH_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "size", int.class);
     private static final MethodDescriptor DOUBLE_METHOD = MethodDescriptor.ofMethod(Integer.class, "doubleValue", double.class);
     private static final MethodDescriptor INT_METHOD = MethodDescriptor.ofMethod(Double.class, "intValue", int.class);
@@ -93,5 +96,19 @@ public class Array {
         // Return the result handle for ease of testing
         return rh;
 
+    }
+
+    public ResultHandle pop(BytecodeCreator method, ClassCreator creator) {
+        ResultHandle arr = variable.read(method);
+        ResultHandle index = method.load(0);
+        AssignableResultHandle answer = method.createVariable(Object.class);
+        ResultHandle intLength = method.invokeVirtualMethod(LENGTH_METHOD, arr);
+        BranchResult br = method.ifGreaterThanZero(intLength);
+        // Deleting the element returns it, so it acts as a pop
+        BytecodeCreator trueBranch = br.trueBranch();
+        trueBranch.assign(answer, trueBranch.invokeVirtualMethod(REMOVE_METHOD, arr, index));
+        BytecodeCreator falseBranch = br.falseBranch();
+        falseBranch.assign(answer, falseBranch.loadNull()); // This should be mysterious
+        return answer;
     }
 }

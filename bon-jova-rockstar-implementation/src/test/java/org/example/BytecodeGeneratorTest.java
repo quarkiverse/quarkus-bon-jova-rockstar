@@ -1,6 +1,7 @@
 package org.example;
 
 import io.quarkus.gizmo.TestClassLoader;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -1435,6 +1436,28 @@ names in Rockstar.)
         }
 
         @Test
+        public void shouldBeAbleToUseWithInArrayAssignments() {
+            String program = """
+                    rock lines with 7
+                    say lines
+                                        """;
+
+
+            assertEquals("1\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldBeAbleToUseListsOfWithInArrayAssignments() {
+            String program = """
+                    push lines with 1, 4, 8, 16
+                    say lines
+                                        """;
+
+
+            assertEquals("4\n", compileAndLaunch(program));
+        }
+
+        @Test
         public void shouldBeAbleToAccessArrayUsingExpressions() {
             String program = """
                     rock arr
@@ -1466,6 +1489,62 @@ names in Rockstar.)
             String output = compileAndLaunch(program);
 
             assertEquals("1\n1\n", output);
+        }
+
+        @Test
+        public void shouldAccessFirstElementOfTheArrayUsingPop() {
+            String program = """
+                    rock 1 into lines
+                    rock 4 into lines
+                    rock 8 into lines
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                                        """;
+
+
+            assertEquals("1\n4\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldBeAbleToPopPastTheEndOfArray() {
+            String program = """
+                    rock 1 into lines
+                    rock 4 into lines
+                    rock 8 into lines
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                                        """;
+
+
+            String output = compileAndLaunch(program);
+            assertTrue(output.startsWith("1\n4\n8\n"), output);
+        }
+
+        @Disabled("Needs better mysterious support")
+        @Test
+        public void shouldAccessFirstElementOfTheArrayUsingPopAndOutputMysterious() {
+            String program = """
+                    rock 1 into lines
+                    rock 4 into lines
+                    rock 8 into lines
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                    let line be pop lines
+                    say line
+                                        """;
+            assertEquals("1\n4\n8\nmysterious\n", compileAndLaunch(program));
         }
     }
 
