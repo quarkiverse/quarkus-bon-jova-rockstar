@@ -119,17 +119,16 @@ public class RemoteLyricsReader {
     );
     private static final List<LyricsProvider> LYRICS_PROVIDERS = List.of(
             new OvhLyricsProvider(),
-            new JLyricsProvider("MusixMatch"),
-            new JLyricsProvider("Genius"),
             new JLyricsProvider("LyricsFreak"),
+            new JLyricsProvider("Genius"),
+            new JLyricsProvider("MusixMatch"),
             new JLyricsProvider("A-Z Lyrics"));
     private static final Map<String, String> cache = new HashMap<>();
 
-    public static List<String> readRemoteLyrics() {
-        return readRemoteLyrics(false);
-    }
+    // The number of times we'll retry downloading lyrics from a remote API to tackle network instability.
+    private static final int NUMBER_OF_RETRIES = 1;
 
-    static List<String> readRemoteLyrics(boolean logDebugOutput) {
+    public static List<String> readRemoteLyrics(boolean logDebugOutput) {
         List<StructuredTaskScope.Subtask<Optional<String>>> allLyricsResults = new ArrayList<>();
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
@@ -169,12 +168,15 @@ public class RemoteLyricsReader {
 
         // Then try the remote APIs.
         for (LyricsProvider lyricsProvider : LYRICS_PROVIDERS) {
-            Optional<String> lyrics = lyricsProvider.provideLyrics(song);
-            if (lyrics.isPresent()) {
-                if (logDebugOutput) System.out.println("Lyrics found for " + song + " in " + lyricsProvider);
-                cache.putIfAbsent(songInKebabCase, lyrics.get());
-                LyricsFileUtil.writeLyricsToFileIfAbsent(songInKebabCase, lyrics.get());
-                return lyrics;
+
+            for (int i = 1; i <= NUMBER_OF_RETRIES; i++) {
+                Optional<String> lyrics = lyricsProvider.provideLyrics(song);
+                if (lyrics.isPresent()) {
+                    if (logDebugOutput) System.out.println("Lyrics found for " + song + " in " + lyricsProvider);
+                    cache.putIfAbsent(songInKebabCase, lyrics.get());
+                    LyricsFileUtil.writeLyricsToFileIfAbsent(songInKebabCase, lyrics.get());
+                    return lyrics;
+                }
             }
         }
 

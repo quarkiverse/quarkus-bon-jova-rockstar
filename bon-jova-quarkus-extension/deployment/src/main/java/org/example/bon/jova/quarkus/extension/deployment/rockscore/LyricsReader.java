@@ -4,6 +4,10 @@ import java.util.List;
 
 public class LyricsReader {
     public List<String> read() {
-        return RemoteLyricsReader.readRemoteLyrics(true);
+        return read(false);
+    }
+
+    List<String> read(boolean logDebugOutput) {
+        return RemoteLyricsReader.readRemoteLyrics(logDebugOutput);
     }
 }

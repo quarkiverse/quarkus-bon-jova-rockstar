@@ -38,7 +38,8 @@ public class LyricsFileUtil {
         }
     }
 
-    private static void createDirIfAbsent() {
+    // Synchronize this method, to prevent another thread creating the directory halfway in this method.
+    private static synchronized void createDirIfAbsent() {
         if (!Files.exists(lyricsDir)) {
             try {
                 Files.createDirectory(lyricsDir);
