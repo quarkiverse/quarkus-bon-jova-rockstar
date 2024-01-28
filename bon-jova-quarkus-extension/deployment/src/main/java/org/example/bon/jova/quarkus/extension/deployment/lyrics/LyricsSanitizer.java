@@ -1,4 +1,4 @@
-package org.example.bon.jova.quarkus.extension.deployment.rockscore;
+package org.example.bon.jova.quarkus.extension.deployment.lyrics;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -10,11 +10,11 @@ public class LyricsSanitizer {
 
     private LyricsSanitizer() {}
 
-    static UnaryOperator<String> noUppercaseLetters() {
+    public static UnaryOperator<String> noUppercaseLetters() {
         return String::toLowerCase;
     }
 
-    static UnaryOperator<String> noForbiddenCharacters() {
+    public static UnaryOperator<String> noForbiddenCharacters() {
         return word -> {
             for (Character character : CHARS_TO_REMOVE) {
                 word = word.replace(character.toString(), "");
@@ -23,11 +23,11 @@ public class LyricsSanitizer {
         };
     }
 
-    static Predicate<String> nonEmptyWords() {
+    public static Predicate<String> nonEmptyWords() {
         return word -> !word.isEmpty();
     }
 
-    static Predicate<String> wordsLongerThanLimit() {
+    public static Predicate<String> wordsLongerThanLimit() {
         return word -> word.length() >= MIN_WORD_LENGTH;
     }
 }

@@ -1,4 +1,4 @@
-package org.example.bon.jova.quarkus.extension.deployment.rockscore;
+package org.example.bon.jova.quarkus.extension.deployment.lyrics;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +38,7 @@ public class LyricsFileUtil {
         }
     }
 
-    // Synchronize this method, to prevent another thread creating the directory halfway in this method.
+    // This synchronized method prevents other threads from creating the directory in-between method execution.
     private static synchronized void createDirIfAbsent() {
         if (!Files.exists(lyricsDir)) {
             try {

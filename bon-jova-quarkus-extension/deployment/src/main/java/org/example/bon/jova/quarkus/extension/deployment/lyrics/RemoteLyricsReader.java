@@ -1,4 +1,4 @@
-package org.example.bon.jova.quarkus.extension.deployment.rockscore;
+package org.example.bon.jova.quarkus.extension.deployment.lyrics;
 
 import com.jagrosh.jlyrics.Lyrics;
 import com.jagrosh.jlyrics.LyricsClient;
@@ -128,6 +128,9 @@ public class RemoteLyricsReader {
     // The number of times we'll retry downloading lyrics from a remote API to tackle network instability.
     private static final int NUMBER_OF_RETRIES = 1;
 
+    private RemoteLyricsReader() {
+    }
+
     public static List<String> readRemoteLyrics(boolean logDebugOutput) {
         List<StructuredTaskScope.Subtask<Optional<String>>> allLyricsResults = new ArrayList<>();
 
@@ -150,7 +153,7 @@ public class RemoteLyricsReader {
         }
     }
 
-    private static Optional<String> readRemoteLyrics(Song song, boolean logDebugOutput) {
+    public static Optional<String> readRemoteLyrics(Song song, boolean logDebugOutput) {
         // Try the cache first.
         String songInKebabCase = song.toKebabCase();
         if (cache.containsKey(songInKebabCase)) {
@@ -185,12 +188,6 @@ public class RemoteLyricsReader {
         return Optional.empty();
     }
 
-    record Song(String title, String artist) {
-        public String toKebabCase() {
-            return String.format("%s-%s", artist.toLowerCase().replaceAll("[.|/|'|\\s|(|)|’|&]", "-"), title.toLowerCase().replaceAll("[.|/|'|\\s]", "-"));
-        }
-    }
-
     interface LyricsProvider {
         Optional<String> provideLyrics(Song song);
     }
@@ -206,7 +203,7 @@ public class RemoteLyricsReader {
             var url = "https://api.lyrics.ovh/v1/{artist}/{title}";
             var ignorePattern = "Paroles de la chanson(.+) par (.+)\\r\\n";
 
-            String response = with(get(url, song.artist, song.title).asString()).get("lyrics");
+            String response = with(get(url, song.artist(), song.title()).asString()).get("lyrics");
 
             if (response == null) {
                 return Optional.empty();
@@ -227,7 +224,7 @@ public class RemoteLyricsReader {
         @Override
         public Optional<String> provideLyrics(Song song) {
             try {
-                return Optional.ofNullable(lyricsClient.getLyrics(String.format("%s - %s", song.artist, song.title)).get())
+                return Optional.ofNullable(lyricsClient.getLyrics(String.format("%s - %s", song.artist(), song.title())).get())
                                 .map(Lyrics::getContent);
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);

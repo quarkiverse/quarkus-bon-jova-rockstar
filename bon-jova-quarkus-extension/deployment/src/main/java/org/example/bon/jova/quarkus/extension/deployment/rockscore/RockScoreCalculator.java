@@ -1,20 +1,24 @@
 package org.example.bon.jova.quarkus.extension.deployment.rockscore;
 
-import java.nio.file.Path;
+import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsRatingCalculator;
+import org.example.bon.jova.quarkus.extension.deployment.lyrics.Song;
+import org.example.bon.jova.quarkus.extension.deployment.wordcounter.WordCounter;
+
+import java.util.List;
 
 public class RockScoreCalculator {
     private final LyricsRatingCalculator lyricsRatingCalculator;
-    private Path lyricsDir;
+    private List<String> allLyrics;
 
-    public RockScoreCalculator(Path lyricsDir) {
-        this.lyricsDir = lyricsDir;
-        this.lyricsRatingCalculator = new LyricsRatingCalculator(WordCounter.countWords(this.lyricsDir));
+    public RockScoreCalculator(List<String> allLyrics) {
+        this.allLyrics = allLyrics;
+        this.lyricsRatingCalculator = new LyricsRatingCalculator(WordCounter.countWords(this.allLyrics));
     }
 
     public int calculateRockScore(String rockstarProgram) {
         final var lyricsRating = lyricsRatingCalculator.calculateLyricsRating(rockstarProgram);
-        final var maxLyricsRatingOfThe80s = lyricsRatingCalculator.calculateMaxLyricsRating(lyricsDir);
+        final var maxLyricsRatingOfThe80s = lyricsRatingCalculator.calculateMaxLyricsRating(allLyrics);
 
-        return Integer.min((int) (lyricsRating / (double) maxLyricsRatingOfThe80s.lyricsRating() * 100), 100);
+        return Integer.min((int) (lyricsRating / (double) maxLyricsRatingOfThe80s * 100), 100);
     }
 }
