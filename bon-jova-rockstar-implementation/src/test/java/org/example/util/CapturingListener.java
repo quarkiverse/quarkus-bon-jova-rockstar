@@ -13,7 +13,7 @@ import java.util.List;
 public class CapturingListener extends RockstarBaseListener {
     private Rockstar.AssignmentStmtContext assignmentStatement;
     private Rockstar.PoeticNumberLiteralContext poeticNumberLiteral;
-    private List<Rockstar.ExpressionContext> expressions = new ArrayList<>();
+    private final List<Rockstar.ExpressionContext> expressions = new ArrayList<>();
     private Rockstar.LiteralContext literal;
     private Rockstar.ConstantContext constant;
     private Rockstar.VariableContext variable;
@@ -21,6 +21,8 @@ public class CapturingListener extends RockstarBaseListener {
     private Rockstar.InputStmtContext input;
     private Rockstar.RoundingStmtContext rounding;
     private Rockstar.ArrayStmtContext array;
+
+    private Rockstar.StringStmtContext stringSplit;
 
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext assignmentStatement) {
@@ -76,6 +78,11 @@ public class CapturingListener extends RockstarBaseListener {
         this.array = ctx;
     }
 
+    @Override
+    public void enterStringStmt(Rockstar.StringStmtContext ctx) {
+        this.stringSplit = ctx;
+    }
+
     public Rockstar.PoeticNumberLiteralContext getPoeticNumberLiteral() {
         return poeticNumberLiteral;
     }
@@ -114,5 +121,9 @@ public class CapturingListener extends RockstarBaseListener {
 
     public RuleContext getArray() {
         return array;
+    }
+
+    public RuleContext getStringSplit() {
+        return stringSplit;
     }
 }

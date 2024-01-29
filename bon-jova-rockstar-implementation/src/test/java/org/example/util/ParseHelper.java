@@ -64,6 +64,11 @@ public class ParseHelper {
         return (Rockstar.ArrayStmtContext) getGrammarElement(program, CapturingListener::getArray);
     }
 
+
+    public Rockstar.StringStmtContext getStringSplit(String program) {
+        return (Rockstar.StringStmtContext) getGrammarElement(program, CapturingListener::getStringSplit);
+    }
+
     private RuleContext getGrammarElement(String program, Function<CapturingListener,
             RuleContext> getter) {
 /*

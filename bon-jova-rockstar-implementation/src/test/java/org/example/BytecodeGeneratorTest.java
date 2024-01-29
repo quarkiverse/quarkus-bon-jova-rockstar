@@ -1345,6 +1345,57 @@ names in Rockstar.)
     }
 
     @Nested
+    class Strings {
+
+        @Disabled("Needs support for changing the type of a variable")
+        @Test
+        public void shouldSplitStringsInPlace() {
+            String program = """
+                    My life is "misery"
+                    Cut my life
+                    Say my life
+                    """;
+            assertEquals("6\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldSplitStringsIntoCharArrays() {
+            String program = """
+                    My life is "one two"
+                    Cut my life into pieces
+                    Say pieces
+                    """;
+            assertEquals("7\n", compileAndLaunch(program));
+        }
+
+        @Disabled("Needs support for changing the type of a variable")
+        @Test
+        public void shouldSplitStringsInPlaceWithDelimiter() {
+            String program = """
+                    Your cake is "chocolate"
+                    My knife is "o"
+                    Cut your cake with my knife
+                    """;
+
+            assertEquals("3\n", compileAndLaunch(program));
+
+        }
+
+        @Test
+        public void shouldSplitStringsUsingADelimiter() {
+            String program = """
+                    Your deceit is " "
+                    My heart is "a string with spaces"
+                    Shatter my heart into pieces with your deceit
+                    Say pieces
+                    """;
+
+            assertEquals("4\n", compileAndLaunch(program));
+
+        }
+    }
+
+    @Nested
     class Arrays {
         @Test
         public void shouldInitialiseAnArrayWithRock() {

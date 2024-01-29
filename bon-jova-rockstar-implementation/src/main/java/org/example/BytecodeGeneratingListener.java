@@ -361,6 +361,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
+    public void enterStringStmt(Rockstar.StringStmtContext ctx) {
+        new StringSplit(ctx).toCode(currentCreator, creator);
+    }
+
+
+    @Override
     public void enterFunctionDeclaration(Rockstar.FunctionDeclarationContext ctx) {
         // A function creator in Gizmo is like a lambda, which is not really what we want, so use methods
         // TODO the scope of these should be local, not global

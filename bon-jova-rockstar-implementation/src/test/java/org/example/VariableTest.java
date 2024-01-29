@@ -6,6 +6,7 @@ import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import org.example.util.ParseHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
@@ -70,6 +71,18 @@ public class VariableTest {
         String program = """
                 My             thing is true
                 Shout my   thing
+                                            """;
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
+        Variable v = new Variable(ctx, boolean.class);
+        assertEquals("my__thing", v.getVariableName());
+    }
+
+    @Disabled("Lies cannot be used in a variable name since it is a boolean alias")
+    @Test
+    public void shouldAllowLiesVariableNames() {
+        String program = """
+                Your lies is "hi"
+                Shout your lies
                                             """;
         Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
         Variable v = new Variable(ctx, boolean.class);
