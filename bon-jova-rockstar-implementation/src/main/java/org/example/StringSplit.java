@@ -73,10 +73,10 @@ public class StringSplit {
 
             AssignableResultHandle index = method.createVariable(int.class);
             method.assign(index, method.load(0));
+
             WhileLoop loop = method.whileLoop(bc -> bc.ifIntegerLessThan(index, length));
             BytecodeCreator block = loop.block();
             ResultHandle charAsString = block.invokeVirtualMethod(CHAR_AT_METHOD, toSplit, index);
-
             block.invokeInterfaceMethod(ADD_METHOD, answer, charAsString);
             block.assign(index, block.increment(index));
         }

@@ -67,13 +67,15 @@ Some of these may work but have not been validated with tests.
 
 ## Arrays
 
-- [ ] Array declaration using indexes
+- [X] Reading at numerical indexes
+- [X] Array initialisation by setting a value at an index
 - [ ] Non-numeric array keys
+- [ ] Use the array index syntax to read (but not write) specific characters from a string
 
 ## Queue operations
 
-- [ ] Pushing
-- [ ] Popping
+- [X] Pushing
+- [X] Popping
 - [ ] Special `roll x into y` syntax for removing the first element from an array and assigning it to a variable
 - [ ] Special syntax for pushing poetic literals onto a queue
 

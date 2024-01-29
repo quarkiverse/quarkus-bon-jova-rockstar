@@ -688,7 +688,7 @@ names in Rockstar.)
                 """;
         String output = compileAndLaunch(program);
 
-        var expected = BigDecimal.valueOf(2.0/3);
+        var expected = BigDecimal.valueOf(2.0 / 3);
         assertEquals("%.7f%n".formatted(expected), output);
     }
 
@@ -1597,6 +1597,33 @@ names in Rockstar.)
                     say line
                                         """;
             assertEquals("1\n4\n8\nmysterious\n", compileAndLaunch(program));
+        }
+
+        // Arrays are zero-based, and dynamically allocated when values are assigned using numeric indexes.
+        @Test
+        public void shouldSetTheArrayLengthOnWritingToAnIndex() {
+            String program = """
+                    Let the array at 0 be "zero"
+                    Let the array at 1 be "one"
+                    Let the array at 255 be "big"
+                    Shout the array
+                    Shout the array at 0
+                    Shout the array at 255
+                                                            """;
+            assertEquals("256\nzero\nbig\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldNotOverWriteExistingContentsWhenPopulatingArrayOnInitialisationAtALargeIndex() {
+            String program = """
+                    Rock 1, 2, 3 into arr
+                    Let arr at 8 be 7
+                    Say arr at 2
+                    Say arr at 8
+                    Say arr
+                                        """;
+            assertEquals("3\n7\n9\n", compileAndLaunch(program));
+
         }
     }
 

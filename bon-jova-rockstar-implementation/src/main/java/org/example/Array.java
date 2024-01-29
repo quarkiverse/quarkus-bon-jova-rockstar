@@ -7,6 +7,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
+import io.quarkus.gizmo.WhileLoop;
 import rock.Rockstar;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import static org.example.Expression.coerceAwayNothing;
 public class Array {
     private static final MethodDescriptor LIST_CONSTRUCTOR = MethodDescriptor.ofConstructor(ArrayList.class);
     static final MethodDescriptor ADD_METHOD = MethodDescriptor.ofMethod(List.class, "add", boolean.class, Object.class);
+    static final MethodDescriptor ADD_AT_INDEX_METHOD = MethodDescriptor.ofMethod(List.class, "add", void.class, int.class, Object.class);
     private static final MethodDescriptor GET_METHOD = MethodDescriptor.ofMethod(List.class, "get", Object.class, int.class);
     private static final MethodDescriptor REMOVE_METHOD = MethodDescriptor.ofMethod(List.class, "remove", Object.class, int.class);
     private static final MethodDescriptor LENGTH_METHOD = MethodDescriptor.ofMethod(List.class, "size", int.class);
@@ -28,6 +30,8 @@ public class Array {
     private final Variable variable;
     public static final Class<?> TYPE_CLASS = List.class;
     private List<Expression> initialContents;
+    private Expression index;
+    private Expression placedValue;
 
     public Array(Rockstar.ArrayStmtContext ctx) {
         // TODO two variables, or an intermediate class to handle the map/list duality?
@@ -39,6 +43,11 @@ public class Array {
 
         if (ctx.list() != null) {
             initialContents = ctx.list().expression().stream().map(Expression::new).toList();
+        }
+
+        if (ctx.KW_LET() != null && ctx.KW_AT() != null) {
+            index = new Expression(ctx.expression(0));
+            placedValue = new Expression(ctx.expression(1));
         }
     }
 
@@ -91,6 +100,20 @@ public class Array {
             for (Expression c : initialContents) {
                 method.invokeInterfaceMethod(ADD_METHOD, rh, c.getResultHandle(method, creator));
             }
+        }
+
+        if (index != null) {
+            // Ensure capacity
+            ResultHandle addIndex = method.invokeVirtualMethod(INT_METHOD, index.getResultHandle(method, creator));
+            ResultHandle length = method.invokeInterfaceMethod(LENGTH_METHOD, rh);
+            AssignableResultHandle currentPosition = method.createVariable(int.class);
+            method.assign(currentPosition, length);
+            WhileLoop loop = method.whileLoop(bc -> bc.ifIntegerLessThan(currentPosition, addIndex));
+            BytecodeCreator block = loop.block();
+            block.invokeInterfaceMethod(ADD_METHOD, rh, block.loadNull());
+            block.assign(currentPosition, block.increment(currentPosition));
+
+            method.invokeInterfaceMethod(ADD_AT_INDEX_METHOD, rh, addIndex, placedValue.getResultHandle(method, creator));
         }
 
         // Return the result handle for ease of testing
