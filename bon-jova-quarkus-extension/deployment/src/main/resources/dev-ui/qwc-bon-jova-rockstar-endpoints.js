@@ -152,7 +152,7 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
 
     _getLevel(score) {
         let level = "error";
-        if (score >= 66 && score < 100) {
+        if (score >= 50 && score < 100) {
             level = "warning";
         } else if (score === 100) {
             level = "success";

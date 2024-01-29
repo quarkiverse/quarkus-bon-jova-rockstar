@@ -1,6 +1,7 @@
 package io.quarkiverse.pact.it;
 
 import org.apache.maven.cli.MavenCli;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NormalModeRockstarExtensionIT {
 
+    @Disabled("Until we fix downloading lyrics from this test")
     @Test
     public void testMavenBuild() {
         final ByteArrayOutputStream testOut = new ByteArrayOutputStream();

@@ -688,7 +688,8 @@ names in Rockstar.)
                 """;
         String output = compileAndLaunch(program);
 
-        assertEquals("0.6666667\n", output);
+        var expected = BigDecimal.valueOf(2.0/3);
+        assertEquals("%.7f%n".formatted(expected), output);
     }
 
     @Test
