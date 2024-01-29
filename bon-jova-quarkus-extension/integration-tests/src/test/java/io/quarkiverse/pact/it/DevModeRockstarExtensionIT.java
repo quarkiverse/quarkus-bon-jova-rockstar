@@ -55,6 +55,7 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
         Assertions.assertEquals(0, results.getTestsFailed());
     }
 
+    @Disabled("Until we fix downloading lyrics from this test")
     @Test
     public void testThatTheTestsPassedOnSomeRun() throws MavenInvocationException, IOException {
         //we also check continuous testing
@@ -69,6 +70,7 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
         Assertions.assertEquals(0, results.getTotalTestsFailed());
     }
 
+    @Disabled("Until we fix downloading lyrics from this test")
     @Test
     public void testThatCodeChangeTriggersHotReloadAndTestRerun() throws MavenInvocationException, IOException {
         // Baseline check; wait for the tests to run

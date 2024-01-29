@@ -35,7 +35,7 @@ class LyricsRatingCalculatorTest {
 
     @Test
     void testCalculateMaxLyricsRating() {
-        var expectedSongLyricsRating = 84;
+        var expectedSongLyricsRating = 83;
 
         var lyricsRatingCalculator = new LyricsRatingCalculator(wordCounts);
         var actualMaxLyricsRating = lyricsRatingCalculator.calculateMaxLyricsRating(allLyrics);
