@@ -30,7 +30,9 @@ class LyricsRatingCalculatorTest {
         var actualLyricsRating = lyricsRatingCalculator.calculateLyricsRating(String.join(System.lineSeparator(),
                         Files.readAllLines(Path.of("src/test/resources/hello_hanno_hello_holly.rock"))));
 
-        assertEquals(expectedLyricsRating, actualLyricsRating);
+        // We assert using a range, because lyrics are downloaded from multiple sources, causing small differences in
+        // the lyrics rating over multiple test runs.
+        assertWithinRange(expectedLyricsRating, actualLyricsRating, 10);
     }
 
     @Test
@@ -40,6 +42,12 @@ class LyricsRatingCalculatorTest {
         var lyricsRatingCalculator = new LyricsRatingCalculator(wordCounts);
         var actualMaxLyricsRating = lyricsRatingCalculator.calculateMaxLyricsRating(allLyrics);
 
-        assertEquals(expectedSongLyricsRating, actualMaxLyricsRating);
+        // We assert using a range, because lyrics are downloaded from multiple sources, causing small differences in
+        // the lyrics rating over multiple test runs.
+        assertWithinRange(expectedSongLyricsRating, actualMaxLyricsRating, 10);
+    }
+
+    private static void assertWithinRange(int expected, int actual, int range) {
+        assertTrue(expected >= actual - range && expected <= actual + range);
     }
 }
