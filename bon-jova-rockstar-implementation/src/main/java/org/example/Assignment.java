@@ -17,44 +17,56 @@ public class Assignment {
     private final String text;
     private Expression expression;
 
+    private Array arrayAccess;
+
     public Assignment(Rockstar.AssignmentStmtContext ctx) {
         this.text = ctx.getText();
 
-        if (ctx.expression() != null) {
-            expression = new Expression(ctx.expression());
-            value = expression.getValue();
-            variableClass = expression.getValueClass();
+        if (ctx.KW_ROLL() != null) {
+            value = null;
+            variableClass = Object.class;
+            Variable source = new Variable(ctx.variable(0), Object.class);
+            arrayAccess = new Array(source);
+
+            variable = new Variable(ctx.variable().get(1), variableClass);
+
         } else {
-            // The literals and constant could be in an expression, or top-level
-            // (which is a bit annoying and perhaps is something that should be optimised in the grammar)
-            Rockstar.LiteralContext literalContext = ctx.literal();
-            Rockstar.ConstantContext constantContext = ctx.constant();
-
-            if (literalContext != null) {
-                Literal literal = new Literal(literalContext);
-                value = literal.getValue();
-                variableClass = literal.getValueClass();
-            } else if (constantContext != null) {
-                Constant constant = new Constant(constantContext);
-                value = constant.getValue();
-                variableClass = constant.getValueClass();
+            if (ctx.expression() != null) {
+                expression = new Expression(ctx.expression());
+                value = expression.getValue();
+                variableClass = expression.getValueClass();
             } else {
-                if (ctx.poeticStringLiteral() != null) {
-                    value = ctx.poeticStringLiteral()
-                            .getText();
-                    variableClass = String.class;
+                // The literals and constant could be in an expression, or top-level
+                // (which is a bit annoying and perhaps is something that should be optimised in the grammar)
+                Rockstar.LiteralContext literalContext = ctx.literal();
+                Rockstar.ConstantContext constantContext = ctx.constant();
 
-                } else if (ctx.poeticNumberLiteral() != null) {
-                    PoeticNumberLiteral lit = new PoeticNumberLiteral(ctx.poeticNumberLiteral());
-                    value = lit.getValue();
-                    variableClass = lit.getVariableClass();
+                if (literalContext != null) {
+                    Literal literal = new Literal(literalContext);
+                    value = literal.getValue();
+                    variableClass = literal.getValueClass();
+                } else if (constantContext != null) {
+                    Constant constant = new Constant(constantContext);
+                    value = constant.getValue();
+                    variableClass = constant.getValueClass();
                 } else {
-                    value = null;
-                    variableClass = Object.class;
+                    if (ctx.poeticStringLiteral() != null) {
+                        value = ctx.poeticStringLiteral()
+                                .getText();
+                        variableClass = String.class;
+
+                    } else if (ctx.poeticNumberLiteral() != null) {
+                        PoeticNumberLiteral lit = new PoeticNumberLiteral(ctx.poeticNumberLiteral());
+                        value = lit.getValue();
+                        variableClass = lit.getVariableClass();
+                    } else {
+                        value = null;
+                        variableClass = Object.class;
+                    }
                 }
             }
+            variable = new Variable(ctx.variable().get(0), variableClass);
         }
-        variable = new Variable(ctx.variable(), variableClass);
         originalName = variable.getVariableName();
         // Variables should 'apply' to future pronouns when used in assignments
         variable.track();
@@ -82,6 +94,9 @@ public class Assignment {
 
         if (expression != null) {
             rh = expression.getResultHandle(method, creator);
+        } else if (arrayAccess != null) {
+            variable.getField(creator, method);
+            rh = arrayAccess.pop(method, creator);
         } else {
             // This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
             Object value = getValue();
