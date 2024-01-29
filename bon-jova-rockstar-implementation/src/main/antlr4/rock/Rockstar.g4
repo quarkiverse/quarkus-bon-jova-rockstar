@@ -6,7 +6,7 @@ program: (NL|ws)* (statementList | functionDeclaration)* ws*;
 
 statementList: statement+;
 
-statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
@@ -27,6 +27,11 @@ list: (expression) (COMMA ws expression)*;
 arrayStmt: KW_ROCK ws variable
        | KW_ROCK ws list ws KW_INTO ws variable
        | KW_ROCK ws variable ws KW_WITH ws list
+;
+
+stringStmt: KW_SPLIT ws expression?? ws KW_WITH ws expression
+        | KW_SPLIT ws expression?? (ws KW_INTO ws variable)? (ws KW_WITH ws expression)?
+        | KW_SPLIT ws expression?? (ws KW_WITH ws expression)? (ws KW_INTO ws variable)?
 ;
 
 functionCall: functionName=variable WS KW_TAKING WS argList;

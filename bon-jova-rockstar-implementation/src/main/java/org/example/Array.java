@@ -17,10 +17,10 @@ import static org.example.Expression.coerceAwayNothing;
 
 public class Array {
     private static final MethodDescriptor LIST_CONSTRUCTOR = MethodDescriptor.ofConstructor(ArrayList.class);
-    private static final MethodDescriptor ADD_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "add", boolean.class, Object.class);
-    private static final MethodDescriptor GET_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "get", Object.class, int.class);
-    private static final MethodDescriptor REMOVE_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "remove", Object.class, int.class);
-    private static final MethodDescriptor LENGTH_METHOD = MethodDescriptor.ofMethod(ArrayList.class, "size", int.class);
+    static final MethodDescriptor ADD_METHOD = MethodDescriptor.ofMethod(List.class, "add", boolean.class, Object.class);
+    private static final MethodDescriptor GET_METHOD = MethodDescriptor.ofMethod(List.class, "get", Object.class, int.class);
+    private static final MethodDescriptor REMOVE_METHOD = MethodDescriptor.ofMethod(List.class, "remove", Object.class, int.class);
+    private static final MethodDescriptor LENGTH_METHOD = MethodDescriptor.ofMethod(List.class, "size", int.class);
     private static final MethodDescriptor DOUBLE_METHOD = MethodDescriptor.ofMethod(Integer.class, "doubleValue", double.class);
     private static final MethodDescriptor INT_METHOD = MethodDescriptor.ofMethod(Double.class, "intValue", int.class);
 
@@ -53,7 +53,7 @@ public class Array {
 
     public static ResultHandle toScalarContext(Variable variable, BytecodeCreator method) {
         ResultHandle arr = variable.read(method);
-        ResultHandle intLength = method.invokeVirtualMethod(LENGTH_METHOD, arr);
+        ResultHandle intLength = method.invokeInterfaceMethod(LENGTH_METHOD, arr);
         // We work in doubles everywhere, so convert to a double; use doubleValue not a cast, since the dynamic invocation actually gave us an Integer
         return method.invokeVirtualMethod(DOUBLE_METHOD, intLength);
     }
@@ -70,7 +70,7 @@ public class Array {
 
         }
         index = method.invokeVirtualMethod(INT_METHOD, index);
-        return method.invokeVirtualMethod(GET_METHOD, rh, index);
+        return method.invokeInterfaceMethod(GET_METHOD, rh, index);
     }
 
     public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
@@ -89,7 +89,7 @@ public class Array {
 
         if (initialContents != null) {
             for (Expression c : initialContents) {
-                method.invokeVirtualMethod(ADD_METHOD, rh, c.getResultHandle(method, creator));
+                method.invokeInterfaceMethod(ADD_METHOD, rh, c.getResultHandle(method, creator));
             }
         }
 
@@ -102,11 +102,11 @@ public class Array {
         ResultHandle arr = variable.read(method);
         ResultHandle index = method.load(0);
         AssignableResultHandle answer = method.createVariable(Object.class);
-        ResultHandle intLength = method.invokeVirtualMethod(LENGTH_METHOD, arr);
+        ResultHandle intLength = method.invokeInterfaceMethod(LENGTH_METHOD, arr);
         BranchResult br = method.ifGreaterThanZero(intLength);
         // Deleting the element returns it, so it acts as a pop
         BytecodeCreator trueBranch = br.trueBranch();
-        trueBranch.assign(answer, trueBranch.invokeVirtualMethod(REMOVE_METHOD, arr, index));
+        trueBranch.assign(answer, trueBranch.invokeInterfaceMethod(REMOVE_METHOD, arr, index));
         BytecodeCreator falseBranch = br.falseBranch();
         falseBranch.assign(answer, falseBranch.loadNull()); // This should be mysterious
         return answer;

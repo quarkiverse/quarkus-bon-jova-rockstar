@@ -136,6 +136,7 @@ KW_ROCK: R O C K | P U S H;
 KW_ROLL: R O L L | P O P;
 KW_AT: A T;
 
+KW_SPLIT: C U T | S P L I T | S H A T T E R;
 
 PROPER_NOUN: [A-Z][A-Z|a-z]*;
 WORD: [a-z|A-Z]+;

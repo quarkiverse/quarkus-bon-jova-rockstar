@@ -79,8 +79,9 @@ Some of these may work but have not been validated with tests.
 
 ## Splitting and joining strings
 
-- [ ] Split a string in Rockstar, use the `cut` mutation (aliases `split` and `shatter`)
-- [ ] Delimiters
+- [X] Split a string in Rockstar, use the `cut` mutation (aliases `split` and `shatter`)
+- [ ] Split strings in place
+- [X] Delimiters
 - [ ] The `join` support
 
 ## Casting
