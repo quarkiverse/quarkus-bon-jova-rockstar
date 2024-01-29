@@ -126,8 +126,8 @@ public class RemoteLyricsReader {
             new JLyricsProvider("A-Z Lyrics"));
     private static final Map<String, String> cache = new HashMap<>();
 
-    // The number of times we'll retry downloading lyrics from a remote API to tackle network instability.
-    private static final int NUMBER_OF_RETRIES = 1;
+    // The number of times we'll retry downloading lyrics from a remote API to tackle possible network instability.
+    private static final int NUMBER_OF_RETRIES = 2;
 
     private RemoteLyricsReader() {
     }

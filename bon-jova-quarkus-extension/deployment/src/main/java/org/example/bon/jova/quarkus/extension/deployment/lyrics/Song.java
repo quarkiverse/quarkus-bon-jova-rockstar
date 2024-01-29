@@ -46,6 +46,11 @@ public final class Song {
         return Objects.hash(title, artist);
     }
 
+    @Override
+    public String toString() {
+        return toKebabCase();
+    }
+
     public void setLyrics(Optional<String> lyrics) {
         this.lyrics = lyrics;
     }
