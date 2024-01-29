@@ -110,8 +110,29 @@ public class ArrayTest {
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {9d};
         assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
-
     }
+
+    @Test
+    public void shouldPopulateArrayOnInitialisationAtAIndexNextToTheEnd() {
+        String program = """
+                Let arr at 0 be 2
+                """;
+        Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
+        Object[] contents = {2d};
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+    }
+
+    @Test
+    public void shouldPopulateArrayOnInitialisationAtALargeIndex() {
+        String program = """
+                Let arr at 5 be 2
+                """;
+        Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
+        Object[] contents = {null, null, null, null, null, 2d};
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+    }
+    
+    // We can't test reading arrays because they're multi-line executions
 
     private Object execute(Array a) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());

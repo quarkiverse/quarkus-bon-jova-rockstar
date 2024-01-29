@@ -27,6 +27,8 @@ list: (expression) (COMMA ws expression)*;
 arrayStmt: KW_ROCK ws variable
        | KW_ROCK ws list ws KW_INTO ws variable
        | KW_ROCK ws variable ws KW_WITH ws list
+       | KW_LET ws variable ws KW_AT ws expression ws KW_BE ws expression
+
 ;
 
 stringStmt: KW_SPLIT ws expression?? ws KW_WITH ws expression
