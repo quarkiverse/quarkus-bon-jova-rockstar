@@ -1625,6 +1625,22 @@ names in Rockstar.)
             assertEquals("3\n7\n9\n", compileAndLaunch(program));
 
         }
+
+        // Rockstar also supports a special roll x into y syntax for removing the first element from an array and assigning it to a variable
+        @Test
+        public void shouldSupportAssignmentUsingRollIntoVariables() {
+            String program = """
+                    Rock the list with 4, 5, 6
+                    Roll the list into foo
+                    Roll the list into bar
+                    Roll the list into baz
+                    Shout foo
+                    Shout bar
+                    Shout baz
+                    """;
+            assertEquals("4\n5\n6\n", compileAndLaunch(program));
+
+        }
     }
 
     private String compileAndLaunch(String program, String... args) {

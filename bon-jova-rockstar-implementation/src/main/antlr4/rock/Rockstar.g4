@@ -50,6 +50,7 @@ assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws (KW_IS|KW_WAS_WERE))
               | KW_LET ws variable ws KW_BE ws expression
               | KW_PUT ws expression ws KW_INTO ws variable
               | variable ws (KW_SAYS | KW_SAY) WS poeticStringLiteral
+              | KW_ROLL ws variable ws KW_INTO ws variable
 ;
 
 roundingStmt: KW_TURN ws variable ws (KW_ROUND | KW_UP | KW_DOWN)
