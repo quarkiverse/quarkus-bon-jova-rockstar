@@ -3,13 +3,14 @@ package org.example.bon.jova.quarkus.extension.deployment.lyrics;
 import com.jagrosh.jlyrics.Lyrics;
 import com.jagrosh.jlyrics.LyricsClient;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.StructuredTaskScope;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.path.json.JsonPath.with;
@@ -132,21 +133,24 @@ public class RemoteLyricsReader {
     }
 
     public static List<String> readRemoteLyrics(boolean logDebugOutput) {
-        List<StructuredTaskScope.Subtask<Optional<String>>> allLyricsResults = new ArrayList<>();
-
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            for (Song song : songsToFetch) {
-                allLyricsResults.add(scope.fork(() -> readRemoteLyrics(song, logDebugOutput)));
-            }
-
+        try (var executorService = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<Future<Optional<String>>> allLyricsResults;
             try {
-                scope.join().throwIfFailed();
-            } catch (ExecutionException | InterruptedException e) {
+                allLyricsResults = executorService.invokeAll(songsToFetch.stream()
+                            .map(song -> (Callable<Optional<String>>) () -> readRemoteLyrics(song, logDebugOutput))
+                            .toList());
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
             return allLyricsResults.stream()
-                    .map(StructuredTaskScope.Subtask::get)
+                    .map(optionalFuture -> {
+                        try {
+                            return optionalFuture.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .toList();
