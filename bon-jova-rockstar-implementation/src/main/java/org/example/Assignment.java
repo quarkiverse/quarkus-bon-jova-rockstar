@@ -2,7 +2,6 @@ package org.example;
 
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
-import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import org.example.grammar.PoeticNumberLiteral;
 import rock.Rockstar;
@@ -88,14 +87,11 @@ public class Assignment {
     // TODO make argument order consistent across related classes
     public void toCode(ClassCreator creator, BytecodeCreator method) {
 
-        FieldDescriptor field = variable.getField(creator, method);
-
         ResultHandle rh;
 
         if (expression != null) {
             rh = expression.getResultHandle(method, creator);
         } else if (arrayAccess != null) {
-            variable.getField(creator, method);
             rh = arrayAccess.pop(method, creator);
         } else {
             // This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
@@ -114,7 +110,7 @@ public class Assignment {
             }
         }
 
-        method.writeStaticField(field, rh);
+        variable.write(method, creator, rh);
 
     }
 }

@@ -110,13 +110,13 @@ public class Variable {
         return variables.containsKey(variableName);
     }
 
-    public void write(BytecodeCreator method, ResultHandle value) {
-        FieldDescriptor field = variables.get(variableName);
+    public void write(BytecodeCreator method, ClassCreator creator, ResultHandle value) {
+
+        FieldDescriptor field = getField(creator, method);
         method.writeStaticField(field, value);
     }
 
-    // TODO would it be nicer to store our own class?
-    public FieldDescriptor getField(ClassCreator creator, BytecodeCreator method) {
+    private FieldDescriptor getField(ClassCreator creator, BytecodeCreator method) {
         FieldDescriptor field;
         if (!isAlreadyDefined()) {
             // Variables are global in scope, so need to be stored at the class level (either as static or instance variables)

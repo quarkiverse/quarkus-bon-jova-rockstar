@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class VariableTest {
@@ -221,11 +222,7 @@ names in Rockstar.)
         Variable variable = new Variable(ctx, String.class);
         String className = "soundcheck";
         ResultHandle writtenValue = method.load(className);
-        // We need to initialise the field before trying to write to it (yuck, clunk)
-        // TODO should we maybe try and streamline that in the variable class, or is this the logical flow?
-        // TODO we now definitely have enough information for the variable to do its own field initialisation
-        FieldDescriptor field = variable.getField(creator, method);
-        variable.write(method, writtenValue);
+        variable.write(method, creator, writtenValue);
         ResultHandle readValue = variable.read(method);
 
         // Ignore the number in our comparison
@@ -243,20 +240,28 @@ names in Rockstar.)
                 .className("holder")
                 .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
+        Set<FieldDescriptor> fields = creator.getExistingFields();
+        assertEquals(0, fields.size());
 
         Rockstar.VariableContext ctx = new ParseHelper().getVariable("fred is 5");
         Variable variable = new Variable(ctx, defaultVariableClass);
 
-        FieldDescriptor field1 = variable.getField(creator, method);
-        assertNotNull(field1);
+        variable.write(method, creator, method.load(0));
+        fields = creator.getExistingFields();
+        assertEquals(1, fields.size());
+        FieldDescriptor field1 = fields.iterator().next();
+
 
         // Now a second variable instance with the same name should return the same field
         ctx = new ParseHelper().getVariable("fred is 8");
         variable = new Variable(ctx, defaultVariableClass);
 
-        FieldDescriptor field2 = variable.getField(creator, method);
-        assertSame(field1, field2);
+        variable.write(method, creator, method.load(1));
+        fields = creator.getExistingFields();
+        assertEquals(1, fields.size());
+        FieldDescriptor field2 = fields.iterator().next();
 
+        assertSame(field1, field2);
     }
 
     @Test
@@ -269,9 +274,7 @@ names in Rockstar.)
         Rockstar.VariableContext ctx = new ParseHelper().getVariable("My thing is 6");
         Variable variable = new Variable(ctx, defaultVariableClass);
 
-        FieldDescriptor field = variable.getField(creator, method);
-        assertEquals("my__thing", field.getName());
+        variable.write(method, creator, method.load(2));
+        assertEquals("my__thing", creator.getExistingFields().iterator().next().getName());
     }
-
-
 }

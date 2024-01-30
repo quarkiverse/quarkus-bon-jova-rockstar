@@ -24,7 +24,7 @@ public class StringSplit {
 
     private final Class<?> variableClass;
     private final Variable variable;
-    private Expression source;
+    private final Expression source;
     private Expression delimiter;
 
     public StringSplit(Rockstar.StringStmtContext ctx) {
@@ -81,12 +81,7 @@ public class StringSplit {
             block.assign(index, block.increment(index));
         }
 
-        if (!variable.isAlreadyDefined()) {
-            // TODO refactor so getting the field is private
-            variable.getField(creator, method);
-        }
-
-        variable.write(method, answer);
+        variable.write(method, creator, answer);
 
         // Return the result handle for ease of testing
         return answer;

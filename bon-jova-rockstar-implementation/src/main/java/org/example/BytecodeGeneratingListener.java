@@ -153,7 +153,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
                 ResultHandle added = tryBlock.add(primitive, one);
                 tryBlock.assign(incremented, added);
-                variable.write(tryBlock, incremented);
+                variable.write(tryBlock, creator, incremented);
             }
 
             // Casting a null to a Double works, casting to a double gives an NPE
@@ -182,7 +182,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 }
             }
 
-            variable.write(currentCreator, incremented);
+            variable.write(currentCreator, creator, incremented);
         }
     }
 
@@ -215,7 +215,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
                 ResultHandle added = tryBlock.add(primitive, minusOne);
                 tryBlock.assign(incremented, added);
-                variable.write(tryBlock, incremented);
+                variable.write(tryBlock, creator, incremented);
             }
 
             // Casting a null to a Double works, casting to a double gives an NPE
@@ -239,14 +239,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 }
             }
 
-            variable.write(currentCreator, incremented);
+            variable.write(currentCreator, creator, incremented);
         }
     }
 
     @Override
     public void enterRoundingStmt(Rockstar.RoundingStmtContext ctx) {
         Rounding rounding = new Rounding(ctx);
-        rounding.toCode(currentCreator);
+        rounding.toCode(currentCreator, creator);
     }
 
     @Override
@@ -398,8 +398,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         int i = 0;
         for (Variable v : variables) {
             // TODO this is all wrong, should be a scoped thing, not a global var
-            FieldDescriptor field = v.getField(creator, fun);
-            v.write(fun, fun.getMethodParam(i));
+            v.write(fun, creator, fun.getMethodParam(i));
             i++;
         }
     }
