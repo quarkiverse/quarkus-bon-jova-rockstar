@@ -1643,6 +1643,102 @@ names in Rockstar.)
         }
     }
 
+    @Nested
+    class Casting {
+        @Test
+        public void shouldCastDoubleToString() {
+            String program = """
+                    Let X be "123.45"
+                    Cast X
+                        (X now contains the numeric value 123.45)
+                    Say X
+                    Say X + 2 (casting really shows when doing math)
+                    """;
+            assertEquals("123.45\n125.45\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldCastDoubleToStringUsingBurnAlias() {
+            String program = """
+                    Let X be "123.45"
+                    Burn X
+                        (X now contains the numeric value 123.45)
+                    Say X
+                    Say X + 2 (casting really shows when doing math)
+                    """;
+            assertEquals("123.45\n125.45\n", compileAndLaunch(program));
+        }
+
+        @Disabled("Not yet implemented")
+        @Test
+        public void shouldCastStringToDoubleWithConversionBases() {
+            String program = """
+                    Let X be "ff"
+                    Cast X with 16
+                        (X now contains the numeric value 255 - OxFF)
+                    Say X
+                    Say X + 2
+                                       
+                                        
+                    Cast "12345" into result
+                        (result now contains the number 12345)
+                    Cast "aa" into result with 16
+                        (result now contains the number 170 - 0xAA)
+                                        
+                    Cast 65 into result
+                        (result now contains the string "A" - ASCII code 65)
+                                        
+                    Cast 1046 into result
+                        (result now contains the Cyrillic letter "Ж" - Unicode code point 1046)
+                    """;
+            assertEquals("255\n257\n", compileAndLaunch(program));
+        }
+
+        @Disabled("Not yet implemented")
+        @Test
+        public void shouldCastIntoAVariable() {
+            String program = """             
+                    Cast "12345" into result
+                        (result now contains the number 12345)
+                    Say result
+                    Say result + 2
+                    Cast "aa" into result with 16
+                        (result now contains the number 170 - 0xAA)
+                    Say result
+                    Say result + 2
+                    """;
+            assertEquals("12345\n12347\n170\n172\n", compileAndLaunch(program));
+        }
+
+        @Disabled("Not yet implemented")
+        @Test
+        public void shouldCastNumbersIntoStringsAsUnicode() {
+            String program = """       
+                    Cast 65 into result
+                        (result now contains the string "A" - ASCII code 65)
+                    Say result
+                    Say result + 2
+                                        
+                    Cast 1046 into result
+                        (result now contains the Cyrillic letter "Ж" - Unicode code point 1046)
+                    Say result
+                    """;
+            assertEquals("A\nA2\nЖ\n", compileAndLaunch(program));
+        }
+    }
+
+    @Test
+    public void shouldUpdateTypeOnNewUsage() {
+        String program = """
+                my world is "octopus"
+                            my world is nothing
+                            Build my world up
+                            Build my world up
+                            say my world
+                """;
+        assertEquals("2\n", compileAndLaunch(program));
+    }
+
     private String compileAndLaunch(String program, String... args) {
         // Save the current System.out for later restoration
         PrintStream originalOut = System.out;

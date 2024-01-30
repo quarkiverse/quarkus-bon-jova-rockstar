@@ -24,7 +24,7 @@ public class Assignment {
         if (ctx.KW_ROLL() != null) {
             value = null;
             variableClass = Object.class;
-            Variable source = new Variable(ctx.variable(0), Object.class);
+            Variable source = new Variable(ctx.variable(0), Array.TYPE_CLASS);
             arrayAccess = new Array(source);
 
             variable = new Variable(ctx.variable().get(1), variableClass);

@@ -6,7 +6,7 @@ program: (NL|ws)* (statementList | functionDeclaration)* ws*;
 
 statementList: statement+;
 
-statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | castStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
@@ -80,6 +80,8 @@ ups: KW_UP (COMMA? ws KW_UP)*;
 decrementStmt: KW_KNOCK ws variable ws downs;
 
 downs: KW_DOWN (COMMA? ws KW_DOWN)*;
+
+castStmt: KW_CAST ws variable;
 
 returnStmt: KW_GIVE (ws KW_BACK)? ws expression (ws KW_BACK)?;
 
@@ -187,4 +189,5 @@ allKeywords: KW_PUT
            | KW_AND
            | KW_OR
            | KW_NOR
+           | KW_CAST
 ;

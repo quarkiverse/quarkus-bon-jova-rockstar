@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -37,7 +36,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     // For some constructs, we may want to create a scope but not switch to it until the next statement list; this stack is a convenient
     // place to store them
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
-    private static final MethodDescriptor STRING_CONCAT = MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;");
+    private static final MethodDescriptor STRING_CONCAT = MethodDescriptor.ofMethod("java/lang/String", "concat", String.class, String.class);
+    private static final MethodDescriptor VALUE_OF_METHOD = MethodDescriptor.ofMethod("java/lang/Double", "valueOf", Double.class, String.class);
     private BytecodeCreator currentCreator;
     // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
     private BytecodeCreator targetScopeForJumps;
@@ -389,11 +389,11 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         List<Variable> variables = variableContexts.stream()
                 .map(vctx -> new Variable(vctx, Object.class))
-                .collect(Collectors.toList());
+                .toList();
 
         fun.setParameterNames(variables.stream()
                 .map(Variable::getVariableName)
-                .collect(Collectors.toList())
+                .toList()
                 .toArray(new String[]{}));
         int i = 0;
         for (Variable v : variables) {
@@ -406,6 +406,20 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void exitFunctionDeclaration(Rockstar.FunctionDeclarationContext ctx) {
         exitBlock();
+    }
+
+    @Override
+    public void enterCastStmt(Rockstar.CastStmtContext ctx) {
+        // Simple support, just string to number
+        Variable oldVar = new Variable(ctx.variable());
+        ResultHandle oldVal = oldVar.read(currentCreator);
+
+        ResultHandle newVal = currentCreator.invokeStaticMethod(VALUE_OF_METHOD, oldVal);
+
+        // For now, hardcode what we are casting to
+        Variable newVar = new Variable(ctx.variable(), double.class);
+        newVar.write(currentCreator, creator, newVal);
+
     }
 
     @Override
