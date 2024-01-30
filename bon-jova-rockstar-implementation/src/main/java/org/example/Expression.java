@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,12 +41,19 @@ public class Expression {
 
     private Expression lhe;
     private Expression rhe;
+    private List<Expression> extraRhes;
 
     private List<Expression> params;
 
     private Operation operation;
 
     private UnaryOperation unaryOperation;
+    private static final MethodDescriptor CONCAT_METHOD = MethodDescriptor.ofMethod(String.class, "concat", String.class, String.class);
+    private static final MethodDescriptor constructor = MethodDescriptor.ofConstructor(BigDecimal.class, double.class);
+    private static final MethodDescriptor divide = MethodDescriptor.ofMethod(BigDecimal.class, "divide", BigDecimal.class, BigDecimal.class, MathContext.class);
+    private static final MethodDescriptor toDouble = MethodDescriptor.ofMethod(BigDecimal.class, "doubleValue", double.class);
+
+    FieldDescriptor mathContext = FieldDescriptor.of(MathContext.class, "DECIMAL32", MathContext.class);
 
     enum Context {SCALAR, NORMAL}
 
@@ -77,6 +85,11 @@ public class Expression {
         Rockstar.ConstantContext constant = ctx.constant();
         Rockstar.VariableContext variableContext = ctx.variable();
         Rockstar.FunctionCallContext functionCall = ctx.functionCall();
+        if (ctx.extraExpressions() != null) {
+            extraRhes = ctx.extraExpressions().expression().stream().map(Expression::new).toList();
+        } else {
+            extraRhes = Collections.emptyList();
+        }
 
         if (ctx.comparisionOp() != null) {
             // We don't know the answer, but we know the type
@@ -287,14 +300,7 @@ public class Expression {
         // Do type coercion of rockstar nulls (which are a special type, not null)
         // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
 
-        if (rhe.isNothing()) {
-            rrh = coerceNothingIntoType(method, method.load(true));
-        }
-
-
-        if (rhe.isMysterious()) {
-            rrh = coerceMysteriousIntoType(method, method.load(true));
-        }
+        rrh = coerceFalsyTypes(method, rhe, rrh);
 
         switch (unaryOperation) {
             case NEGATION -> {
@@ -330,33 +336,57 @@ public class Expression {
         switch (operation) {
             case ADD -> {
 
-                return doOperation(method, lrh, rrh, (bc, a, b) -> {
-                    return bc.add(a, b);
-                }, (bc, a, b) -> {
+                BytecodeInvoker numericOperation = (bc, a, b) -> bc.add(a, b);
+                BytecodeInvoker stringOperation = (bc, a, b) -> {
                     ResultHandle lsrh = stringify(bc, a);
                     ResultHandle rsrh = stringify(bc, b);
                     return bc.invokeVirtualMethod(
-                            MethodDescriptor.ofMethod("java/lang/String", "concat", "Ljava/lang/String;", "Ljava/lang/String;"),
+                            CONCAT_METHOD,
                             lsrh, rsrh);
-                });
+                };
+                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
+                for (Expression extra : extraRhes) {
+                    // This could be a fancy reduce with streams, but for works well enough
+                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+
+                    erh = coerceFalsyTypes(method, extra, erh);
+
+                    answer = doOperation(method, answer, erh, numericOperation, stringOperation);
+                }
+                return answer;
             }
             case SUBTRACT -> {
 
-                return doOperation(method, lrh, rrh, (bc, a, b) -> {
+                BytecodeInvoker numericOperation = (bc, a, b) -> {
                     // Handle subtraction by multiplying by -1 and adding
                     ResultHandle negativeRightSide = bc.multiply(bc.load(-1d), b);
                     return bc.add(a, negativeRightSide);
-                }, (bc, a, b) -> {
-                    bc.throwException(UnsupportedOperationException.class, "Subtraction of strings is not possible.");
-                    return bc.load("nope");
-                });
+                };
+                BytecodeInvoker stringOperation = unsupportedOperation("Subtraction of strings is not possible.");
+                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
+
+                for (Expression extra : extraRhes) {
+                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+
+                    erh = coerceFalsyTypes(method, extra, erh);
+
+                    answer = doOperation(method, answer, erh, numericOperation, stringOperation);
+                }
+                return answer;
 
             }
             case MULTIPLY -> {
-                return doOperation(method, lrh, rrh, (bc, a, b) -> bc.multiply(a, b), (bc, a, b) -> {// TODO of should be implemented
-                    bc.throwException(UnsupportedOperationException.class, "Multiplication of strings not yet implemented.");
-                    return bc.load("not yet");
-                });
+                BytecodeInvoker numericOperation = (bc, a, b) -> bc.multiply(a, b);
+                BytecodeInvoker stringOperation = unsupportedOperation("Multiplication of strings not yet implemented.");
+                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
+                for (Expression extra : extraRhes) {
+                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+
+                    erh = coerceFalsyTypes(method, extra, erh);
+
+                    answer = doOperation(method, answer, erh, numericOperation, stringOperation);
+                }
+                return answer;
             }
             case DIVIDE -> {
                 // Needs Gizmo 1.8, which is not yet accessible in Quarkus extensions
@@ -366,17 +396,16 @@ public class Expression {
 //                });
 
                 // So in the interim, do a work around
-                MethodDescriptor constructor = MethodDescriptor.ofConstructor(BigDecimal.class, double.class);
-                MethodDescriptor divide = MethodDescriptor.ofMethod(BigDecimal.class, "divide", BigDecimal.class, BigDecimal.class, MathContext.class);
-                MethodDescriptor toDouble = MethodDescriptor.ofMethod(BigDecimal.class, "doubleValue", double.class);
 
-                FieldDescriptor mathContext = FieldDescriptor.of(MathContext.class, "DECIMAL32", MathContext.class);
+                ResultHandle answer = divide(method, lrh, rrh);
+                for (Expression extra : extraRhes) {
+                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
 
-                ResultHandle lbd = method.newInstance(constructor, lrh);
-                ResultHandle rbd = method.newInstance(constructor, rrh);
-                ResultHandle answer = method.invokeVirtualMethod(divide, lbd, rbd, method.readStaticField(mathContext));
-                ResultHandle doubleAnswer = method.invokeVirtualMethod(toDouble, answer);
-                return doubleAnswer;
+                    erh = coerceFalsyTypes(method, extra, erh);
+
+                    answer = divide(method, answer, erh);
+                }
+                return answer;
             }
             case CONJUNCTION -> {
                 // See https://stackoverflow.com/questions/17052001/binary-expression-in-asm-compiler/17053797#17053797
@@ -440,6 +469,32 @@ public class Expression {
             }
             default -> throw new RuntimeException("Unsupported operation " + operation);
         }
+    }
+
+    private ResultHandle divide(BytecodeCreator method, ResultHandle lrh, ResultHandle rrh) {
+        ResultHandle lbd = method.newInstance(constructor, lrh);
+        ResultHandle rbd = method.newInstance(constructor, rrh);
+        ResultHandle answer = method.invokeVirtualMethod(divide, lbd, rbd, method.readStaticField(mathContext));
+        ResultHandle doubleAnswer = method.invokeVirtualMethod(toDouble, answer);
+        return doubleAnswer;
+    }
+
+    private static BytecodeInvoker unsupportedOperation(String message) {
+        return (bc, a, b) -> {
+            bc.throwException(UnsupportedOperationException.class, message);
+            return bc.load("nope");
+        };
+    }
+
+    private static ResultHandle coerceFalsyTypes(BytecodeCreator method, Expression extra, ResultHandle erh) {
+        if (extra.isNothing()) {
+            erh = coerceNothingIntoType(method, erh);
+        }
+
+        if (extra.isMysterious()) {
+            erh = coerceMysteriousIntoType(method, erh);
+        }
+        return erh;
     }
 
     private ResultHandle getHandleForFunction(BytecodeCreator method, ClassCreator classCreator) {

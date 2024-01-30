@@ -8,19 +8,22 @@ statementList: statement+;
 
 statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | castStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
+
 expression: functionCall
-          | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression
-          | lhe=expression ws op=(KW_ADD|KW_WITH|KW_SUBTRACT) ws rhe=expression
-          | lhe=expression ws op=(PLUS_SIGN|HYPHEN) ws rhe=expression
-          | lhe=expression ws* op=(ASTERISK|SLASH) ws* rhe=expression
+          | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression extraExpressions?
+          | lhe=expression ws op=(KW_ADD|KW_WITH|KW_SUBTRACT) ws rhe=expression extraExpressions?
+          | lhe=expression ws op=(PLUS_SIGN|HYPHEN) ws rhe=expression extraExpressions?
+          | lhe=expression ws* op=(ASTERISK|SLASH) ws* rhe=expression extraExpressions?
           | lhe=expression ws comparisionOp ws rhe=expression
           | lhe=expression contractedComparisionOp ws rhe=expression
-          | lhe=expression ws op=(KW_AND|KW_OR|KW_NOR) ws rhe=expression
+          | lhe=expression ws op=(KW_AND|KW_OR|KW_NOR) ws rhe=expression extraExpressions?
           | KW_NOT ws rhe=expression
           | variable ws KW_AT ws expression
           | KW_ROLL ws variable
           | (literal|variable|constant)
 ;
+
+extraExpressions: (COMMA ws (KW_AND ws)? expression)+;
 
 list: (expression) (COMMA ws expression)*;
 

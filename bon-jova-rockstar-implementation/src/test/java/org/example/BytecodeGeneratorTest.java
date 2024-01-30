@@ -362,6 +362,99 @@ names in Rockstar.)
 // Surprise! Satriani says 234 for this, rather than a logical operation
     }
 
+    @Nested
+    @DisplayName("List arithmetic")
+    class ListArithmetic {
+        // Rockstar operators support a list of expressions on the right-hand side of the operator. (Imagine explaining in English that, say, “the restaurant bill is the food, plus the drinks, the service, and the tax” - same idea.)
+        @Test
+        public void shouldHandleNumericListsInAdditionAssignments() {
+
+            String program = """
+                    Let X be 1 with 2, 3, 4
+                    Say X
+                    """;
+            assertEquals("10\n", compileAndLaunch(program));
+
+        }
+
+        @Test
+        public void shouldHandleNumericListsInSubtractionAssignments() {
+
+            String program = """
+                    Let X be 1 without 2, 3, 4
+                    Say X
+                    """;
+            assertEquals("-8\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleNumericListsInDivisionAssignments() {
+
+            String program = """
+                    Let X be 480 over 2, 3, 4
+                    Say X
+                    """;
+            assertEquals("20\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleStringListsInAdditionAssignments() {
+
+            String program = """
+                    Let Y be "foo" with "bar", "baz"
+                    Say Y
+                    """;
+            assertEquals("foobarbaz\n", compileAndLaunch(program));
+
+        }
+
+        @Test
+        public void shouldHandleStringListsAndExtraWordsInAdditionAssignments() {
+
+            String program = """
+                    Let Y be "foo" with "bar", and "baz"
+                    Say Y
+                    """;
+            assertEquals("foobarbaz\n", compileAndLaunch(program));
+
+        }
+
+        @Test
+        public void shouldHandleNumericListsInMultiplicationAssignments() {
+
+            String program = """
+                    Let X be 5 times 2, 2, 2
+                    Say X
+                    """;
+            assertEquals("40\n", compileAndLaunch(program));
+
+        }
+
+        @Disabled("Multiplication of strings not yet implemented")
+        @Test
+        public void shouldHandleStringListsInMultiplicationAssignments() {
+
+            String program = """
+                    Let X be "foo" times 2, 2, 2
+                    Say X
+                    """;
+            assertEquals("foofoofoofoofoofoofoofoo\n", compileAndLaunch(program));
+
+        }
+
+        // List arithmetic is only possible where the result type supports further operations.
+        //       Let X be 2 times "foo", "bar" - is mysterious (because 2 * foo = "foofoo", and "foofoo" * "bar" is undefined)
+        @Disabled("Multiplication of strings not yet implemented")
+        @Test
+        public void shouldGracefullyHandleListsInStringMultiplicationAssignments() {
+            String program = """
+                    Let X be 2 times "foo", "bar"
+                    Say X
+                    """;
+            assertEquals("mysterious\n", compileAndLaunch(program));
+        }
+    }
+
     @Test
     public void shouldHandleStringLiteralPronounReferences() {
         String program = """

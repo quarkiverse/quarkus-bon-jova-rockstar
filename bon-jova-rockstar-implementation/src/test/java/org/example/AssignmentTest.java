@@ -266,6 +266,26 @@ public class AssignmentTest {
         // awfully close to just writing the code down twice, so just be happy if we get here without explosions
     }
 
+    // Rockstar operators support a list of expressions on the right-hand side of the operator. (Imagine explaining in English that, say, “the restaurant bill is the food, plus the drinks, the service, and the tax” - same idea.)
+    @Test
+    public void shouldHandleListsInAssignments() {
+
+        // No declaration of my hands before put-ing into it
+        String program = """
+                Let X be 1 with 2, 3, 4
+                """;
+        Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment(program);
+        Assignment a = new Assignment(ctx);
+        assertEquals(double.class, a.getVariableClass());
+
+        program = """
+                Let X be "foo" with "bar", and "baz"
+                """;
+        ctx = new ParseHelper().getAssignment(program);
+        a = new Assignment(ctx);
+        assertEquals(String.class, a.getVariableClass());
+    }
+
     @Test
     public void shouldWriteToClass() {
         Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is \"hello\"\nEverything is my thing");
