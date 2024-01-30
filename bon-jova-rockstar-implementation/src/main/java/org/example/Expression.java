@@ -336,7 +336,7 @@ public class Expression {
         switch (operation) {
             case ADD -> {
 
-                BytecodeInvoker numericOperation = (bc, a, b) -> bc.add(a, b);
+                BytecodeInvoker numericOperation = BytecodeCreator::add;
                 BytecodeInvoker stringOperation = (bc, a, b) -> {
                     ResultHandle lsrh = stringify(bc, a);
                     ResultHandle rsrh = stringify(bc, b);
@@ -376,7 +376,7 @@ public class Expression {
 
             }
             case MULTIPLY -> {
-                BytecodeInvoker numericOperation = (bc, a, b) -> bc.multiply(a, b);
+                BytecodeInvoker numericOperation = BytecodeCreator::multiply;
                 BytecodeInvoker stringOperation = unsupportedOperation("Multiplication of strings not yet implemented.");
                 ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
                 for (Expression extra : extraRhes) {
@@ -452,19 +452,19 @@ public class Expression {
                 return method.bitwiseXor(equalityCheck, method.load(true));
             }
             case GREATER_THAN_CHECK -> {
-                return doComparison(method, (ResultHandle eq) -> method.ifGreaterThanZero(eq),
+                return doComparison(method, method::ifGreaterThanZero,
                         lrh, rrh);
             }
             case LESS_THAN_CHECK -> {
-                return doComparison(method, (ResultHandle eq) -> method.ifLessThanZero(eq),
+                return doComparison(method, method::ifLessThanZero,
                         lrh, rrh);
             }
             case GREATER_OR_EQUAL_THAN_CHECK -> {
-                return doComparison(method, (ResultHandle eq) -> method.ifGreaterEqualZero(eq),
+                return doComparison(method, method::ifGreaterEqualZero,
                         lrh, rrh);
             }
             case LESS_OR_EQUAL_THAN_CHECK -> {
-                return doComparison(method, (ResultHandle eq) -> method.ifLessEqualZero(eq),
+                return doComparison(method, method::ifLessEqualZero,
                         lrh, rrh);
             }
             default -> throw new RuntimeException("Unsupported operation " + operation);
@@ -500,7 +500,7 @@ public class Expression {
     private ResultHandle getHandleForFunction(BytecodeCreator method, ClassCreator classCreator) {
         List<ResultHandle> args = params.stream()
                 .map(v -> v.getResultHandle(method, classCreator))
-                .collect(Collectors.toList());
+                .toList();
         Class[] paramClasses = new Class[params.size()];
         Arrays.fill(paramClasses, Object.class);
 
