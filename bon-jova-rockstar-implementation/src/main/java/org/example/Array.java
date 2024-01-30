@@ -86,7 +86,7 @@ public class Array {
         // TODO it would be nice to specify the initial capacity, even if creating a collection to initialise it with is too tricky
         ResultHandle rh;
 
-        if (variable.isAlreadyDefined()) {
+        if (variable.isAlreadyWritten()) {
             rh = variable.read(method);
         } else {
             rh = method.newInstance(LIST_CONSTRUCTOR);

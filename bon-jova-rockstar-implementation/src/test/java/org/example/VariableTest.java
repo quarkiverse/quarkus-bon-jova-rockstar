@@ -14,6 +14,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VariableTest {
 
@@ -231,7 +232,33 @@ names in Rockstar.)
 
         // There is not an equals implementation beyond ==, so just compare the strings
         assertEquals(writtenValue.toString(), readValue.toString());
+    }
 
+    @Test
+    public void shouldAllowVariableTypeToChange() {
+        ClassCreator creator = ClassCreator.builder()
+                .className("holder")
+                .build();
+        MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
+
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable("johnny is \"nice\"");
+        // The class here needs to match the class of what we load into the result handle
+        Variable variable = new Variable(ctx, String.class);
+        String className = "soundcheck";
+        ResultHandle writtenValue = method.load(className);
+        variable.write(method, creator, writtenValue);
+        ResultHandle readValue = variable.read(method);
+        assertTrue(readValue.toString().contains("type='Ljava/lang/String;'"), readValue.toString());
+
+        Rockstar.VariableContext ctx2 = new ParseHelper().getVariable("johnny is 4");
+        Variable variable2 = new Variable(ctx2, double.class);
+        // Sense check
+        assertEquals(double.class, variable2.getVariableClass());
+        ResultHandle writtenValue2 = method.load(2d);
+        variable2.write(method, creator, writtenValue2);
+        ResultHandle readValue2 = variable2.read(method);
+
+        assertTrue(readValue2.toString().contains("type='D'"), readValue2.toString());
     }
 
     @Test

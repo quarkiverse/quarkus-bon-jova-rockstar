@@ -88,7 +88,10 @@ Some of these may work but have not been validated with tests.
 
 ## Casting
 
-- [ ] Conversion between types
+- [X] Casting strings to doubles
+- [ ] Casting using bases other than 10
+- [ ] Casting into a variable
+- [ ] Casting numbers to strings using UTF-8 conversions
 
 ## Single quotes
 
