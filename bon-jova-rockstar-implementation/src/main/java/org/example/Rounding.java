@@ -1,6 +1,7 @@
 package org.example;
 
 import io.quarkus.gizmo.BytecodeCreator;
+import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
@@ -28,7 +29,7 @@ public class Rounding {
         }
     }
 
-    public ResultHandle toCode(BytecodeCreator method) {
+    public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
         ResultHandle variableContents = variable.read(method);
 
         ResultHandle answer = null;
@@ -49,7 +50,7 @@ public class Rounding {
 
         // Write the update back to the variable
         if (variable != null) {
-            variable.write(method, answer);
+            variable.write(method, creator, answer);
         }
 
         // Also return the result handle, for ease of testing

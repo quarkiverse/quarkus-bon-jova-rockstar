@@ -2,7 +2,6 @@ package org.example;
 
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
-import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
@@ -39,15 +38,12 @@ public class Input {
         return variableClass;
     }
 
-    public FieldDescriptor toCode(ClassCreator creator, BytecodeCreator method, MethodCreator main) {
-
-        FieldDescriptor field = variable.getField(creator, method);
+    public Variable toCode(ClassCreator creator, BytecodeCreator method, MethodCreator main) {
 
         ResultHandle args = main.getMethodParam(0);
         ResultHandle rh = method.readArrayValue(args, argIndex);
 
-        method.writeStaticField(field, rh);
-
-        return field;
+        variable.write(method, creator, rh);
+        return variable;
     }
 }

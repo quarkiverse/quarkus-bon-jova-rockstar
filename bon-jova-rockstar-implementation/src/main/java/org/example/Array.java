@@ -4,7 +4,6 @@ import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
-import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.WhileLoop;
@@ -91,9 +90,7 @@ public class Array {
             rh = variable.read(method);
         } else {
             rh = method.newInstance(LIST_CONSTRUCTOR);
-            // TODO refactor so getting the field is private
-            FieldDescriptor field = variable.getField(creator, method);
-            method.writeStaticField(field, rh);
+            variable.write(method, creator, rh);
         }
 
         if (initialContents != null) {

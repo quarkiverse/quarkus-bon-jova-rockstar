@@ -85,7 +85,7 @@ public class RoundingTest {
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
             a.toCode(creator, method);
-            ResultHandle rh = r.toCode(method);
+            ResultHandle rh = r.toCode(method, creator);
             method.returnValue(rh);
         }
 

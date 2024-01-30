@@ -1,7 +1,6 @@
 package org.example;
 
 import io.quarkus.gizmo.ClassCreator;
-import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
@@ -73,11 +72,9 @@ public class InputTest {
             MethodCreator method = creator.getMethodCreator(methodName, Object.class, String[].class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
-            FieldDescriptor fd = a.toCode(creator, method, method);
-
-            ResultHandle rh = method.readStaticField(fd);
+            Variable v = a.toCode(creator, method, method);
+            ResultHandle rh = v.read(method);
             method.returnValue(rh);
-
         }
 
         Class<?> clazz = null;
