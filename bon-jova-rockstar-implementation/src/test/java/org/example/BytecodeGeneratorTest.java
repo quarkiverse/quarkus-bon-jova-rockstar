@@ -1734,6 +1734,28 @@ names in Rockstar.)
             assertEquals("4\n5\n6\n", compileAndLaunch(program));
 
         }
+
+        @Test
+        public void shouldSupportNonNumericKeys() {
+            String program = """
+                    let my array at "some_key" be "some_value"
+                    Shout my array at "some_key"
+                    """;
+            assertEquals("some_value\n", compileAndLaunch(program));
+
+        }
+
+        @Test
+        public void shouldSupportMixOfNumericAndNonNumericKeys() {
+            // Non-numeric keys are not counted in the length, but numeric keys are
+            String program = """
+                    Let my array at "some_key" be "some_value"
+                    Shout my array
+                    Let my array at 7 be "some other value"
+                    Shout my array
+                                        """;
+            assertEquals("0\n8\n", compileAndLaunch(program));
+        }
     }
 
     @Nested

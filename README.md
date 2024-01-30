@@ -69,7 +69,7 @@ Some of these may work but have not been validated with tests.
 
 - [X] Reading at numerical indexes
 - [X] Array initialisation by setting a value at an index
-- [ ] Non-numeric array keys
+- [X] Non-numeric array keys
 - [ ] Use the array index syntax to read (but not write) specific characters from a string
 
 ## Queue operations
@@ -93,7 +93,7 @@ Some of these may work but have not been validated with tests.
 - [ ] Casting into a variable
 - [ ] Casting numbers to strings using UTF-8 conversions
 
-## Single quotes
+## ✓ Single quotes
 
 - [X] Equivalency to `is'
 - [X] Ignoring in other cases
