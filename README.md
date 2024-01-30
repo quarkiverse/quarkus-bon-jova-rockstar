@@ -107,7 +107,7 @@ Some of these may work but have not been validated with tests.
 - [ ] Compound assignment using `let`
 - [X] Rounding
 - [X] Rounding with pronouns
-- [ ] List operations
+- [X] List arithmetic
 - [ ] Operator precedence
 
 ## ✓ Comparison and logical operations
