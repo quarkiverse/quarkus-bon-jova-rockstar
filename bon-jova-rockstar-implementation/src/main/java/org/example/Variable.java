@@ -21,16 +21,27 @@ public class Variable {
     private Class<?> variableClass;
 
     public Variable(Rockstar.VariableContext variable, Class<?> variableClass) {
-        this(variable, false);
+        this(variable.getText(), variable.PRONOUNS(), variableClass);
+    }
+
+    Variable(String text, Class<?> variableClass) {
+        this(text, null, variableClass);
+    }
+
+    /**
+     * Used for synthetic variables; should not generally be used
+     */
+    private Variable(String text, TerminalNode pronouns, Class<?> variableClass) {
+        this(text, pronouns, false);
 
         this.variableClass = variableClass;
 
         if (!variables.containsKey(variableName)) {
             Map<Class<?>, FieldDescriptor> map = new HashMap<>();
-            map.put(variableClass, null);
-            variables.put(variableName, map);
+            map.put(this.variableClass, null);
+            variables.put(this.variableName, map);
         } else {
-            Map<Class<?>, FieldDescriptor> map = variables.get(variableName);
+            Map<Class<?>, FieldDescriptor> map = variables.get(this.variableName);
             // Overwrite any previous type references
             if (!map.containsKey(variableClass)) {
                 map.clear();
@@ -44,10 +55,13 @@ public class Variable {
     }
 
     private Variable(Rockstar.VariableContext variable, boolean enforceType) {
+        this(variable.getText(), variable.PRONOUNS(), enforceType);
+    }
+
+    private Variable(String text, TerminalNode pronouns, boolean enforceType) {
         // Work out the variable name
         // In principle trivial, in practice made a bit complicated by normalisation and more complicated by pronouns
 
-        TerminalNode pronouns = variable.PRONOUNS();
         if (pronouns != null) {
             if (mostRecentVariableName == null) {
                 // This could be an internal error or a program one
@@ -56,8 +70,6 @@ public class Variable {
             variableName = mostRecentVariableName;
 
         } else {
-            String text = variable
-                    .getText();
             variableName = getNormalisedVariableName(text);
         }
 

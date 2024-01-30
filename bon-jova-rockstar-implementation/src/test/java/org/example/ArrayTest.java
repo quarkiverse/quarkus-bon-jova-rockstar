@@ -13,6 +13,7 @@ import rock.Rockstar;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -131,7 +132,17 @@ public class ArrayTest {
         Object[] contents = {null, null, null, null, null, 2d};
         assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
     }
-    
+
+    @Test
+    public void shouldAcceptNonNumericKeys() {
+        String program = """
+                Let arr at "hello" be 2
+                """;
+        Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
+        Map execute = (Map) execute(new Array(ctx));
+        assertEquals(2d, execute.get("hello"));
+    }
+
     // We can't test reading arrays because they're multi-line executions
 
     private Object execute(Array a) {
