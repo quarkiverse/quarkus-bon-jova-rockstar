@@ -1461,6 +1461,20 @@ names in Rockstar.)
             assertEquals("7\n", compileAndLaunch(program));
         }
 
+        @Test
+        public void shouldSplitStringsIntoCharArraysAndThenReadThem() {
+            String program = """
+                        delimiter is ";"
+                        line is "hi; bye"
+                        split line into segments with delimiter
+                        let stationName be segments at 0
+                        say stationName
+                    """;
+
+            assertEquals("hi\n", compileAndLaunch(program));
+
+        }
+
         @Disabled("Needs support for changing the type of a variable")
         @Test
         public void shouldSplitStringsInPlaceWithDelimiter() {
@@ -1756,6 +1770,26 @@ names in Rockstar.)
                                         """;
             assertEquals("0\n8\n", compileAndLaunch(program));
         }
+
+        @Test
+        public void shouldSupportMixOfNumericAndNonNumericKeysEvenWhenArrayIsAssignedToAnotherVariable() {
+            // Non-numeric keys are not counted in the length, but numeric keys are
+            String program = """
+                    Let my array at "some_key" be "some_value"
+                    Shout my array at "some_key"
+                    Let my array at 7 be "some other value"
+                    Shout my array
+                    Shout my array at 7
+                    Let copy be my array
+                    Shout copy at 7
+                    Shout copy at "some_key"
+                                        """;
+            assertEquals("some_value\n" +
+                    "8\n" +
+                    "some other value\n" +
+                    "some other value\n" +
+                    "some_value\n", compileAndLaunch(program));
+        }
     }
 
     @Nested
@@ -1859,7 +1893,7 @@ names in Rockstar.)
         PrintStream originalOut = System.out;
         String className = "rock.soundcheck";
 
-        TestClassLoader loader = new TestClassLoader(this.getClass().getClassLoader().getParent());
+        TestClassLoader loader = new TestClassLoader(this.getClass().getClassLoader());
 
         try {
             new BytecodeGenerator().generateBytecode(new ByteArrayInputStream(program.getBytes(StandardCharsets.UTF_8)), className,

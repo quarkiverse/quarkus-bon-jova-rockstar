@@ -3,7 +3,6 @@ package org.example;
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
-import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.WhileLoop;
@@ -18,7 +17,7 @@ import static org.example.Array.TYPE_CLASS;
 public class StringSplit {
     private static final MethodDescriptor SPLIT_METHOD = MethodDescriptor.ofMethod(String.class, "split", String[].class, String.class);
     private static final MethodDescriptor LENGTH_METHOD = MethodDescriptor.ofMethod(String.class, "length", int.class);
-
+    private static final MethodDescriptor ADD_ALL_METHOD = MethodDescriptor.ofMethod(TYPE_CLASS, "addAll", void.class, List.class);
     private static final MethodDescriptor ASLIST_METHOD = MethodDescriptor.ofMethod(Arrays.class, "asList", List.class, Object[].class);
     private static final MethodDescriptor CHAR_AT_METHOD = MethodDescriptor.ofMethod(String.class, "charAt", char.class, int.class);
 
@@ -58,18 +57,18 @@ public class StringSplit {
 
 
         ResultHandle toSplit = source.getResultHandle(method, creator);
-        ResultHandle answer;
+        ResultHandle answer = method.newInstance(Array.CONSTRUCTOR);
+
         if (delimiter != null) {
             ResultHandle delimiterHandle = delimiter.getResultHandle(method, creator);
             ResultHandle splitArray = method.invokeVirtualMethod(SPLIT_METHOD, toSplit, delimiterHandle);
-            answer = method.invokeStaticMethod(ASLIST_METHOD, splitArray);
+            ResultHandle splitList = method.invokeStaticMethod(ASLIST_METHOD, splitArray);
+            method.invokeVirtualMethod(ADD_ALL_METHOD, answer, splitList);
         } else {
             // Doing the lambda in bytecode is hard, so just do a while loop
             // and working with the int stream is also hard ...
             // ... and working with the primitive array is also hard ...
             ResultHandle length = method.invokeVirtualMethod(LENGTH_METHOD, toSplit);
-
-            answer = Gizmo.newArrayList(method);
 
             AssignableResultHandle index = method.createVariable(int.class);
             method.assign(index, method.load(0));
@@ -77,7 +76,7 @@ public class StringSplit {
             WhileLoop loop = method.whileLoop(bc -> bc.ifIntegerLessThan(index, length));
             BytecodeCreator block = loop.block();
             ResultHandle charAsString = block.invokeVirtualMethod(CHAR_AT_METHOD, toSplit, index);
-            block.invokeInterfaceMethod(ADD_METHOD, answer, charAsString);
+            block.invokeVirtualMethod(ADD_METHOD, answer, charAsString);
             block.assign(index, block.increment(index));
         }
 
