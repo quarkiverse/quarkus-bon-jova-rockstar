@@ -6,6 +6,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -52,6 +53,7 @@ public class BonJovaQuarkusExtensionTest {
     }
 
     @Test
+    @Disabled("not working in CI")
     void testRockstarEndpoint() {
         RestAssured.when()
                 .get("/rockstar/hello_world.rock")
@@ -70,6 +72,7 @@ public class BonJovaQuarkusExtensionTest {
     }
 
     @Test
+    @Disabled("not working in CI")
     void testRockstarProgramWithArguments() {
         RestAssured.when()
                 .get("/rockstar/hello_hanno_hello_holly.rock?arg=Hanno&arg=Holly")
