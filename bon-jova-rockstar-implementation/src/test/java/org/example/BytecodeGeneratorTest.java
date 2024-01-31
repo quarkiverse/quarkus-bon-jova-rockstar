@@ -757,6 +757,20 @@ names in Rockstar.)
     }
 
     @Test
+    public void shouldHandleAreAssignments() {
+        String program = """
+                Your heart is true
+                Your stories are ok
+                If your heart ain't wrong and your stories ain't lies
+                Say "You're a trustworthy friend"
+                Else
+                Whisper "Would not recommend"
+                                """;
+        assertEquals("You're a trustworthy friend\n", compileAndLaunch(program));
+
+    }
+
+    @Test
     public void shouldHandleDivisionWithVariablesAndPut() {
 
         String program = """
