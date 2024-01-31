@@ -16,6 +16,10 @@ public class RockScoreCalculator {
     }
 
     public int calculateRockScore(String rockstarProgram) {
+        if (rockstarProgram.isBlank()) {
+            return 0;
+        }
+
         final var lyricsRating = lyricsRatingCalculator.calculateLyricsRating(rockstarProgram);
         final var maxLyricsRatingOfThe80s = lyricsRatingCalculator.calculateMaxLyricsRating(allLyrics);
 
