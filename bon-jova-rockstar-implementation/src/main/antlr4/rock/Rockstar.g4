@@ -205,4 +205,5 @@ allKeywords: KW_PUT
            | KW_OR
            | KW_NOR
            | KW_CAST
+           | KW_ROUND
 ;
