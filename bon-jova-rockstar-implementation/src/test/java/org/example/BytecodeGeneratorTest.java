@@ -288,6 +288,17 @@ names in Rockstar.)
         assertEquals(leet, output);
     }
 
+    // As long as the next symbol is not a Literal Word, the rest of the line is treated as a decimal number in which the values of consecutive digits are given by the lengths of the subsequent barewords, up until the end of the line.
+    @Test
+    public void shouldHandleNoInPoeticLiterals() {
+        String program = """
+                The tide is low. A ball flung-about, beach abandoned, no soiree beats the shore
+                                             Whisper the tide
+                                """;
+        assertEquals("3.141592654\n", compileAndLaunch(program));
+
+    }
+
     /*
      * Put 123 into X will assign the value 123 to the variable X
      */
