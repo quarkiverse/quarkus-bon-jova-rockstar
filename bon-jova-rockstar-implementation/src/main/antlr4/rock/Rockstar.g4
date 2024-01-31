@@ -48,7 +48,7 @@ functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statement
 
 paramList: variable ((COMMA? WS* KW_AND WS | WS COMMA WS | WS AMPERSAND WS | WS APOSTROPHED_N WS) variable)*;
 
-assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws (KW_IS|KW_WAS_WERE)) ws (poeticNumberLiteral|constant|literal)
+assignmentStmt: variable (APOSTROPHE_S | APOSTROPHE_RE | ws KW_IS) ws (poeticNumberLiteral|constant|literal)
               | KW_LET ws variable ws KW_BE ws expression
               | KW_PUT ws expression ws KW_INTO ws variable
               | variable ws (KW_SAYS | KW_SAY) WS poeticStringLiteral
@@ -181,7 +181,6 @@ allKeywords: KW_PUT
            | KW_SUBTRACT
            | KW_IS
            | KW_NOT_EQUAL
-           | KW_WAS_WERE
            | KW_THAN
            | KW_AS
            | KW_GREATER
