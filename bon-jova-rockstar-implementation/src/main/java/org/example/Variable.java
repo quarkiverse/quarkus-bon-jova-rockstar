@@ -144,8 +144,13 @@ public class Variable {
             field = classFieldDescriptorMap.get(variableClass);
         } else {
             // This is an internal error, not a program one
-            throw new RuntimeException("Moral panic: Could not find variable called " + variableName + " of class " + variableClass);
+            if (variables.get(variableName) != null) {
+                throw new RuntimeException("Different class: We looked for a " + variableClass + " but the variable " + variableName + " is stored as a class " + Arrays.toString(variables.get(variableName).keySet().toArray()));
+            } else {
+                throw new RuntimeException("Moral panic: Could not find variable called " + variableName + " of class " + variableClass + ". \nKnown variables are " + Arrays.toString(variables.keySet().toArray()));
+            }
         }
+
         return field;
     }
 

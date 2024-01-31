@@ -2,6 +2,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
+import org.example.RockstarArray;
 import org.example.StringSplit;
 import org.example.Variable;
 import org.example.util.ParseHelper;
@@ -11,9 +12,7 @@ import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,30 +42,32 @@ public class StringSplitTest {
     @Test
     public void shouldCreateAnArrayOnSimpleSplit() {
         Rockstar.StringStmtContext ctx = new ParseHelper().getStringSplit("Cut \"\" into pieces");
-        assertDeepEquals(new ArrayList<String>(), execute(new StringSplit(ctx)));
+        assertDeepEquals(new RockstarArray(), execute(new StringSplit(ctx)));
     }
 
     @Test
     public void shouldSplitIntoCharacterArrayWithNoDelimiter() {
-        List expected = Arrays.asList("h", "e", "l", "l", "o");
+        RockstarArray expected = new RockstarArray();
+        expected.addAll(Arrays.asList("h", "e", "l", "l", "o"));
         Rockstar.StringStmtContext ctx = new ParseHelper().getStringSplit("Cut \"hello\" into pieces");
         assertDeepEquals(expected, execute(new StringSplit(ctx)));
     }
 
     @Test
     public void shouldSplitIntoCharacterArrayHonouringDelimiter() {
-        List expected = Arrays.asList("first", "second");
+        RockstarArray expected = new RockstarArray();
+        expected.addAll(Arrays.asList("first", "second"));
         Rockstar.StringStmtContext ctx = new ParseHelper().getStringSplit("Cut \"first, second\" into pieces with \", \"");
         assertDeepEquals(expected, execute(new StringSplit(ctx)));
     }
 
-    private static void assertDeepEquals(List a, List b) {
+    private static void assertDeepEquals(RockstarArray a, RockstarArray b) {
         // The class may be different, so dump to string
-        assertEquals(Arrays.toString(a.toArray()), Arrays.toString(b.toArray()));
+        assertEquals(Arrays.toString(a.list.toArray()), Arrays.toString(b.list.toArray()));
     }
 
-    private List execute(StringSplit a) {
-        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
+    private RockstarArray execute(StringSplit a) {
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
         String className = "com.StringSplitTest";
@@ -84,7 +85,7 @@ public class StringSplitTest {
 
         try {
             Class<?> clazz = cl.loadClass(className);
-            return (List) clazz.getMethod(methodName)
+            return (RockstarArray) clazz.getMethod(methodName)
                     .invoke(null);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
                  InvocationTargetException e) {

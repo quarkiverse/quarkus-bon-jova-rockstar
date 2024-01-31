@@ -13,7 +13,6 @@ import rock.Rockstar;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -53,13 +52,13 @@ public class ArrayTest {
     @Test
     public void shouldCreateAnArrayOnInitialisationWithRock() {
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray("Rock the thing");
-        assertEquals(new ArrayList<Object>(), execute(new Array(ctx)));
+        assertEquals(new ArrayList<Object>(), execute(new Array(ctx)).list);
     }
 
     @Test
     public void shouldCreateAnArrayOnInitialisationWithPush() {
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray("Push the thing");
-        assertEquals(new ArrayList<Object>(), execute(new Array(ctx)));
+        assertEquals(new ArrayList<Object>(), execute(new Array(ctx)).list);
     }
 
     @Test
@@ -69,7 +68,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {4d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
 
     }
 
@@ -80,7 +79,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {1d, 2d, 3d, 4d, 8d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
     }
 
     @Test
@@ -90,7 +89,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {5d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
     }
 
     @Test
@@ -100,7 +99,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {1d, 2d, 3d, 4d, 8d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
     }
 
     @Test
@@ -110,17 +109,17 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {9d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
     }
 
     @Test
-    public void shouldPopulateArrayOnInitialisationAtAIndexNextToTheEnd() {
+    public void shouldPopulateArrayOnInitialisationAtAIndexNextToTheBeginning() {
         String program = """
                 Let arr at 0 be 2
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {2d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
     }
 
     @Test
@@ -130,7 +129,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = {null, null, null, null, null, 2d};
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)));
+        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
     }
 
     @Test
@@ -139,14 +138,14 @@ public class ArrayTest {
                 Let arr at "hello" be 2
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
-        Map execute = (Map) execute(new Array(ctx));
+        RockstarArray execute = execute(new Array(ctx));
         assertEquals(2d, execute.get("hello"));
     }
 
     // We can't test reading arrays because they're multi-line executions
 
-    private Object execute(Array a) {
-        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
+    private RockstarArray execute(Array a) {
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
         String className = "com.ArrayTest";
@@ -164,7 +163,7 @@ public class ArrayTest {
 
         try {
             Class<?> clazz = cl.loadClass(className);
-            return clazz.getMethod(methodName)
+            return (RockstarArray) clazz.getMethod(methodName)
                     .invoke(null);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
                  InvocationTargetException e) {
