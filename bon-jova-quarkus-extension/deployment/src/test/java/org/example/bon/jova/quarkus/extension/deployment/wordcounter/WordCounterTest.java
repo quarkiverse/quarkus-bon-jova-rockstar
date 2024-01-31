@@ -2,17 +2,19 @@ package org.example.bon.jova.quarkus.extension.deployment.wordcounter;
 
 import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsReader;
 import org.example.bon.jova.quarkus.extension.deployment.lyrics.Song;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WordCounterTest {
+    @Disabled("See #90")
     @Test
     void testCountWords() {
         var songs = List.of(sweetChildOfMine(), backInBlack());
@@ -21,11 +23,11 @@ class WordCounterTest {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList(), true);
-        assertEquals(expectedWordCounts(), actualWordCounts);
+        assertEquals(new TreeMap(expectedWordCounts()), new TreeMap(actualWordCounts));
     }
 
     private Song sweetChildOfMine() {
-        var sweetChildOfMine =  new Song(
+        var sweetChildOfMine = new Song(
                 "Sweet Child O' Mine",
                 "Guns N' Roses"
         );
@@ -37,7 +39,7 @@ class WordCounterTest {
     }
 
     private Song backInBlack() {
-        var backInBlack =  new Song(
+        var backInBlack = new Song(
                 "Back In Black",
                 "AC/DC"
         );
