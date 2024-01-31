@@ -109,22 +109,32 @@ variable: COMMON_VARIABLE_PREFIXES ws WORD
         | PRONOUNS
 ;
 
-poeticNumberLiteral: poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (ws poeticNumberLiteralGarbage* ws* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
+poeticNumberLiteral: poeticNumberLiteralLeadingWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator? (ws poeticNumberLiteralGarbage* ws* poeticNumberLiteralWord poeticNumberLiteralGarbage* poeticNumberLiteralDecimalSeparator?)*;
 
 poeticNumberLiteralGarbage: ws* (COMMA | EXCLAMATION_MARK | QUESTION_MARK | PLUS_SIGN | AMPERSAND | SINGLE_QUOTE) ws*
 ;
 
-poeticNumberLiteralWord: poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
-                       | poeticNumberLiteralWord SINGLE_QUOTE poeticNumberLiteralWord?
-                       | poeticNumberLiteralWord APOSTROPHE_S poeticNumberLiteralWord?
-                       | poeticNumberLiteralWord APOSTROPHE_RE poeticNumberLiteralWord?
-                       | poeticNumberLiteralWord APOSTROPHED_N poeticNumberLiteralWord?
-                       | SINGLE_QUOTE poeticNumberLiteralWord
+poeticNumberLiteralLeadingWord: poeticNumberLiteralLeadingWord HYPHEN poeticNumberLiteralLeadingWord
+                       | poeticNumberLiteralLeadingWord SINGLE_QUOTE poeticNumberLiteralLeadingWord?
+                       | poeticNumberLiteralLeadingWord APOSTROPHE_S poeticNumberLiteralLeadingWord?
+                       | poeticNumberLiteralLeadingWord APOSTROPHE_RE poeticNumberLiteralLeadingWord?
+                       | poeticNumberLiteralLeadingWord APOSTROPHED_N poeticNumberLiteralLeadingWord?
+                       | SINGLE_QUOTE poeticNumberLiteralLeadingWord
                        | COMMON_VARIABLE_PREFIXES
                        | allKeywords
                        | PRONOUNS
                        | WORD
                        | PROPER_NOUN
+;
+
+
+poeticNumberLiteralWord: poeticNumberLiteralLeadingWord
+                        | poeticNumberLiteralWord HYPHEN poeticNumberLiteralWord
+                         | poeticNumberLiteralWord SINGLE_QUOTE poeticNumberLiteralWord?
+                         | poeticNumberLiteralWord APOSTROPHE_S poeticNumberLiteralWord?
+                         | poeticNumberLiteralWord APOSTROPHE_RE poeticNumberLiteralWord?
+                         | poeticNumberLiteralWord APOSTROPHED_N poeticNumberLiteralWord?
+                       | allConstants
 ;
 
 poeticNumberLiteralDecimalSeparator: DOT;
@@ -142,15 +152,19 @@ poeticStringLiteralGarbage: DOT
 
 poeticStringLiteralWord: COMMON_VARIABLE_PREFIXES
                        | PRONOUNS
-                       | CONSTANT_UNDEFINED
-                       | CONSTANT_NULL
-                       | CONSTANT_TRUE
-                       | CONSTANT_FALSE
+                       | allConstants
                        | allKeywords
                        | WORD
                        | WORD_WITH_QUOTES
                        | PROPER_NOUN
 ;
+
+allConstants:  CONSTANT_UNDEFINED
+                       | CONSTANT_NULL
+                       | CONSTANT_TRUE
+                       | CONSTANT_FALSE
+;
+
 
 allKeywords: KW_PUT
            | KW_INTO
