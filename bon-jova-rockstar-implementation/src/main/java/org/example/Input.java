@@ -1,9 +1,12 @@
 package org.example;
 
+import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BytecodeCreator;
+import io.quarkus.gizmo.CatchBlockCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
+import io.quarkus.gizmo.TryBlock;
 import rock.Rockstar;
 
 public class Input {
@@ -41,9 +44,14 @@ public class Input {
     public Variable toCode(ClassCreator creator, BytecodeCreator method, MethodCreator main) {
 
         ResultHandle args = main.getMethodParam(0);
-        ResultHandle rh = method.readArrayValue(args, argIndex);
+        AssignableResultHandle answer = method.createVariable(String.class);
+        TryBlock tryBlock = method.tryBlock();
+        ResultHandle rh = tryBlock.readArrayValue(args, argIndex);
+        tryBlock.assign(answer, rh);
+        CatchBlockCreator catchBlock = tryBlock.addCatch(Throwable.class);
+        catchBlock.assign(answer, catchBlock.loadNull());
 
-        variable.write(method, creator, rh);
+        variable.write(method, creator, answer);
         return variable;
     }
 }
