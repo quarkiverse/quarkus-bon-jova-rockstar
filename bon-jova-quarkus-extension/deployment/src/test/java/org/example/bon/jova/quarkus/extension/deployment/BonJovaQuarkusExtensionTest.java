@@ -55,7 +55,7 @@ public class BonJovaQuarkusExtensionTest {
     void testRockstarEndpoint() {
         // TODO Sleep in tests is the last resort of the desperate
         try {
-            Thread.sleep(500);
+            Thread.sleep(1500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +79,7 @@ public class BonJovaQuarkusExtensionTest {
     void testRockstarProgramWithArguments() {
         // TODO Sleep in tests is the last resort of the desperate
         try {
-            Thread.sleep(500);
+            Thread.sleep(1500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
