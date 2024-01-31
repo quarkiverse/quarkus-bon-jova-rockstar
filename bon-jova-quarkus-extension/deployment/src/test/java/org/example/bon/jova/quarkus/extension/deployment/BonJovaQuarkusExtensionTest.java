@@ -53,6 +53,12 @@ public class BonJovaQuarkusExtensionTest {
 
     @Test
     void testRockstarEndpoint() {
+        // TODO Sleep in tests is the last resort of the desperate
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         RestAssured.when()
                 .get("/rockstar/hello_world.rock")
                 .then()
@@ -71,6 +77,13 @@ public class BonJovaQuarkusExtensionTest {
 
     @Test
     void testRockstarProgramWithArguments() {
+        // TODO Sleep in tests is the last resort of the desperate
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         RestAssured.when()
                 .get("/rockstar/hello_hanno_hello_holly.rock?arg=Hanno&arg=Holly")
                 .then()
