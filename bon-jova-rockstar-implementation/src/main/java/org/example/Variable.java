@@ -42,10 +42,15 @@ public class Variable {
             variables.put(this.variableName, map);
         } else {
             Map<Class<?>, FieldDescriptor> map = variables.get(this.variableName);
-            // Overwrite any previous type references
+            // Overwrite any previous type references, if we can't work with them
+            // If it's an object, just keep it and accept that we optimistically narrowed it
+            // TODO this is probably still quite fragile
+            // TODO we need a unit test for this - or six
+            FieldDescriptor oldField = map.get(Object.class);
+
             if (!map.containsKey(variableClass)) {
                 map.clear();
-                map.put(variableClass, null);
+                map.put(variableClass, oldField);
             }
         }
     }
@@ -171,7 +176,5 @@ public class Variable {
         }
         return field;
     }
-
-
 }
 
