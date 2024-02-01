@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,11 +39,15 @@ public class FileLauncher {
         return File.createTempFile(ROCK_PREFIX, DOT_CLASS);
     }
 
-    public static String launch(File file) throws IOException,
+    public static String launch(File file, String... args) throws IOException,
             InterruptedException {
         List<String> arguments = new ArrayList<>();
         arguments.add(getJreExecutable().toString());
         arguments.add(getBasename(file));
+
+        if (args != null) {
+            arguments.addAll(Arrays.stream(args).toList());
+        }
 
         ProcessBuilder processBuilder = new ProcessBuilder(arguments);
         File workingDir = file.getParentFile();
@@ -63,16 +68,16 @@ public class FileLauncher {
                 .replace(DOT_CLASS, "");
     }
 
-    public static String compileAndLaunch(String filename) throws IOException {
+    public static String compileAndLaunch(String filename, String... args) throws IOException {
         InputStream stream = FileLauncher.class
                 .getResourceAsStream(filename);
         RockFileCompiler compiler = new RockFileCompiler();
         File outFile = createTempClassFile();
         try {
             compiler.compile(stream, outFile);
-            return FileLauncher.launch(outFile);
+            return FileLauncher.launch(outFile, args);
         } catch (Throwable e) {
-            fail("Problem with file " + outFile + ": " + e);
+            fail(e);
             return null;
         }
     }
