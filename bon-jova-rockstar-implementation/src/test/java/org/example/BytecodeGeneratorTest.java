@@ -1858,6 +1858,18 @@ names in Rockstar.)
             assertEquals("123.45\n125.45\n", compileAndLaunch(program));
         }
 
+        @Test
+        public void shouldCastIntoAVariable() {
+            String program = """             
+                    Let X be "123.45"
+                    Say X + 4
+                    Cast X into Y
+                    Say Y           
+                    Say Y + 4
+                    """;
+            assertEquals("123.454\n123.45\n127.45\n", compileAndLaunch(program));
+        }
+
         @Disabled("Not yet implemented")
         @Test
         public void shouldCastStringToDoubleWithConversionBases() {
@@ -1885,7 +1897,7 @@ names in Rockstar.)
 
         @Disabled("Not yet implemented")
         @Test
-        public void shouldCastIntoAVariable() {
+        public void shouldCastAnExpressionIntoAVariable() {
             String program = """             
                     Cast "12345" into result
                         (result now contains the number 12345)
