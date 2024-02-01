@@ -83,7 +83,7 @@ decrementStmt: KW_KNOCK ws variable ws downs;
 
 downs: KW_DOWN (COMMA? ws KW_DOWN)*;
 
-castStmt: KW_CAST ws variable;
+castStmt: KW_CAST ws variable (ws KW_INTO ws variable)?;
 
 returnStmt: KW_GIVE (ws KW_BACK)? ws expression (ws KW_BACK)?;
 

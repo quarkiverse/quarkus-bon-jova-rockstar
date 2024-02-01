@@ -411,13 +411,16 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterCastStmt(Rockstar.CastStmtContext ctx) {
         // Simple support, just string to number
-        Variable oldVar = new Variable(ctx.variable());
+        Variable oldVar = new Variable(ctx.variable().get(0));
         ResultHandle oldVal = oldVar.read(currentCreator);
 
         ResultHandle newVal = currentCreator.invokeStaticMethod(VALUE_OF_METHOD, oldVal);
-
-        // For now, hardcode what we are casting to
-        Variable newVar = new Variable(ctx.variable(), double.class);
+        Variable newVar;
+        if (ctx.KW_INTO() != null) {
+            newVar = new Variable(ctx.variable().get(1), double.class);
+        } else {
+            newVar = new Variable(ctx.variable().get(0), double.class);
+        }
         newVar.write(currentCreator, creator, newVal);
 
     }
