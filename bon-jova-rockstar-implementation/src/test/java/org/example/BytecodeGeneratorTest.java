@@ -933,6 +933,130 @@ names in Rockstar.)
         }
 
         @Test
+        public void shouldHandleWhileLoopsWithChangingVariable() {
+            String program = """
+                    Tommy was shy
+                    While Tommy ain't 2,
+                    Let Tommy be 2
+                    Say Tommy
+                    """;
+            String output = compileAndLaunch(program);
+
+            String expected = """
+                    2
+                    """;
+            assertEquals(expected, output);
+
+            program = """
+                    Tommy was "something"
+                    While Tommy ain't "large",
+                    Say Tommy
+                    Let Tommy be "large"
+                    Say Tommy
+                    """;
+
+            assertEquals("something\nlarge\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleWhileLoopsWithImplicitFalsinessChecksAgainstNothingWithLetAssignment() {
+            String program = """
+                    Tommy was "something"
+                    While Tommy,
+                    Say Tommy
+                    Let Tommy be nothing
+                                        
+                    Say "done"
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("something\ndone\n", output);
+        }
+
+        @Test
+        public void shouldHandleWhileLoopsWithImplicitFalsinessChecksAgainstNothingWithIsAssignment() {
+            String program = """
+                    Tommy was "something"
+                    While Tommy,
+                    Say Tommy
+                    Tommy is nothing
+                                        
+                    Say "done"
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("something\ndone\n", output);
+        }
+
+        @Test
+        public void shouldHandleWhileLoopsWithImplicitFalsinessChecksAgainstMysterious() {
+            String program = """
+                    Tommy was "something"
+                    While Tommy,
+                    Say Tommy
+                    Let Tommy be mysterious
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("something\n", output);
+        }
+
+        @Test
+        public void shouldHandleIfBlocksWithImplicitFalsinessChecksAgainstNothing() {
+            String program = """
+                    Tommy was "something"
+                    If Tommy,
+                    Say Tommy
+                    Let Tommy be nothing
+                    If Tommy,
+                    Say "else"                    
+                    """;
+
+            String output = compileAndLaunch(program);
+
+            assertEquals("something\n", output);
+        }
+
+        @Test
+        public void shouldHandleIfLoopsWithImplicitFalsinessChecksAgainstMysterious() {
+            String program = """
+                    Tommy was "something"
+                    If Tommy,
+                    Say Tommy
+                    Let Tommy be mysterious
+                    If Tommy,
+                    Say "else"   
+                                       """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("something\n", output);
+        }
+
+        @Test
+        public void shouldHandleIfLoopsWithImplicitFalsinessChecksAgainstNegatedValue() {
+            String program = """
+                    Tommy was "something"
+                    If not Tommy,
+                    Say Tommy
+                                       """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("", output);
+        }
+
+        @Test
+        public void shouldHandleIfLoopsWithImplicitFalsinessChecksAgainstNegatedNothing() {
+            String program = """
+                    Tommy was nothing
+                    If not Tommy,
+                    Say "he is not"
+                                       """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("he is not\n", output);
+        }
+
+        @Test
         public void shouldWhileLoopsInAFunction() {
             String program = """
                     Midnight takes your heart and your soul
@@ -1556,6 +1680,22 @@ names in Rockstar.)
         }
 
         @Test
+        public void shouldInitialiseAnArrayWithRockIfArrayHadBeenSetToNull() {
+            String program = """
+                    Rock the array
+                    Say the array
+                    Let the array be nothing
+                    Say the array
+                    Rock "hi" into the array
+                    Say the array
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Satriani says '2', but I think 1 is more correct
+            assertEquals("0\n\n1\n", output);
+        }
+
+        @Test
         public void shouldOutputArrayLength() {
             String program = """
                     Rock 1, 2, 3, 4, 8 into arr
@@ -1564,6 +1704,18 @@ names in Rockstar.)
             String output = compileAndLaunch(program);
 
             assertEquals("5\n", output);
+        }
+
+        @Test
+        public void shouldTolerateInitialisingWithNull() {
+            String program = """
+                    Jane is nothing
+                    Rock Jane into arr
+                    Say arr
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("1\n", output);
         }
 
         // Returning an array in a scalar context will return the current length of the array
@@ -1619,9 +1771,8 @@ names in Rockstar.)
         }
 
         @Test
-        public void shouldPutContentInRightPlaceWhenAppendingToArray() {
+        public void shouldPutContentInRightPlaceWhenAppendingToNewArray() {
             String program = """
-                    rock arr
                     rock 1 into arr
                     rock 5 into arr
                     rock 8 into arr
@@ -1654,6 +1805,17 @@ names in Rockstar.)
 
 
             assertEquals("4\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldBeAbleToUsePushInArrayAssignments() {
+            String program = """
+                    push lines
+                    say lines
+                                        """;
+
+
+            assertEquals("0\n", compileAndLaunch(program));
         }
 
         @Test

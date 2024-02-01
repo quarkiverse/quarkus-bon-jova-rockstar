@@ -43,6 +43,8 @@ public class Constant {
                 value = null;
                 valueClass = null;
             }
+
+            valueClass = Object.class;
         }
     }
 

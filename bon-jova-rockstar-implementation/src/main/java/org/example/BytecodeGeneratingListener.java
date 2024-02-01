@@ -38,6 +38,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
     private static final MethodDescriptor STRING_CONCAT = MethodDescriptor.ofMethod("java/lang/String", "concat", String.class, String.class);
     private static final MethodDescriptor VALUE_OF_METHOD = MethodDescriptor.ofMethod("java/lang/Double", "valueOf", Double.class, String.class);
+    private static final MethodDescriptor BOOLEAN_VALUE = MethodDescriptor.ofMethod(Boolean.class, "booleanValue", boolean.class);
     private BytecodeCreator currentCreator;
     // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
     private BytecodeCreator targetScopeForJumps;
@@ -320,12 +321,16 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         if (ctx.KW_WHILE() != null) {
             fun = (BytecodeCreator method) -> {
-                ResultHandle evaluated = expression.getResultHandle(method, creator);
+                ResultHandle evaluated = expression.getResultHandle(method, creator, Expression.Context.BOOLEAN);
+                // TODO delete this comment Convoluted code! We can't return a boolean from the expression, or we sometimes get java.lang.NoClassDefFoundError: boolean
+                // But the Boolean in ifTrue gets cast to Int, so we need to turn our Boolean into a boolean
+                //  return method.ifTrue(method.invokeVirtualMethod(BOOLEAN_VALUE, evaluated));
                 return method.ifTrue(evaluated);
             };
         } else if (ctx.KW_UNTIL() != null) {
             fun = (BytecodeCreator method) -> {
-                ResultHandle evaluated = expression.getResultHandle(method, creator);
+                // See above - same convolution
+                ResultHandle evaluated = expression.getResultHandle(method, creator, Expression.Context.BOOLEAN);
                 return method.ifFalse(evaluated);
             };
         } else {

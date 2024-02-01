@@ -30,6 +30,8 @@ public class Literal {
                 // idiomatic-ish)
                 valueClass = String.class;
             }
+            // TODO
+            valueClass = Object.class;
         }
     }
 
@@ -52,8 +54,14 @@ public class Literal {
             return method.load((double) value);
         } else if (boolean.class.equals(valueClass)) {
             return method.load((boolean) value);
+        } else if (value instanceof String) {
+            return method.load((String) value);
+        } else if (value instanceof Double) {
+            return method.load((double) value);
+        } else if (value instanceof Boolean) {
+            return method.load((Boolean) value);
         } else {
-            throw new RuntimeException("Internal error: unknown type " + value);
+            throw new RuntimeException("Internal error: unknown type " + valueClass + " for " + value);
         }
     }
 }

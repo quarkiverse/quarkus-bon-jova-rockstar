@@ -21,13 +21,18 @@ public class RockstarArray {
     }
 
     public Object get(double i) {
-        return list.get((int) i);
+
+        if (i < list.size()) {
+            return list.get((int) i);
+        } else {
+            return null;
+        }
     }
 
     public Object get(Object key) {
         // Rockstar only has a small number of types, so we don't need to check every Java type
         if (key instanceof Double) {
-            return list.get(((Double) key).intValue());
+            return get(((Double) key).doubleValue());
         } else if (key instanceof String) {
             try {
                 int num = Integer.parseInt((String) key);

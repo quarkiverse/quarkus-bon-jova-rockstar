@@ -42,11 +42,20 @@ public class IntegrationTests {
         assertEquals(expected, output);
     }
 
+
     private String getFileContents(String name) throws URISyntaxException, IOException {
         Path filePath = Path.of(this.getClass()
                 .getResource(name)
                 .toURI());
 
         return Files.readString(filePath);
+    }
+
+    private String[] getFileContentsAsArray(String name) throws URISyntaxException, IOException {
+        Path filePath = Path.of(this.getClass()
+                .getResource(name)
+                .toURI());
+
+        return Files.readAllLines(filePath).toArray(new String[0]);
     }
 }

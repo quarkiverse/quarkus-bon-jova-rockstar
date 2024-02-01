@@ -196,7 +196,28 @@ class RockstarArrayTest {
         ra.addAll(list);
         assertEquals(5, ra.size());
         assertEquals(8, ra.get(3));
-
     }
 
+    @Test
+    public void shouldTolerateAddingNull() {
+        RockstarArray ra = new RockstarArray();
+        ra.add(null);
+        assertEquals(1, ra.size());
+    }
+
+    @Test
+    public void shouldTolerateGettingPastTheEndOfTheArray() {
+        RockstarArray ra = new RockstarArray();
+        List list = List.of(3, 5, 8, 9);
+        ra.addAll(list);
+        assertEquals(null, ra.get(9));
+    }
+
+    @Test
+    public void shouldTolerateGettingPastTheEndOfTheArrayForObjectKeys() {
+        RockstarArray ra = new RockstarArray();
+        List list = List.of(3, 5, 8, 9);
+        ra.addAll(list);
+        assertEquals(null, ra.get(Double.valueOf(9)));
+    }
 }

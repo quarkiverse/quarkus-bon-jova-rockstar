@@ -105,8 +105,14 @@ public class Assignment {
                 rh = method.load((boolean) value);
             } else if (value == NOTHING) { // We can't check the type, because Nothings are stored as objects in case they get coerced
                 rh = method.loadNull();
+            } else if (value instanceof String) {
+                rh = method.load((String) value);
+            } else if (value instanceof Double) {
+                rh = method.load((double) value);
+            } else if (value instanceof Boolean) {
+                rh = method.load((Boolean) value);
             } else {
-                throw new RuntimeException("Internal error: unknown type " + value + " in assigment '" + text + "'");
+                throw new RuntimeException("Internal error: unknown type " + variableClass + " for " + value + " used in assigment '" + text + "'");
             }
         }
 

@@ -1,5 +1,6 @@
 package org.example;
 
+import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
@@ -79,13 +80,19 @@ public class Array {
     // This (badly-named) method covers initialisation and writing
     public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
 
-        ResultHandle rh;
+        AssignableResultHandle rh = method.createVariable(TYPE_CLASS);
 
         if (variable.isAlreadyWritten()) {
-            rh = variable.read(method);
+            method.assign(rh, variable.read(method));
+
+            // it could exist, but have been set to null, so do a null check
+
+            BytecodeCreator isNull = method.ifNull(rh).trueBranch();
+            isNull.assign(rh, isNull.newInstance(CONSTRUCTOR));
+            variable.write(method, creator, rh);
         } else {
             // TODO it would be nice to specify the initial capacity, even if creating a collection to initialise it with is too tricky
-            rh = method.newInstance(CONSTRUCTOR);
+            method.assign(rh, method.newInstance(CONSTRUCTOR));
             variable.write(method, creator, rh);
         }
 
