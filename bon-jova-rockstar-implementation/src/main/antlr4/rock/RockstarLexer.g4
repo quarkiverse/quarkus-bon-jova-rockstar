@@ -82,7 +82,7 @@ KW_BE: B E;
 KW_SAYS: S A Y S | S A I D;
 
 KW_TAKING: T A K I N G;
-KW_TAKES: T A K E S;
+KW_TAKES: T A K E S | W A N T S;
 
 KW_LISTEN: L I S T E N;
 KW_TO: T O ;
