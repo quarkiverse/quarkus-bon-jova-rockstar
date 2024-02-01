@@ -69,6 +69,17 @@ public class VariableTest {
     }
 
     @Test
+    public void shouldHandlePluralCommonVariableNames() {
+        String program = """
+                Our thing is true
+                Shout our thing
+                                            """;
+        Rockstar.VariableContext ctx = new ParseHelper().getVariable(program);
+        Variable v = new Variable(ctx, boolean.class);
+        assertEquals("our__thing", v.getVariableName());
+    }
+
+    @Test
     public void shouldIgnoreExtraWhitespaceInCommonVariableNames() {
         String program = """
                 My             thing is true
