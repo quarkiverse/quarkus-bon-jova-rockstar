@@ -13,8 +13,8 @@ import io.quarkus.deployment.pkg.builditem.CurateOutcomeBuildItem;
 import io.quarkus.devui.spi.page.CardPageBuildItem;
 import io.quarkus.devui.spi.page.Page;
 import org.example.RockFileCompiler;
-import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsReader;
 import org.example.bon.jova.quarkus.extension.deployment.rockscore.RockScoreCalculator;
+import org.example.bon.jova.quarkus.extension.lyrics.LyricsReader;
 import org.example.bon.jova.quarkus.extension.runtime.RockstarResource;
 
 import java.io.File;

@@ -1,6 +1,6 @@
 package org.example.bon.jova.quarkus.extension.deployment.rockscore;
 
-import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsReader;
+import org.example.bon.jova.quarkus.extension.lyrics.LyricsReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
