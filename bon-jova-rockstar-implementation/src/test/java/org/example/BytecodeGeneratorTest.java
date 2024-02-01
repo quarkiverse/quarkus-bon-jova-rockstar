@@ -1072,6 +1072,27 @@ names in Rockstar.)
             assertEquals("got this far\n", compileAndLaunch(program));
         }
 
+        @Disabled("This exact code passes when run as an integration test, but fails here - why?!")
+        @Test
+        public void shouldHandleConsecutiveLoops() {
+            String program = """
+                    The walls are high and mighty
+                    While the walls ain't nothing
+                    Knock the walls down
+                                        
+                    Shout the walls
+                                        
+                    Finished are our hopes and dreams
+                    Our city is in need of rebuilding
+                    While our city is not finished
+                    Build our city up
+                                        
+                    Shout our city
+                    """;
+
+            assertEquals("0\n2420\n", compileAndLaunch(program));
+        }
+
         @Test
         public void shouldHandleUntilLoops() {
             String program = """
@@ -2137,6 +2158,25 @@ names in Rockstar.)
                     Say result
                     """;
             assertEquals("A\nA2\nЖ\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldHandleComplexCasts() {
+            String program = """
+                    The world is only scared
+                    Cast the world into your thoughts
+                    Happiness is a fire
+                    Let your need be the world without happiness
+                    say "your need " + your need
+                    Cast your need into your anger
+                    say "your anger " + your anger
+                    Say "your thoughts" + your thoughts
+                                        """;
+
+            assertEquals("your need 32\n" +
+                    "your anger  \n" +
+                    "your thoughts.\n", compileAndLaunch(program));
+
         }
     }
 
