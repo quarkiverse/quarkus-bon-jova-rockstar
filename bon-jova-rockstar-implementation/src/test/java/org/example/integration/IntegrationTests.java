@@ -1,5 +1,6 @@
 package org.example.integration;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -23,6 +24,21 @@ public class IntegrationTests {
     public void shouldRunFizzBuzz() throws IOException, URISyntaxException {
         String output = compileAndLaunch("/fizzbuzz.rock");
         String expected = getFileContents("/expected-fizzbuzz.output");
+        assertEquals(expected, output);
+    }
+
+    @Disabled("Not yet working")
+    @Test
+    public void shouldRunFactorization() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/factorization.rock", "178");
+        assertEquals("2\n89\n", output);
+    }
+
+    @Disabled("Not yet working")
+    @Test
+    public void shouldRunMandelbrot() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/mandelbrot.rock");
+        String expected = getFileContents("/expected-mandelbrot.output");
         assertEquals(expected, output);
     }
 
