@@ -74,7 +74,6 @@ public class IntegrationTests {
     }
 
     @Test
-    @Disabled("Not yet working")
     void shouldRunCityWalls() throws IOException, URISyntaxException {
         String output = compileAndLaunch("/concept-demo-4-city-walls.rock");
         String expected = getFileContents("/expected-concept-demo-4-city-walls.output");
