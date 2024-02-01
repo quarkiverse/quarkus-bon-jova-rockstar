@@ -38,7 +38,6 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     // place to store them
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
     private static final MethodDescriptor STRING_CONCAT = MethodDescriptor.ofMethod("java/lang/String", "concat", String.class, String.class);
-    private static final MethodDescriptor VALUE_OF_METHOD = MethodDescriptor.ofMethod("java/lang/Double", "valueOf", Double.class, String.class);
     private static final MethodDescriptor BOOLEAN_VALUE = MethodDescriptor.ofMethod(Boolean.class, "booleanValue", boolean.class);
     private BytecodeCreator currentCreator;
     // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
@@ -417,26 +416,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     @Override
     public void enterCastStmt(Rockstar.CastStmtContext ctx) {
-        // Simple support, just string to number
-        Variable oldVar = new Variable(ctx.variable().get(0));
-        ResultHandle oldVal = oldVar.read(currentCreator);
-
-        // Tolerate casting things that aren't strings
-        ResultHandle isString = currentCreator.instanceOf(oldVal, String.class);
-        BranchResult br = currentCreator.ifTrue(isString);
-        AssignableResultHandle newVal = currentCreator.createVariable(Object.class);
-        BytecodeCreator isStringBranch = br.trueBranch();
-        isStringBranch.assign(newVal, isStringBranch.invokeStaticMethod(VALUE_OF_METHOD, oldVal));
-        br.falseBranch().assign(newVal, oldVal);
-
-        Variable newVar;
-        if (ctx.KW_INTO() != null) {
-            newVar = new Variable(ctx.variable().get(1), double.class);
-        } else {
-            newVar = new Variable(ctx.variable().get(0), double.class);
-        }
-        newVar.write(currentCreator, creator, newVal);
-
+        Cast cast = new Cast(ctx);
+        cast.toCode(currentCreator, creator);
     }
 
     @Override

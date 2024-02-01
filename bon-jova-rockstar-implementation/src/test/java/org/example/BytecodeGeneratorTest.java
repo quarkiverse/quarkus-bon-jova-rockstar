@@ -2083,41 +2083,27 @@ names in Rockstar.)
         }
 
         @Test
-        public void shouldCastPoeticNumberLiteralsIntoAVariable() {
-            String program = """             
-                    The world is only scared
-                    Cast the world into your thoughts
-                    Say the world
-                                        """;
-            assertEquals("46\n", compileAndLaunch(program));
-        }
-
-        @Disabled("Not yet implemented")
-        @Test
-        public void shouldCastStringToDoubleWithConversionBases() {
+        public void shouldCastStringToDoubleWithRadix() {
             String program = """
                     Let X be "ff"
                     Cast X with 16
                         (X now contains the numeric value 255 - OxFF)
                     Say X
                     Say X + 2
-                                       
-                                        
-                    Cast "12345" into result
-                        (result now contains the number 12345)
-                    Cast "aa" into result with 16
-                        (result now contains the number 170 - 0xAA)
-                                        
-                    Cast 65 into result
-                        (result now contains the string "A" - ASCII code 65)
-                                        
-                    Cast 1046 into result
-                        (result now contains the Cyrillic letter "Ж" - Unicode code point 1046)
                     """;
             assertEquals("255\n257\n", compileAndLaunch(program));
         }
 
-        @Disabled("Not yet implemented")
+        @Test
+        public void shouldCastStringToDoubleWithRadixIntoAVariable() {
+            String program = """
+                    Cast "aa" into result with 16
+                    Say result
+                    Say result + 2
+                    """;
+            assertEquals("170\n172\n", compileAndLaunch(program));
+        }
+
         @Test
         public void shouldCastAnExpressionIntoAVariable() {
             String program = """             
@@ -2133,17 +2119,21 @@ names in Rockstar.)
             assertEquals("12345\n12347\n170\n172\n", compileAndLaunch(program));
         }
 
-        @Disabled("Not yet implemented")
         @Test
-        public void shouldCastNumbersIntoStringsAsUnicode() {
+        public void shouldCastPoeticNumberExpressionsIntoAVariable() {
+            String program = """             
+                    The world is only scared
+                    Cast the world into your thoughts
+                    Say your thoughts
+                                        """;
+            assertEquals(".\n", compileAndLaunch(program));
+        }
+
+        @Disabled("A problem with assigning a double to an object")
+        @Test
+        public void shouldCastLiteralsIntoStringsAsUnicode() {
             String program = """       
                     Cast 65 into result
-                        (result now contains the string "A" - ASCII code 65)
-                    Say result
-                    Say result + 2
-                                        
-                    Cast 1046 into result
-                        (result now contains the Cyrillic letter "Ж" - Unicode code point 1046)
                     Say result
                     """;
             assertEquals("A\nA2\nЖ\n", compileAndLaunch(program));

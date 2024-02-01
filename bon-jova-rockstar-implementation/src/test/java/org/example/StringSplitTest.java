@@ -1,10 +1,9 @@
+package org.example;
+
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
-import org.example.RockstarArray;
-import org.example.StringSplit;
-import org.example.Variable;
 import org.example.util.ParseHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
