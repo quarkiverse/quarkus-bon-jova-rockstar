@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.example.BytecodeGeneratingListener.isBoolean;
 import static org.example.BytecodeGeneratingListener.isNumber;
 import static org.example.BytecodeGeneratingListener.isObject;
 import static org.example.Constant.NOTHING;
@@ -49,13 +50,16 @@ public class Expression {
 
     private UnaryOperation unaryOperation;
     private static final MethodDescriptor CONCAT_METHOD = MethodDescriptor.ofMethod(String.class, "concat", String.class, String.class);
+    private static final MethodDescriptor COMPARE_TO_METHOD = MethodDescriptor.ofMethod(Comparable.class, "compareTo", "I", Object.class);
+    private static final MethodDescriptor EQUALITY_METHOD = MethodDescriptor.ofMethod(Object.class, "equals", "Z", Object.class);
+    private static final MethodDescriptor DOUBLE_CREATOR = MethodDescriptor.ofConstructor(Double.class, double.class);
     private static final MethodDescriptor constructor = MethodDescriptor.ofConstructor(BigDecimal.class, double.class);
     private static final MethodDescriptor divide = MethodDescriptor.ofMethod(BigDecimal.class, "divide", BigDecimal.class, BigDecimal.class, MathContext.class);
     private static final MethodDescriptor toDouble = MethodDescriptor.ofMethod(BigDecimal.class, "doubleValue", double.class);
 
     FieldDescriptor mathContext = FieldDescriptor.of(MathContext.class, "DECIMAL32", MathContext.class);
 
-    enum Context {SCALAR, NORMAL}
+    enum Context {SCALAR, BOOLEAN, NORMAL}
 
 
     public Expression(Rockstar.VariableContext ctx) {
@@ -218,9 +222,17 @@ public class Expression {
 
     private static AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
                                                        ResultHandle lrh, ResultHandle rrh) {
+
+        ResultHandle safeLrh = coerceAwayNothing(method, lrh, rrh);
+        safeLrh = coerceAwayNothing(method, safeLrh, rrh);
+
+        ResultHandle safeRrh = coerceAwayNothing(method, rrh, lrh);
+        safeRrh = coerceAwayNothing(method, safeRrh, lrh);
+
+
         ResultHandle equalityCheck = method.invokeInterfaceMethod(
-                MethodDescriptor.ofMethod("java/lang/Comparable", "compareTo", "I", "Ljava/lang/Object;"),
-                lrh, rrh);
+                COMPARE_TO_METHOD,
+                safeLrh, safeRrh);
         BranchResult result = comparison.doCheck(equalityCheck);
         AssignableResultHandle answer = method.createVariable("Z");
         BytecodeCreator trueBranch = result.trueBranch();
@@ -243,20 +255,41 @@ public class Expression {
     }
 
     public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator, Context context) {
+        ResultHandle handle;
         if (function != null) {
-            return getHandleForFunction(method, classCreator);
+            handle = getHandleForFunction(method, classCreator);
         } else if (operation != null) {
-            return getHandleForOperation(method, classCreator);
+            handle = getHandleForOperation(method, classCreator);
         } else if (unaryOperation != null) {
-            return getHandleForUnaryOperation(method, classCreator);
+            handle = getHandleForUnaryOperation(method, classCreator);
         } else if (arrayAccess != null) {
-            return getHandleForArray(method, classCreator);
+            handle = getHandleForArray(method, classCreator);
         } else if (variable != null) {
-            return getHandleForVariable(method, context);
+            handle = getHandleForVariable(method, context);
         } else {
             // This is a literal
-            return getHandleForLiteral(method);
+            handle = getHandleForLiteral(method);
         }
+
+        // Now do an extra check if the context was boolean
+        if (context == Context.BOOLEAN && !isBoolean(handle)) {
+            AssignableResultHandle bool = method.createVariable(boolean.class);
+            method.assign(bool, method.load(1));
+            ResultHandle falsey = method.load(0);
+            BranchResult nullCheck = method.ifNull(handle);
+            nullCheck.trueBranch().assign(bool, falsey);
+            BytecodeCreator notNull = nullCheck.falseBranch();
+            ResultHandle doub = notNull.newInstance(DOUBLE_CREATOR, notNull.load(0d));
+            // Be lazy and do a comparison so we don't have to cast
+            BytecodeCreator isZero = notNull.ifTrue(
+                    notNull.invokeVirtualMethod(EQUALITY_METHOD, doub, handle)).trueBranch();
+            isZero.assign(bool, falsey);
+
+            return bool;
+        } else {
+            return handle;
+        }
+
     }
 
     private ResultHandle getHandleForLiteral(BytecodeCreator method) {
@@ -271,8 +304,16 @@ public class Expression {
             answer = method.loadNull();
         } else if (value == NOTHING) {
             answer = method.loadNull();
+        } else if (value == null) {
+            answer = method.loadNull();
+        } else if (value instanceof String) {
+            answer = method.load((String) value);
+        } else if (value instanceof Double) {
+            answer = method.load((double) value);
+        } else if (value instanceof Boolean) {
+            answer = method.load((Boolean) value);
         } else {
-            throw new RuntimeException("Confused expression: Could not interpret type " + valueClass);
+            throw new RuntimeException("Confused expression: Could not interpret type " + valueClass + " with value " + value);
         }
         return answer;
     }
@@ -287,19 +328,28 @@ public class Expression {
     }
 
     private ResultHandle getHandleForVariable(BytecodeCreator method, Context context) {
-        if (valueClass != Array.TYPE_CLASS || context == Context.NORMAL) {
-            return variable.read(method);
+        ResultHandle rh = variable.read(method);
+        if (context == Context.NORMAL) {
+            return rh;
         } else {
-            return Array.toScalarContext(variable, method);
+            // For boolean contexts, we also want arrays to go to a number length
+            BranchResult arrayCheck = method.ifTrue(method.instanceOf(rh, RockstarArray.class));
+            AssignableResultHandle answer = method.createVariable(Object.class);
+            BytecodeCreator isArray = arrayCheck.trueBranch();
+            isArray.assign(answer, Array.toScalarContext(variable, isArray));
+            BytecodeCreator isNotArray = arrayCheck.falseBranch();
+            isNotArray.assign(answer, rh);
+            return answer;
         }
     }
 
     private ResultHandle getHandleForUnaryOperation(BytecodeCreator method, ClassCreator classCreator) {
-        ResultHandle rrh = rhe.getResultHandle(method, classCreator);
+        ResultHandle rrh = rhe.getResultHandle(method, classCreator, Context.BOOLEAN);
 
         // Do type coercion of rockstar nulls (which are a special type, not null)
         // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
 
+        // TODO this may not be needed since we passed a boolean context
         rrh = coerceFalsyTypes(method, rhe, rrh);
 
         switch (unaryOperation) {
@@ -614,7 +664,7 @@ public class Expression {
         BytecodeCreator isNotNull = nullCheck.falseBranch();
 
         isNotNull.assign(answer, isNotNull.invokeVirtualMethod(
-                MethodDescriptor.ofMethod("java/lang/Object", "equals", "Z", "Ljava/lang/Object;"),
+                EQUALITY_METHOD,
                 lrh, rrh));
 
         return answer;

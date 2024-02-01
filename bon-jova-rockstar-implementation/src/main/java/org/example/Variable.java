@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Variable {
-    private static final Map<String, Map<Class<?>, FieldDescriptor>> variables = new HashMap<>();
+    private static final Map<String, FieldDescriptor> variables = new HashMap<>();
     // Because this is static, we could get cross-talk between programs, but that's a relatively low risk; we manage it by explicitly
     // clearing statics
     private static String mostRecentVariableName = null;
@@ -24,35 +24,13 @@ public class Variable {
         this(variable.getText(), variable.PRONOUNS(), variableClass);
     }
 
-    Variable(String text, Class<?> variableClass) {
-        this(text, null, variableClass);
-    }
 
-    /**
-     * Used for synthetic variables; should not generally be used
-     */
     private Variable(String text, TerminalNode pronouns, Class<?> variableClass) {
         this(text, pronouns, false);
 
         this.variableClass = variableClass;
-
-        if (!variables.containsKey(variableName)) {
-            Map<Class<?>, FieldDescriptor> map = new HashMap<>();
-            map.put(this.variableClass, null);
-            variables.put(this.variableName, map);
-        } else {
-            Map<Class<?>, FieldDescriptor> map = variables.get(this.variableName);
-            // Overwrite any previous type references, if we can't work with them
-            // If it's an object, just keep it and accept that we optimistically narrowed it
-            // TODO this is probably still quite fragile
-            // TODO we need a unit test for this - or six
-            FieldDescriptor oldField = map.get(Object.class);
-
-            if (!map.containsKey(variableClass)) {
-                map.clear();
-                map.put(variableClass, oldField);
-            }
-        }
+        // TODO
+        this.variableClass = Object.class;
     }
 
     public Variable(Rockstar.VariableContext variable) {
@@ -66,6 +44,8 @@ public class Variable {
     private Variable(String text, TerminalNode pronouns, boolean enforceType) {
         // Work out the variable name
         // In principle trivial, in practice made a bit complicated by normalisation and more complicated by pronouns
+// TODO type chaos
+        this.variableClass = Object.class;
 
         if (pronouns != null) {
             if (mostRecentVariableName == null) {
@@ -76,22 +56,6 @@ public class Variable {
 
         } else {
             variableName = getNormalisedVariableName(text);
-        }
-
-        if (enforceType) {
-            Map<Class<?>, FieldDescriptor> map = variables.get(variableName);
-            if (map != null) {
-                if (map.size() == 1) {
-                    variableClass = map.keySet().iterator().next();
-                } else {
-                    String types = Arrays.toString(map.keySet().toArray());
-                    throw new RuntimeException(
-                            "The variable, " + variableName + " has been used as the following types, so we do not know which type this reference should be: " + types);
-                }
-            } else {
-                throw new RuntimeException(
-                        "Reference to a variable, " + variableName + ", but we do not have enough information about the type.");
-            }
         }
     }
 
@@ -138,22 +102,19 @@ public class Variable {
     }
 
     public boolean isAlreadyWritten() {
-        Map<Class<?>, FieldDescriptor> classFieldDescriptorMap = variables.get(variableName);
-        return classFieldDescriptorMap != null && classFieldDescriptorMap.get(variableClass) != null;
+        FieldDescriptor field = variables.get(variableName);
+        return field != null;
     }
 
     private FieldDescriptor getField() {
         FieldDescriptor field;
         if (isAlreadyWritten()) {
-            Map<Class<?>, FieldDescriptor> classFieldDescriptorMap = variables.get(variableName);
-            field = classFieldDescriptorMap.get(variableClass);
+            field = variables.get(variableName);
+
         } else {
             // This is an internal error, not a program one
-            if (variables.get(variableName) != null) {
-                throw new RuntimeException("Different class: We looked for a " + variableClass + " but the variable " + variableName + " is stored as a class " + Arrays.toString(variables.get(variableName).keySet().toArray()));
-            } else {
-                throw new RuntimeException("Moral panic: Could not find variable called " + variableName + " of class " + variableClass + ". \nKnown variables are " + Arrays.toString(variables.keySet().toArray()));
-            }
+
+            throw new RuntimeException("Moral panic: Could not find variable called " + variableName + ". \nKnown variables are " + Arrays.toString(variables.keySet().toArray()));
         }
 
         return field;
@@ -166,8 +127,8 @@ public class Variable {
             field = creator.getFieldCreator(variableName, variableClass)
                     .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                     .getFieldDescriptor();
-            Map<Class<?>, FieldDescriptor> classFieldDescriptorMap = variables.get(variableName);
-            classFieldDescriptorMap.put(variableClass, field);
+
+            variables.put(variableName, field);
         } else {
             field = getField();
             if (!creator.getClassName().equals(field.getDeclaringClass())) {

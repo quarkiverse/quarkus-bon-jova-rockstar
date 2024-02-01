@@ -16,7 +16,7 @@ public class Condition {
     }
 
     public BranchResult toCode(BytecodeCreator main, ClassCreator classCreator) {
-        ResultHandle evaluated = expression.getResultHandle(main, classCreator);
+        ResultHandle evaluated = expression.getResultHandle(main, classCreator, Expression.Context.BOOLEAN);
         BranchResult conditional = main.ifTrue(evaluated);
         return conditional;
     }

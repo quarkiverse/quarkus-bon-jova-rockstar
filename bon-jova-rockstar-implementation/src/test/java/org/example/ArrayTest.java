@@ -142,6 +142,16 @@ public class ArrayTest {
         assertEquals(2d, execute.get("hello"));
     }
 
+    @Test
+    public void shouldReturnNullForAccessBeyondIndex() {
+        String program = """
+                Rock 1, 2 into arr
+                """;
+        Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
+        RockstarArray execute = execute(new Array(ctx));
+        assertEquals(null, execute.get(5));
+    }
+
     // We can't test reading arrays because they're multi-line executions
 
     private RockstarArray execute(Array a) {
