@@ -62,7 +62,7 @@ public class Variable {
     /**
      * This is useful for things like variable names in bytecode, where spaces are not ok
      */
-    private static String getNormalisedVariableName(String variableName) {
+     static String getNormalisedVariableName(String variableName) {
         return variableName
                 .replaceAll(" +", "__") // use two underscores to reduce the chance of a clash with variable names in the program
                 .toLowerCase();

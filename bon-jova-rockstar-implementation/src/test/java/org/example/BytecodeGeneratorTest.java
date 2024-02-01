@@ -1241,6 +1241,21 @@ names in Rockstar.)
         }
 
         @Test
+        public void shouldBeCaseInsensitiveOnFunctionNames() {
+            String program = """
+                    Midnight takes your heart
+                    Give back your heart
+                                           
+                    Ice is "nice"
+                    Say midnight taking ice
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Function returns argument, which is 4
+            assertEquals("nice\n", output);
+        }
+
+        @Test
         public void shouldHandleReturnInFunction() {
             String program = """
                     Midnight takes your heart

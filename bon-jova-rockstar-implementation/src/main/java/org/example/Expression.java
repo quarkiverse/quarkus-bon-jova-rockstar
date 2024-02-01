@@ -28,6 +28,7 @@ import static org.example.BytecodeGeneratingListener.isObject;
 import static org.example.Constant.NOTHING;
 import static org.example.Constant.coerceMysteriousIntoType;
 import static org.example.Constant.coerceNothingIntoType;
+import static org.example.Variable.getNormalisedVariableName;
 
 public class Expression {
 
@@ -186,7 +187,7 @@ public class Expression {
             unaryOperation = UnaryOperation.NEGATION;
 
         } else if (functionCall != null) {
-            function = functionCall.functionName.getText();
+            function = getNormalisedVariableName(functionCall.functionName.getText());
 
             params = Stream.of(functionCall.argList().expression().stream().map(Expression::new), functionCall.argList().variable().stream().map(Expression::new), functionCall.argList().literal().stream().map(Expression::new), functionCall.argList().constant().stream().map(Expression::new))
                     .flatMap(Function.identity())
