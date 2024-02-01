@@ -21,8 +21,8 @@ public class CapturingListener extends RockstarBaseListener {
     private Rockstar.InputStmtContext input;
     private Rockstar.RoundingStmtContext rounding;
     private Rockstar.ArrayStmtContext array;
-
     private Rockstar.StringStmtContext stringSplit;
+    private Rockstar.CastStmtContext cast;
 
     @Override
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext assignmentStatement) {
@@ -64,8 +64,9 @@ public class CapturingListener extends RockstarBaseListener {
         this.input = ctx;
     }
 
-    public Rockstar.AssignmentStmtContext getAssignmentStatement() {
-        return assignmentStatement;
+    @Override
+    public void enterCastStmt(Rockstar.CastStmtContext ctx) {
+        this.cast = ctx;
     }
 
     @Override
@@ -103,6 +104,10 @@ public class CapturingListener extends RockstarBaseListener {
         return constant;
     }
 
+    public Rockstar.AssignmentStmtContext getAssignmentStatement() {
+        return assignmentStatement;
+    }
+
     public Rockstar.VariableContext getVariable() {
         return variable;
     }
@@ -125,5 +130,9 @@ public class CapturingListener extends RockstarBaseListener {
 
     public RuleContext getStringSplit() {
         return stringSplit;
+    }
+
+    public RuleContext getCast() {
+        return cast;
     }
 }

@@ -86,12 +86,12 @@ Some of these may work but have not been validated with tests.
 - [X] Delimiters
 - [X] The `join` support
 
-## Casting
+## ✓ Casting
 
 - [X] Casting strings to doubles
-- [ ] Casting using bases other than 10
-- [ ] Casting expressions into a variable
-- [ ] Casting numbers to strings using UTF-8 conversions
+- [X] Casting using bases other than 10
+- [X] Casting expressions into a variable
+- [X] Casting numbers to strings using UTF-8 conversions
 
 ## ✓ Single quotes
 
