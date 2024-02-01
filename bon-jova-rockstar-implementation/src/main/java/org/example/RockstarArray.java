@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RockstarArray {
 
@@ -12,7 +13,7 @@ public class RockstarArray {
     public List<Object> list;
 
     public RockstarArray() {
-        map = new HashMap();
+        map = new HashMap<>();
         list = new ArrayList<>();
     }
 
@@ -95,5 +96,13 @@ public class RockstarArray {
 
     public void addAll(List inList) {
         list.addAll(inList);
+    }
+
+    public String join() {
+        return join("");
+    }
+
+    public String join(String delimiter) {
+        return list.stream().map(Object::toString).collect(Collectors.joining(delimiter));
     }
 }

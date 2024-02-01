@@ -1992,6 +1992,41 @@ names in Rockstar.)
                     "some other value\n" +
                     "some_value\n", compileAndLaunch(program));
         }
+
+        @Test
+        public void shouldJoinArrayElementsIntoString() {
+            String program = """
+                    Let the string be "abcde"
+                    Split the string into tokens
+                    Join tokens with ";"
+                    Say tokens
+                        """;
+            assertEquals("a;b;c;d;e\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldJoinArrayElementsIntoStringWithNoDelimiter() {
+            String program = """
+                    Let the string be "abcde"
+                    Split the string into tokens
+                    Join tokens
+                    Say tokens
+                        """;
+            assertEquals("abcde\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldJoinArrayElementsIntoVariableUsingInto() {
+            String program = """
+                    The input says hey now hey now now
+                    Split the input into words with " "
+                    Unite words into the output with "! "
+                    Say the output
+                        """;
+
+            // The spec example adds a trailing exclamation mark, but I think it's an error, since Satriani does not and the oother examples do not have trailing delimiters
+            assertEquals("hey! now! hey! now! now\n", compileAndLaunch(program));
+        }
     }
 
     @Nested
