@@ -1623,9 +1623,11 @@ names in Rockstar.)
                     shout Midnight taking my world, Fire is nothing and Midnight taking my world, Hate is nothing
                     """;
             assertEquals("false\n", compileAndLaunch(program));
+        }
 
+        public void shouldHandleFunctionInvocationsIfTheFunctionReturnsNothing() {
             // Another hard version, with null coming back from the function
-            program = """
+            String program = """
                     Midnight takes your heart and your soul
                     Give back your heart
                             

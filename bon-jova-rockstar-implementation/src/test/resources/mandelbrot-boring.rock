@@ -1,0 +1,54 @@
+isInMandelbrotSet wants x, and y (function that decides if a point is in the set and returns a space or a dot)
+    maxIterations is 320
+    iterationCount is 0
+    The hope is 0
+    The fear is 4
+    Let something be 0
+    Let anything be 0
+    While iterationCount is lower than maxIterations and the hope is lower than the fear
+        Let love be something
+        Let love be something of it (in other words, something times something, that is, squared)
+        Let your head be anything
+        Let your head be anything of it (in other words, anything times anything)
+        Let the difference be love without your head (Bon Jova does not order operations using proper mathematical rules, so we need an interim value when chaining addition and subtraction)
+        Let the summit be the difference plus x
+        A million is insufficient (a fancy way of defining 2)
+        Let product be a million times something times anything
+        Let anything be product plus y (Bon Jova does not order operations using proper mathematical rules, so we need an interim value when chaining multiplication and addition)
+        Let something be the summit
+        Let the hope be something of something + anything of anything
+        Build iterationCount up
+
+    The world is only scared
+    Cast the world into dot
+    Happiness is a fire
+    Let your need be the world without happiness
+    Cast your need into blank (all of the above lines are very complicated way to generate two characters, done in a loop for extra inefficiency)
+    If iterationCount is less than maxIterations
+        Let the answer be blank,
+    Else let the answer be dot
+
+    Return the answer
+
+calculateRow takes time
+    Push row (Initialise the array before using it in a while loop, see https://github.com/quarkiverse/quarkus-bon-jova-rockstar/issues/110)
+    index is 0
+    Knock index down, down (Decrement down to -2)
+    Your dreams is 0.4
+    Your spirit is 0.03
+    While index is weaker than your dreams
+    Let index be index with your spirit
+    Let love be index
+    Push row with isInMandelbrotSet taking love 'n' time
+
+    Join row
+    Return row
+
+rowPos is impossible
+Knock rowPos down (a complicated way of declaring -1)
+Our souls are incredible
+Build our souls up (a complicated way of declaring 1)
+While rowPos are weaker than our souls
+    The moon is a light
+    Let rowPos be rowPos with our souls over the moon
+    Say calculateRow taking rowPos
