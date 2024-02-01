@@ -52,6 +52,20 @@ public class IntegrationTests {
         assertEquals(expected, output);
     }
 
+    @Test
+    void shouldRunSingIt() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/concept-demo-1-sing-it.rock");
+        String expected = getFileContents("/expected-concept-demo-1-sing-it.output");
+        assertEquals(expected, output);
+    }
+
+    @Test
+    void shouldRunTheTideIsLow() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/concept-demo-2-the-tide-is-low.rock");
+        String expected = getFileContents("/expected-concept-demo-2-the-tide-is-low.output");
+        assertEquals(expected, output);
+    }
+
     private String getFileContents(String name) throws URISyntaxException, IOException {
         Path filePath = Path.of(this.getClass()
                 .getResource(name)
