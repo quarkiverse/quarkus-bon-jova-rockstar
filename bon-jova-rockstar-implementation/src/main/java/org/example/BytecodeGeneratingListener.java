@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.function.Function;
 
+import static org.example.Variable.getNormalisedVariableName;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -381,12 +382,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         // The spec says all functions must take at least one argument
         // In this case passing a class array to the creator confuses it and doesn't get counted as the varargs
+        String functionName = getNormalisedVariableName(ctx.functionName.getText());
         if (variableContexts.size() == 1) {
-            fun = creator.getMethodCreator(ctx.functionName.getText(), Object.class, Object.class);
+            fun = creator.getMethodCreator(functionName, Object.class, Object.class);
         } else {
             Class<?>[] paramClasses = new Class[variableContexts.size()];
             Arrays.fill(paramClasses, Object.class);
-            fun = creator.getMethodCreator(ctx.functionName.getText(), Object.class, paramClasses);
+            fun = creator.getMethodCreator(functionName, Object.class, paramClasses);
         }
         fun.setModifiers(ACC_PUBLIC + ACC_STATIC);
         enterBlock(fun, ctx);
