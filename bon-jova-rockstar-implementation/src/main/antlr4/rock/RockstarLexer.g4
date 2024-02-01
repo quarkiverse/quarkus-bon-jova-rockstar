@@ -49,6 +49,7 @@ COMMON_VARIABLE_PREFIXES: A
                         | T H E
                         | M Y
                         | Y O U R
+                        | O U R
 ;
 
 CONSTANT_UNDEFINED: M Y S T E R I O U S;
