@@ -1,4 +1,4 @@
-package org.example.bon.jova.quarkus.extension.deployment.lyrics;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
 import java.util.List;
 import java.util.function.Predicate;

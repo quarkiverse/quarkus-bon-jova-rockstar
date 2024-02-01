@@ -1,8 +1,7 @@
 package org.example.bon.jova.quarkus.extension.deployment.rockscore;
 
 import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsRatingCalculator;
-import org.example.bon.jova.quarkus.extension.deployment.lyrics.Song;
-import org.example.bon.jova.quarkus.extension.deployment.wordcounter.WordCounter;
+import org.example.bon.jova.quarkus.extension.lyrics.WordCounter;
 
 import java.util.List;
 

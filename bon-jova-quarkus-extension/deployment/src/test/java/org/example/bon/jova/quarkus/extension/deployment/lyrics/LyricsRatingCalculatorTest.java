@@ -1,6 +1,7 @@
 package org.example.bon.jova.quarkus.extension.deployment.lyrics;
 
-import org.example.bon.jova.quarkus.extension.deployment.wordcounter.WordCounter;
+import org.example.bon.jova.quarkus.extension.lyrics.LyricsReader;
+import org.example.bon.jova.quarkus.extension.lyrics.WordCounter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

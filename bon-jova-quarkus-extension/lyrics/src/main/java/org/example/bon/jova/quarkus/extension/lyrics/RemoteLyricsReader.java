@@ -1,7 +1,9 @@
-package org.example.bon.jova.quarkus.extension.deployment.lyrics;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
 import com.jagrosh.jlyrics.Lyrics;
 import com.jagrosh.jlyrics.LyricsClient;
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 
 import java.util.HashMap;
 import java.util.List;
@@ -207,7 +209,7 @@ public class RemoteLyricsReader {
             var url = "https://api.lyrics.ovh/v1/{artist}/{title}";
             var ignorePattern = "Paroles de la chanson(.+) par (.+)\\r\\n";
 
-            String response = with(get(url, song.artist(), song.title()).asString()).get("lyrics");
+            String response = JsonPath.with(RestAssured.get(url, song.artist(), song.title()).asString()).get("lyrics");
 
             if (response == null) {
                 return Optional.empty();

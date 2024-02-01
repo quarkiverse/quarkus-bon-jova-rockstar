@@ -1,7 +1,6 @@
-package org.example.bon.jova.quarkus.extension.deployment.wordcounter;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
-import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsReader;
-import org.example.bon.jova.quarkus.extension.deployment.lyrics.Song;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +10,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WordCounterTest {
     @Disabled("See #90")
@@ -23,7 +21,7 @@ class WordCounterTest {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList(), true);
-        assertEquals(new TreeMap(expectedWordCounts()), new TreeMap(actualWordCounts));
+        Assertions.assertEquals(new TreeMap(expectedWordCounts()), new TreeMap(actualWordCounts));
     }
 
     private Song sweetChildOfMine() {

@@ -1,6 +1,4 @@
-package org.example.bon.jova.quarkus.extension.deployment.wordcounter;
-
-import org.example.bon.jova.quarkus.extension.deployment.lyrics.LyricsSanitizer;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
 import java.util.HashMap;
 import java.util.List;
