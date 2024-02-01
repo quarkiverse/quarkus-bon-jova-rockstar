@@ -6,7 +6,7 @@ program: (NL|ws)* (statementList | functionDeclaration)* ws*;
 
 statementList: statement+;
 
-statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | castStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | castStmt | joinStmt | returnStmt | continueStmt | breakStmt) (NL+?|EOF);
 
 
 expression: functionCall
@@ -84,6 +84,8 @@ decrementStmt: KW_KNOCK ws variable ws downs;
 downs: KW_DOWN (COMMA? ws KW_DOWN)*;
 
 castStmt: KW_CAST ws variable (ws KW_INTO ws variable)?;
+
+joinStmt: KW_JOIN ws variable (ws KW_INTO ws variable)? (ws KW_WITH ws expression)?;
 
 returnStmt: KW_GIVE (ws KW_BACK)? ws expression (ws KW_BACK)?;
 

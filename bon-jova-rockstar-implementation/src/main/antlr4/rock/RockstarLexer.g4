@@ -140,6 +140,9 @@ KW_SPLIT: C U T | S P L I T | S H A T T E R;
 
 KW_CAST: C A S T | B U R N;
 
+KW_JOIN: J O I N | U N I T E;
+
+
 PROPER_NOUN: [A-Z][A-Z|a-z]*;
 WORD: [a-z|A-Z]+;
 

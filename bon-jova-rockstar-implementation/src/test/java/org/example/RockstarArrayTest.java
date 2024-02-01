@@ -220,4 +220,22 @@ class RockstarArrayTest {
         ra.addAll(list);
         assertEquals(null, ra.get(Double.valueOf(9)));
     }
+
+    @Test
+    public void shouldJoinWithoutADelimiter() {
+        RockstarArray ra = new RockstarArray();
+        List list = List.of(3, 5, 8, 9);
+        ra.addAll(list);
+        assertEquals("3589", ra.join());
+    }
+
+    @Test
+    public void shouldJoinWithADelimiter() {
+        RockstarArray ra = new RockstarArray();
+        List list = List.of(3, 5, 8, 9);
+        ra.addAll(list);
+        assertEquals("3-5-8-9", ra.join("-"));
+    }
+
+
 }

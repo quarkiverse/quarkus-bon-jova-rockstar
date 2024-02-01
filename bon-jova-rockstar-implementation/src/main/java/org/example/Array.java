@@ -1,6 +1,7 @@
 package org.example;
 
 import io.quarkus.gizmo.AssignableResultHandle;
+import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
@@ -23,6 +24,8 @@ public class Array {
     private static final MethodDescriptor MAP_GET_METHOD = MethodDescriptor.ofMethod(TYPE_CLASS, "get", Object.class, Object.class);
     private static final MethodDescriptor REMOVE_METHOD = MethodDescriptor.ofMethod(TYPE_CLASS, "pop", Object.class);
     private static final MethodDescriptor LENGTH_METHOD = MethodDescriptor.ofMethod(TYPE_CLASS, "size", double.class);
+    private static final MethodDescriptor JOIN_METHOD = MethodDescriptor.ofMethod(TYPE_CLASS, "join", String.class);
+    private static final MethodDescriptor JOIN_WITH_DELIMITER_METHOD = MethodDescriptor.ofMethod(TYPE_CLASS, "join", String.class, String.class);
 
     private final Class<?> variableClass;
     private final Variable variable;
@@ -48,6 +51,33 @@ public class Array {
     public Array(Variable variable) {
         this.variable = variable;
         variableClass = variable.getVariableClass();
+    }
+
+    public static void join(Rockstar.JoinStmtContext ctx, BytecodeCreator currentCreator, ClassCreator creator) {
+        Variable oldVar = new Variable(ctx.variable().get(0));
+        ResultHandle oldVal = oldVar.read(currentCreator);
+
+        // Tolerate casting things that aren't strings
+        ResultHandle isString = currentCreator.instanceOf(oldVal, TYPE_CLASS);
+        BranchResult br = currentCreator.ifTrue(isString);
+        AssignableResultHandle newVal = currentCreator.createVariable(Object.class);
+        BytecodeCreator isStringBranch = br.trueBranch();
+        if (ctx.KW_WITH() != null) {
+            ResultHandle delimiter = new Expression(ctx.expression()).getResultHandle(currentCreator, creator);
+            isStringBranch.assign(newVal, isStringBranch.invokeVirtualMethod(JOIN_WITH_DELIMITER_METHOD, oldVal, delimiter));
+        } else {
+            isStringBranch.assign(newVal, isStringBranch.invokeVirtualMethod(JOIN_METHOD, oldVal));
+        }
+        br.falseBranch().throwException(IllegalArgumentException.class, "No, we can't join that.");
+
+
+        Variable newVar;
+        if (ctx.KW_INTO() != null) {
+            newVar = new Variable(ctx.variable().get(1), String.class);
+        } else {
+            newVar = new Variable(ctx.variable().get(0), String.class);
+        }
+        newVar.write(currentCreator, creator, newVal);
     }
 
     public String getVariableName() {

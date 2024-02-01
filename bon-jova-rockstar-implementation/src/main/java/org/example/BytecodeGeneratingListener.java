@@ -438,6 +438,11 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     }
 
     @Override
+    public void enterJoinStmt(Rockstar.JoinStmtContext ctx) {
+        Array.join(ctx, currentCreator, creator);
+    }
+
+    @Override
     public void exitReturnStmt(Rockstar.ReturnStmtContext ctx) {
         Expression e = new Expression(ctx.expression());
         ResultHandle rh = e.getResultHandle(currentCreator, creator);
