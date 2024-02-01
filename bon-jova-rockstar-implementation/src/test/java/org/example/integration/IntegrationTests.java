@@ -34,7 +34,6 @@ public class IntegrationTests {
         assertEquals("2\n89\n", output);
     }
 
-    @Disabled("Not yet working")
     @Test
     public void shouldRunMandelbrot() throws IOException, URISyntaxException {
         String output = compileAndLaunch("/mandelbrot.rock");
@@ -42,6 +41,12 @@ public class IntegrationTests {
         assertEquals(expected, output);
     }
 
+    @Test
+    public void shouldRunBoringMandelbrot() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/mandelbrot-boring.rock");
+        String expected = getFileContents("/expected-mandelbrot.output");
+        assertEquals(expected, output);
+    }
 
     @Disabled("Not yet working")
     @Test

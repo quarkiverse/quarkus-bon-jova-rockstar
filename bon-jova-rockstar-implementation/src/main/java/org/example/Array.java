@@ -52,7 +52,7 @@ public class Array {
         this.variable = variable;
         variableClass = variable.getVariableClass();
     }
-
+    
     public static void join(Rockstar.JoinStmtContext ctx, BytecodeCreator currentCreator, ClassCreator creator) {
         Variable oldVar = new Variable(ctx.variable().get(0));
         ResultHandle oldVal = oldVar.read(currentCreator);

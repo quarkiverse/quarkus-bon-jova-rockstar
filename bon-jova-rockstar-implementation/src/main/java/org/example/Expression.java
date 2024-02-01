@@ -602,6 +602,7 @@ public class Expression {
     }
 
     static ResultHandle coerceAwayNothing(BytecodeCreator method, ResultHandle handle, ResultHandle referenceHandle) {
+        // TODO this feels like a good opportunity for contexts?
         AssignableResultHandle answer = method.createVariable(Object.class);
         BranchResult nullCheck = method.ifNull(handle);
         BytecodeCreator trueBranch = nullCheck.trueBranch();

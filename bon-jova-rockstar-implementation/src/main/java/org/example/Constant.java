@@ -62,7 +62,8 @@ public class Constant {
             // If the reference is null, casts will all work, but we don't want to coerc, just return null
             BranchResult br = method.ifNull(referenceHandle);
             BytecodeCreator trueBranch = br.trueBranch();
-            trueBranch.assign(answer, method.loadNull());
+            trueBranch.assign(answer, method.load(0d));
+            // TODO this will be correct for nothing, but incorrect for mysterious
 
             BytecodeCreator falseBranch = br.falseBranch();
             TryBlock doubleTryBlock = falseBranch.tryBlock();

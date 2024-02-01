@@ -44,7 +44,7 @@ functionCall: functionName=variable WS KW_TAKING WS argList;
 // the second set of entries here isn't just an expression, to try and force the shortest match, rather than the longest match
 argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (literal|variable|constant|expression))*;
 
-functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statementList? returnStmt (NL+?|EOF);
+functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statementList? ws* returnStmt (NL+?|EOF);
 
 paramList: variable ((COMMA? WS* KW_AND WS | WS COMMA WS | WS AMPERSAND WS | WS APOSTROPHED_N WS) variable)*;
 
