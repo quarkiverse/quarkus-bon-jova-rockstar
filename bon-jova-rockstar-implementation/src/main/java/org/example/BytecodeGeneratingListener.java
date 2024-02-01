@@ -419,7 +419,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         Variable oldVar = new Variable(ctx.variable().get(0));
         ResultHandle oldVal = oldVar.read(currentCreator);
 
-        ResultHandle newVal = currentCreator.invokeStaticMethod(VALUE_OF_METHOD, oldVal);
+        // Tolerate casting things that aren't strings
+        ResultHandle isString = currentCreator.instanceOf(oldVal, String.class);
+        BranchResult br = currentCreator.ifTrue(isString);
+        AssignableResultHandle newVal = currentCreator.createVariable(Object.class);
+        BytecodeCreator isStringBranch = br.trueBranch();
+        isStringBranch.assign(newVal, isStringBranch.invokeStaticMethod(VALUE_OF_METHOD, oldVal));
+        br.falseBranch().assign(newVal, oldVal);
+
         Variable newVar;
         if (ctx.KW_INTO() != null) {
             newVar = new Variable(ctx.variable().get(1), double.class);
