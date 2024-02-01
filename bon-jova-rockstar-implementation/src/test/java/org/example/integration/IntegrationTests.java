@@ -61,8 +61,30 @@ public class IntegrationTests {
 
     @Test
     void shouldRunTheTideIsLow() throws IOException, URISyntaxException {
-        String output = compileAndLaunch("/concept-demo-2-the-tide-is-low.rock");
+        String output = compileAndLaunch("/concept-demo-2-the-tide-is-low.rock").replace(',', '.');
         String expected = getFileContents("/expected-concept-demo-2-the-tide-is-low.output");
+        assertEquals(expected, output);
+    }
+
+    @Test
+    void shouldRunOpen() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/concept-demo-3-open.rock");
+        String expected = getFileContents("/expected-concept-demo-3-open.output");
+        assertEquals(expected, output);
+    }
+
+    @Test
+    @Disabled("Not yet working")
+    void shouldRunCityWalls() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/concept-demo-4-city-walls.rock");
+        String expected = getFileContents("/expected-concept-demo-4-city-walls.output");
+        assertEquals(expected, output);
+    }
+
+    @Test
+    void shouldRunTrustworthyFriend() throws IOException, URISyntaxException {
+        String output = compileAndLaunch("/concept-demo-5-trustworthy-friend.rock");
+        String expected = getFileContents("/expected-concept-demo-5-trustworthy-friend.output");
         assertEquals(expected, output);
     }
 
