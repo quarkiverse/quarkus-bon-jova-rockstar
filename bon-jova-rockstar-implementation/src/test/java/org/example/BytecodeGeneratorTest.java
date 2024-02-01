@@ -295,7 +295,9 @@ names in Rockstar.)
                 The tide is low. A ball flung-about, beach abandoned, no soiree beats the shore
                                              Whisper the tide
                                 """;
-        assertEquals("3.141592654\n", compileAndLaunch(program));
+
+        var expected = BigDecimal.valueOf(3.141592654);
+        assertEquals("%.9f%n".formatted(expected), compileAndLaunch(program));
 
     }
 
@@ -2055,7 +2057,10 @@ names in Rockstar.)
                     Say X
                     Say X + 2 (casting really shows when doing math)
                     """;
-            assertEquals("123.45\n125.45\n", compileAndLaunch(program));
+            var expected1 = BigDecimal.valueOf(123.45);
+            var expected2 = BigDecimal.valueOf(125.45);
+
+            assertEquals("%.2f%n%.2f%n".formatted(expected1, expected2), compileAndLaunch(program));
         }
 
         @Test
@@ -2067,7 +2072,11 @@ names in Rockstar.)
                     Say X
                     Say X + 2 (casting really shows when doing math)
                     """;
-            assertEquals("123.45\n125.45\n", compileAndLaunch(program));
+
+            var expected1 = BigDecimal.valueOf(123.45);
+            var expected2 = BigDecimal.valueOf(125.45);
+
+            assertEquals("%.2f%n%.2f%n".formatted(expected1, expected2), compileAndLaunch(program));
         }
 
         @Test
@@ -2079,7 +2088,11 @@ names in Rockstar.)
                     Say Y           
                     Say Y + 4
                     """;
-            assertEquals("123.454\n123.45\n127.45\n", compileAndLaunch(program));
+
+            var expected1 = BigDecimal.valueOf(123.45);
+            var expected2 = BigDecimal.valueOf(127.45);
+
+            assertEquals("123.454%n%.2f%n%.2f%n".formatted(expected1, expected2), compileAndLaunch(program));
         }
 
         @Test
