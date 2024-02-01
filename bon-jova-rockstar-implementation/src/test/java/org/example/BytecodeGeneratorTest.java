@@ -2032,6 +2032,16 @@ names in Rockstar.)
             assertEquals("123.454\n123.45\n127.45\n", compileAndLaunch(program));
         }
 
+        @Test
+        public void shouldCastPoeticNumberLiteralsIntoAVariable() {
+            String program = """             
+                    The world is only scared
+                    Cast the world into your thoughts
+                    Say the world
+                                        """;
+            assertEquals("46\n", compileAndLaunch(program));
+        }
+
         @Disabled("Not yet implemented")
         @Test
         public void shouldCastStringToDoubleWithConversionBases() {
