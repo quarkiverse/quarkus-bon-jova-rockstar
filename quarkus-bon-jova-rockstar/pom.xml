@@ -30,6 +30,11 @@
         <module>lyrics</module>
     </modules>
 
+    <scm>
+        <connection>scm:git:https://github.com/quarkiverse/quarkus-bon-jova-rockstar/</connection>
+        <url>https://github.com/quarkiverse/quarkus-bon-jova-rockstar/</url>
+    </scm>
+
     <properties>
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
         <failsafe-plugin.version>${surefire-plugin.version}</failsafe-plugin.version>
