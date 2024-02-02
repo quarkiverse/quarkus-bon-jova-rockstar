@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.quarkiverse.bonjova</groupId>
-        <artifactId>bon-jova-root</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <groupId>io.quarkiverse</groupId>
+        <artifactId>quarkiverse-parent</artifactId>
+        <version>15</version>
     </parent>
     <name>Bon Jova Quarkus Extension - Parent</name>
     <description>An implementation of Rockstar as a JVM language. Rockstar is an example of an “esoteric language,”
