@@ -4,9 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.quarkiverse.bonjova</groupId>
-        <artifactId>quarkus-bon-jova-parent</artifactId>
+        <artifactId>quarkus-bon-jova-rockstar-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>quarkus-bon-jova-docs</artifactId>
