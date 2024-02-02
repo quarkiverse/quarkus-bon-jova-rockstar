@@ -21,7 +21,8 @@ public final class Song {
     }
 
     public String toKebabCase() {
-        return String.format("%s-%s", artist.toLowerCase().replaceAll("[.|/|'|\\s|(|)|’|&]", "-"), title.toLowerCase().replaceAll("[.|/|'|\\s]", "-"));
+        return String.format("%s-%s", artist.toLowerCase().replaceAll("[.|/|'|\\s|(|)|’|&]", "-"),
+                title.toLowerCase().replaceAll("[.|/|'|\\s]", "-"));
     }
 
     public String title() {
@@ -34,8 +35,10 @@ public final class Song {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
         var that = (Song) obj;
         return Objects.equals(this.title, that.title) &&
                 Objects.equals(this.artist, that.artist);

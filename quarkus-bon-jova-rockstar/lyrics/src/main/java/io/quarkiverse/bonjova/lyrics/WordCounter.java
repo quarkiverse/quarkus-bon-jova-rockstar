@@ -27,7 +27,7 @@ public class WordCounter {
             if (logResults) {
                 wordCounts.entrySet()
                         .stream()
-                        .sorted(java.util.Map.Entry.<String, Integer>comparingByValue().reversed())
+                        .sorted(java.util.Map.Entry.<String, Integer> comparingByValue().reversed())
                         .limit(50)
                         .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
             }
