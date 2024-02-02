@@ -1,0 +1,5 @@
+name: quarkus-bon-jova-rockstar
+title: Bon Jova
+version: dev
+nav:
+  - modules/ROOT/nav.adoc

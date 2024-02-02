@@ -28,6 +28,7 @@
         <module>integration-tests</module>
         <module>runtime</module>
         <module>lyrics</module>
+        <module>docs</module>
     </modules>
 
     <scm>
