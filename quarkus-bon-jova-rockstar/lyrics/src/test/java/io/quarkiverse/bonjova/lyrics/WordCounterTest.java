@@ -27,8 +27,7 @@ class WordCounterTest {
     private Song sweetChildOfMine() {
         var sweetChildOfMine = new Song(
                 "Sweet Child O' Mine",
-                "Guns N' Roses"
-        );
+                "Guns N' Roses");
 
         var lyrics = LyricsReader.readSingle(sweetChildOfMine);
         sweetChildOfMine.setLyrics(lyrics);
@@ -39,8 +38,7 @@ class WordCounterTest {
     private Song backInBlack() {
         var backInBlack = new Song(
                 "Back In Black",
-                "AC/DC"
-        );
+                "AC/DC");
 
         var lyrics = LyricsReader.readSingle(backInBlack);
         backInBlack.setLyrics(lyrics);

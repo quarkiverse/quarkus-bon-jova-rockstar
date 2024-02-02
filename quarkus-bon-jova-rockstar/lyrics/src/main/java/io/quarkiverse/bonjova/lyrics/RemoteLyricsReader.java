@@ -115,8 +115,7 @@ public class RemoteLyricsReader {
             new Song("Love Song", "Tesla"),
             new Song("Rock the Casbah", "The Clash"),
             new Song("Sister Christian", "Night Ranger"),
-            new Song("Hungry Like the Wolf", "Duran Duran")
-    );
+            new Song("Hungry Like the Wolf", "Duran Duran"));
     private static final List<LyricsProvider> LYRICS_PROVIDERS = List.of(
             new OvhLyricsProvider(),
             new JLyricsProvider("LyricsFreak"),
@@ -167,14 +166,16 @@ public class RemoteLyricsReader {
         // Try the cache first.
         String songInKebabCase = song.toKebabCase();
         if (cache.containsKey(songInKebabCase)) {
-            if (logDebugOutput) System.out.println("Lyrics found for " + song + " in cache");
+            if (logDebugOutput)
+                System.out.println("Lyrics found for " + song + " in cache");
             return Optional.of(cache.get(songInKebabCase));
         }
 
         // Then try a pre-downloaded file.
         Optional<String> lyricsFromFile = lyricsFileUtil.readLyricsFromFile(songInKebabCase);
         if (lyricsFromFile.isPresent()) {
-            if (logDebugOutput) System.out.println("Lyrics found for " + song + " in file");
+            if (logDebugOutput)
+                System.out.println("Lyrics found for " + song + " in file");
             cache.putIfAbsent(songInKebabCase, lyricsFromFile.get());
             return lyricsFromFile;
         }
@@ -185,7 +186,8 @@ public class RemoteLyricsReader {
             for (int i = 1; i <= NUMBER_OF_RETRIES; i++) {
                 Optional<String> lyrics = lyricsProvider.provideLyrics(song);
                 if (lyrics.isPresent()) {
-                    if (logDebugOutput) System.out.println("Lyrics found for " + song + " in " + lyricsProvider);
+                    if (logDebugOutput)
+                        System.out.println("Lyrics found for " + song + " in " + lyricsProvider);
                     cache.putIfAbsent(songInKebabCase, lyrics.get());
                     lyricsFileUtil.writeLyricsToFileIfAbsent(songInKebabCase, lyrics.get());
                     return lyrics;
@@ -193,7 +195,8 @@ public class RemoteLyricsReader {
             }
         }
 
-        if (logDebugOutput) System.out.println("Lyrics not found for " + song);
+        if (logDebugOutput)
+            System.out.println("Lyrics not found for " + song);
 
         return Optional.empty();
     }

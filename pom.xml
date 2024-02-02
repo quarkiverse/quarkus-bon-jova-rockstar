@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
     <name>Bon Jova</name>
     <modules>
-        <module>bon-jova-rockstar-compiler</module>
         <module>quarkus-bon-jova-rockstar</module>
         <module>bon-jova-app</module>
     </modules>

@@ -23,7 +23,7 @@ public class NormalModeRockstarExtensionIT {
         String projectDir = "./target/test-classes/projects/simple-app-processed";
         System.setProperty("maven.multiModuleProjectDirectory", new File(projectDir).getAbsolutePath());
         int status = cli.doMain(
-                new String[]{"clean", "verify"},
+                new String[] { "clean", "verify" },
                 projectDir,
                 new PrintStream(testOut),
                 new PrintStream(testErr));
@@ -37,6 +37,5 @@ public class NormalModeRockstarExtensionIT {
         // There should not be any error messages
         assertEquals("", testErr.toString());
     }
-
 
 }

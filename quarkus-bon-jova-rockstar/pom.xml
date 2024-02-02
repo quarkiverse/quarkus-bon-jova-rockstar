@@ -23,6 +23,7 @@
     </description>
 
     <modules>
+        <module>compiler</module>
         <module>deployment</module>
         <module>integration-tests</module>
         <module>runtime</module>

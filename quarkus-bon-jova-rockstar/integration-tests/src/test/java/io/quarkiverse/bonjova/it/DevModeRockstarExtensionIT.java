@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @DisabledIfSystemProperty(named = "quarkus.test.native", matches = "true")
 public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
 
@@ -38,7 +37,8 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
         // There's no json endpoints, so nothing else to check
     }
 
-    @Disabled("The tests currently run twice on startup, which makes the continuous testing utils very upset, so it throws an exception " +
+    @Disabled("The tests currently run twice on startup, which makes the continuous testing utils very upset, so it throws an exception "
+            +
             "when we ask for test status")
     @Test
     public void testThatTheTestsPassed() throws MavenInvocationException, IOException {
@@ -98,7 +98,6 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
 
     }
 
-
     /* Home rolled copy of the method in the test utils, to allow us to skip the check for the last run number */
     public ContinuousTestingMavenTestUtils.TestStatus waitForNextCompletion() {
         try {
@@ -109,7 +108,8 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
                         // the real implementation is much more sophisticated about waiting sure we wait for the next run, and
                         //  subtle race conditions
                         // Check if it's running, and also check if it's never run (ie we got in before the first run)
-                        if (ts.getRunning() > 0 || (ts.getTotalTestsPassed() < 0 && ts.getTotalTestsFailed() < 0 && ts.getTotalTestsSkipped() < 0)) {
+                        if (ts.getRunning() > 0 || (ts.getTotalTestsPassed() < 0 && ts.getTotalTestsFailed() < 0
+                                && ts.getTotalTestsSkipped() < 0)) {
                             return false;
                         } else {
                             return true;
@@ -147,7 +147,8 @@ public class DevModeRockstarExtensionIT extends RunAndCheckMojoTestBase {
             long totalTestsFailed = testStatus.getOrDefault("totalTestsFailed", -1L);
             long totalTestsSkipped = testStatus.getOrDefault("totalTestsSkipped", -1L);
 
-            return new ContinuousTestingMavenTestUtils.TestStatus(lastRun, running, testsRun, testsPassed, testsFailed, testsSkipped,
+            return new ContinuousTestingMavenTestUtils.TestStatus(lastRun, running, testsRun, testsPassed, testsFailed,
+                    testsSkipped,
                     totalTestsPassed,
                     totalTestsFailed, totalTestsSkipped);
         } catch (Exception e) {

@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.containsString;
 
 public class BonJovaQuarkusExtensionTest {
 
-
     private static final Set<File> outputFiles = Set.of(
             new File("target/classes/hello_world.class"), new File("hello_hanno_hello_holly.rock"));
 
@@ -36,16 +35,16 @@ public class BonJovaQuarkusExtensionTest {
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setAllowTestClassOutsideDeployment(true)
-            .setArchiveProducer(() ->
-                    ShrinkWrap.create(JavaArchive.class)
+            .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
 
-                            .addAsResource(
-                                    asset,
-                                    "src/main/java/hello_world.rock"));
+                    .addAsResource(
+                            asset,
+                            "src/main/java/hello_world.rock"));
 
-
-    /* Ideally we wouldn't create any rockstar classes in target/classes, but I can't quite figure out how to change the output directory
-     on the app model the app model creates from the Arquillian archive.
+    /*
+     * Ideally we wouldn't create any rockstar classes in target/classes, but I can't quite figure out how to change the output
+     * directory
+     * on the app model the app model creates from the Arquillian archive.
      */
     @AfterAll
     public static void removeOutputFiles() throws IOException {
