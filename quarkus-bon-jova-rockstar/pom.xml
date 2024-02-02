@@ -32,8 +32,10 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://github.com/quarkiverse/quarkus-bon-jova-rockstar/</connection>
+        <connection>scm:git:git@github.com:quarkiverse/quarkus-bon-jova-rockstar.git</connection>
+        <developerConnection>scm:git:git@github.com:quarkiverse/quarkus-bon-jova-rockstar.git</developerConnection>
         <url>https://github.com/quarkiverse/quarkus-bon-jova-rockstar/</url>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
