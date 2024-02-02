@@ -1,5 +1,6 @@
 package org.example.bon.jova.quarkus.extension.lyrics.generate;
 
+import org.example.bon.jova.quarkus.extension.lyrics.LyricsFileUtil;
 import org.example.bon.jova.quarkus.extension.lyrics.LyricsRatingCalculator;
 import org.example.bon.jova.quarkus.extension.lyrics.LyricsReader;
 import org.example.bon.jova.quarkus.extension.lyrics.WordCounter;
@@ -28,6 +29,8 @@ public class LyricsDataWriter {
     }
 
     private static void writeDataFile(Path destination, Object payload) throws IOException {
+        LyricsFileUtil.createDirIfAbsent(destination.getParent());
+
         var file = destination.toFile();
 
         try (var outputStream = new ObjectOutputStream(new FileOutputStream(file))) {

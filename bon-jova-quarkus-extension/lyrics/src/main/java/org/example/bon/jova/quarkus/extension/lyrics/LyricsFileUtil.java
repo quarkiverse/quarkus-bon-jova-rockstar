@@ -18,7 +18,7 @@ public class LyricsFileUtil {
     }
 
     public Optional<String> readLyricsFromFile(String songInKebabCase) {
-        createDirIfAbsent();
+        createDirIfAbsent(lyricsDir);
 
         Path lyricsFilePath = lyricsDir.resolve(songInKebabCase + DOT_TXT);
         if (Files.exists(lyricsFilePath)) {
@@ -33,7 +33,7 @@ public class LyricsFileUtil {
     }
 
     public void writeLyricsToFileIfAbsent(String songInKebabCase, String lyrics) {
-        createDirIfAbsent();
+        createDirIfAbsent(lyricsDir);
         Path lyricsFilePath = lyricsDir.resolve(songInKebabCase + DOT_TXT);
         if (Files.exists(lyricsFilePath)) {
             return;
@@ -47,10 +47,10 @@ public class LyricsFileUtil {
     }
 
     // This synchronized method prevents other threads from creating the directory in-between method execution.
-    private synchronized void createDirIfAbsent() {
-        if (!Files.exists(lyricsDir)) {
+    public static synchronized void createDirIfAbsent(Path dir) {
+        if (!Files.exists(dir)) {
             try {
-                Files.createDirectories(lyricsDir);
+                Files.createDirectories(dir);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
