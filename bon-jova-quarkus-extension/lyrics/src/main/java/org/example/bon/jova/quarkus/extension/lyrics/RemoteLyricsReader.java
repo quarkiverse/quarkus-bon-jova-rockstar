@@ -5,6 +5,7 @@ import com.jagrosh.jlyrics.LyricsClient;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +132,14 @@ public class RemoteLyricsReader {
     // The number of times we'll retry downloading lyrics from a remote API to tackle possible network instability.
     private static final int NUMBER_OF_RETRIES = 5;
 
+    private static LyricsFileUtil lyricsFileUtil = new LyricsFileUtil();
+
     private RemoteLyricsReader() {
+    }
+
+    public static RemoteLyricsReader withLyricsFileUtil(LyricsFileUtil lyricsFileUtil) {
+        RemoteLyricsReader.lyricsFileUtil = lyricsFileUtil;
+        return new RemoteLyricsReader();
     }
 
     public static List<String> readRemoteLyrics(boolean logDebugOutput) {
@@ -168,7 +176,7 @@ public class RemoteLyricsReader {
         }
 
         // Then try a pre-downloaded file.
-        Optional<String> lyricsFromFile = LyricsFileUtil.readLyricsFromFile(songInKebabCase);
+        Optional<String> lyricsFromFile = lyricsFileUtil.readLyricsFromFile(songInKebabCase);
         if (lyricsFromFile.isPresent()) {
             if (logDebugOutput) System.out.println("Lyrics found for " + song + " in file");
             cache.putIfAbsent(songInKebabCase, lyricsFromFile.get());
@@ -183,7 +191,7 @@ public class RemoteLyricsReader {
                 if (lyrics.isPresent()) {
                     if (logDebugOutput) System.out.println("Lyrics found for " + song + " in " + lyricsProvider);
                     cache.putIfAbsent(songInKebabCase, lyrics.get());
-                    LyricsFileUtil.writeLyricsToFileIfAbsent(songInKebabCase, lyrics.get());
+                    lyricsFileUtil.writeLyricsToFileIfAbsent(songInKebabCase, lyrics.get());
                     return lyrics;
                 }
             }

@@ -1,4 +1,4 @@
-package org.example.bon.jova.quarkus.extension.deployment.lyrics;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
 import org.example.bon.jova.quarkus.extension.lyrics.LyricsSanitizer;
 import org.example.bon.jova.quarkus.extension.lyrics.WordCounter;

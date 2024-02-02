@@ -6,10 +6,18 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public class LyricsFileUtil {
-    private static final Path lyricsDir = Path.of("target/lyrics");
+    private Path lyricsDir;
     private static final String DOT_TXT = ".txt";
 
-    public static Optional<String> readLyricsFromFile(String songInKebabCase) {
+    LyricsFileUtil() {
+        this(Path.of("lyrics/target/lyrics"));
+    }
+
+    LyricsFileUtil(Path lyricsDir) {
+        this.lyricsDir = lyricsDir;
+    }
+
+    public Optional<String> readLyricsFromFile(String songInKebabCase) {
         createDirIfAbsent();
 
         Path lyricsFilePath = lyricsDir.resolve(songInKebabCase + DOT_TXT);
@@ -24,7 +32,7 @@ public class LyricsFileUtil {
         return Optional.empty();
     }
 
-    public static void writeLyricsToFileIfAbsent(String songInKebabCase, String lyrics) {
+    public void writeLyricsToFileIfAbsent(String songInKebabCase, String lyrics) {
         createDirIfAbsent();
         Path lyricsFilePath = lyricsDir.resolve(songInKebabCase + DOT_TXT);
         if (Files.exists(lyricsFilePath)) {
@@ -39,7 +47,7 @@ public class LyricsFileUtil {
     }
 
     // This synchronized method prevents other threads from creating the directory in-between method execution.
-    private static synchronized void createDirIfAbsent() {
+    private synchronized void createDirIfAbsent() {
         if (!Files.exists(lyricsDir)) {
             try {
                 Files.createDirectory(lyricsDir);
