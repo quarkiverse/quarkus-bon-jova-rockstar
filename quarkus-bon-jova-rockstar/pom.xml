@@ -10,6 +10,11 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <name>Bon Jova Quarkus Extension - Parent</name>
+    <description>An implementation of Rockstar as a JVM language. Rockstar is an example of an “esoteric language,”
+        designed to be interesting rather than intuitive, efficient or especially functional. Rockstar’s interesting
+        feature is that its programs use the lyrical conventions of eighties rock ballads. Bon Jova is an implementation
+        of Rockstar as a JVM language, and also a supporting Quarkus extension.
+    </description>
 
     <artifactId>quarkus-bon-jova-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -84,4 +89,19 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>it</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <modules>
+                <module>integration-tests</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
