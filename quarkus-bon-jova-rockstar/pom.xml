@@ -11,7 +11,7 @@
 
     <groupId>io.quarkiverse.bonjova</groupId>
     <artifactId>quarkus-bon-jova-rockstar-parent</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>An implementation of Rockstar as a JVM language. Rockstar is an example of an “esoteric language,”
@@ -31,7 +31,7 @@
     <scm>
         <connection>scm:git:https://github.com/quarkiverse/quarkus-bon-jova-rockstar/</connection>
         <url>https://github.com/quarkiverse/quarkus-bon-jova-rockstar/</url>
-      <tag>bon-jova-root-0.6.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <properties>
