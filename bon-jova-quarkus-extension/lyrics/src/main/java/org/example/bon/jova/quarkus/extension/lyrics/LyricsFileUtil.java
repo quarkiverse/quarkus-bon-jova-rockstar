@@ -50,7 +50,7 @@ public class LyricsFileUtil {
     private synchronized void createDirIfAbsent() {
         if (!Files.exists(lyricsDir)) {
             try {
-                Files.createDirectory(lyricsDir);
+                Files.createDirectories(lyricsDir);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
