@@ -77,7 +77,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>org.example.bon.jova.quarkus.extension.lyrics.generate.LyricsDataGenerator</mainClass>
+                            <mainClass>org.example.bon.jova.quarkus.extension.lyrics.generate.LyricsDataWriter</mainClass>
                         </configuration>
                     </execution>
                 </executions>

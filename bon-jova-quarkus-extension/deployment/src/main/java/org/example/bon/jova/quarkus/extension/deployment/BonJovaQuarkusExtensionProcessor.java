@@ -14,7 +14,6 @@ import io.quarkus.devui.spi.page.CardPageBuildItem;
 import io.quarkus.devui.spi.page.Page;
 import org.example.RockFileCompiler;
 import org.example.bon.jova.quarkus.extension.deployment.rockscore.RockScoreCalculator;
-import org.example.bon.jova.quarkus.extension.lyrics.LyricsReader;
 import org.example.bon.jova.quarkus.extension.runtime.RockstarResource;
 
 import java.io.File;
@@ -135,7 +134,7 @@ class BonJovaQuarkusExtensionProcessor {
     }
 
     private List<RockFileViewModel> generateRockFiles() {
-        var rockScoreCalculator = setupRockScoreCalculator();
+        var rockScoreCalculator = new RockScoreCalculator();
 
         try (var stream = Files.list(Path.of("src/main/rockstar"))) {
             return stream.map(path -> {
@@ -153,10 +152,6 @@ class BonJovaQuarkusExtensionProcessor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private RockScoreCalculator setupRockScoreCalculator() {
-        return new RockScoreCalculator(LyricsReader.readAll());
     }
 
     private String generateRestUrl(String rockFileName) {

@@ -11,7 +11,7 @@ public class LyricsReader {
     }
 
     public static List<String> readAll() {
-        return readAll(new LyricsFileUtil(), true);
+        return readAll(new LyricsFileUtil(), false);
     }
 
     static List<String> readAll(LyricsFileUtil lyricsFileUtil, boolean logDebugOutput) {
