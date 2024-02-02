@@ -1,5 +1,6 @@
-package org.example.bon.jova.quarkus.extension.deployment.lyrics;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
+import org.example.bon.jova.quarkus.extension.lyrics.LyricsRatingCalculator;
 import org.example.bon.jova.quarkus.extension.lyrics.LyricsReader;
 import org.example.bon.jova.quarkus.extension.lyrics.WordCounter;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,7 +20,7 @@ class LyricsRatingCalculatorTest {
 
     @BeforeAll
     static void setUp() {
-        allLyrics = LyricsReader.readAll();
+        allLyrics = LyricsReader.readAll(new LyricsFileUtil(Path.of("target/lyrics")), false);
         wordCounts = WordCounter.countWords(allLyrics);
     }
 

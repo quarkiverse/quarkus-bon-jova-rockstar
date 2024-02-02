@@ -17,7 +17,7 @@ public class WordCounter {
         return countWords(lyrics, false);
     }
 
-    static Map<String, Integer> countWords(List<String> lyrics, boolean logResults) {
+    public static Map<String, Integer> countWords(List<String> lyrics, boolean logResults) {
         // Skip cache for small lyrics sets, as this is probably a test configuration.
         if (wordCounts == null || lyrics.size() < wordCounts.size()) {
             wordCounts = new HashMap<>();

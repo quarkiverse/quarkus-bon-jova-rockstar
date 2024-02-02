@@ -11,10 +11,12 @@ public class LyricsReader {
     }
 
     public static List<String> readAll() {
-        return readAll(false);
+        return readAll(new LyricsFileUtil(), false);
     }
 
-    static List<String> readAll(boolean logDebugOutput) {
-        return RemoteLyricsReader.readRemoteLyrics(logDebugOutput);
+    static List<String> readAll(LyricsFileUtil lyricsFileUtil, boolean logDebugOutput) {
+        return RemoteLyricsReader
+                .withLyricsFileUtil(lyricsFileUtil)
+                .readRemoteLyrics(logDebugOutput);
     }
 }

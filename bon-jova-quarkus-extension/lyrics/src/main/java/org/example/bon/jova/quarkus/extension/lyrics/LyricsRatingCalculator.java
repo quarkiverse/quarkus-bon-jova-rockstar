@@ -1,7 +1,6 @@
-package org.example.bon.jova.quarkus.extension.deployment.lyrics;
+package org.example.bon.jova.quarkus.extension.lyrics;
 
-import org.example.bon.jova.quarkus.extension.lyrics.LyricsSanitizer;
-import org.example.bon.jova.quarkus.extension.lyrics.WordCounter;
+import org.example.bon.jova.quarkus.extension.lyrics.generate.LyricsDataReader;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +11,10 @@ public class LyricsRatingCalculator {
 
     // cached variable that stores deterministic values
     private static Integer maxLyricsRatingOfThe80s;
+
+    public LyricsRatingCalculator() {
+        this.wordCounts = LyricsDataReader.readWordCounts();
+    }
 
     public LyricsRatingCalculator(Map<String, Integer> wordCounts) {
         this.wordCounts = wordCounts;
