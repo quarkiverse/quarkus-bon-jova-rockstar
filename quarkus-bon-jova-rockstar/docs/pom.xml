@@ -3,9 +3,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.quarkiverse.pact</groupId>
-        <artifactId>quarkus-pact-parent</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <groupId>io.quarkiverse.bonjova</groupId>
+        <artifactId>quarkus-bon-jova-parent</artifactId>
+        <version>0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -74,7 +74,7 @@
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../target/asciidoc/generated/config/</directory>
-                                    <include>quarkus-pact.adoc</include>
+                                    <include>quarkus-bon-jova.adoc</include>
                                     <filtering>false</filtering>
                                 </resource>
                                 <resource>
