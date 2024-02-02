@@ -114,7 +114,7 @@ java -cp bon-jova-rockstar-implementation/target/classes:~/.m2/repository/io/qua
 /.m2/repository/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar:~
 /.m2/repository/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar:~
 /.m2/repository/io/smallrye/jandex/3.1.3/jandex-3.1.3.jar:~
-/.m2/repository/org/antlr/antlr4-runtime/4.10.1/antlr4-runtime-4.10.1.jar org.example.RockFileCompiler ~/demo.rock
+/.m2/repository/org/antlr/antlr4-runtime/4.10.1/antlr4-runtime-4.10.1.jar io.quarkiverse.bonjova.RockFileCompiler ~/demo.rock
 ```
 
 (alternative: use jbang, less hardcoding of the path)
