@@ -104,17 +104,17 @@ We can compile on the command line
 mvn dependency:build-classpath to get the classpath of the implementation, then put it on a java classpath with
 target/classes
 
-Use vi to make a file in `~`
+Use vi to make a `hello.rock` file in `~`
 
 Then launch it with
 
 ```
-java -cp bon-jova-rockstar-implementation/target/classes:~/.m2/repository/io/quarkus/gizmo/gizmo/1.7.0/gizmo-1.7.0.jar:~
+java -cp bon-jova-rockstar-compiler/target/classes:~/.m2/repository/io/quarkus/gizmo/gizmo/1.7.0/gizmo-1.7.0.jar:~
 /.m2/repository/org/ow2/asm/asm/9.5/asm-9.5.jar:~/.m2/repository/org/ow2/asm/asm-util/9.5/asm-util-9.5.jar:~
 /.m2/repository/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar:~
 /.m2/repository/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar:~
 /.m2/repository/io/smallrye/jandex/3.1.3/jandex-3.1.3.jar:~
-/.m2/repository/org/antlr/antlr4-runtime/4.10.1/antlr4-runtime-4.10.1.jar io.quarkiverse.bonjova.RockFileCompiler ~/demo.rock
+/.m2/repository/org/antlr/antlr4-runtime/4.10.1/antlr4-runtime-4.10.1.jar io.quarkiverse.bonjova.RockFileCompiler ~/hello.rock
 ```
 
 (alternative: use jbang, less hardcoding of the path)

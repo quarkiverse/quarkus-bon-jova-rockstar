@@ -7,12 +7,12 @@
     <parent>
         <groupId>io.quarkiverse.bonjova</groupId>
         <artifactId>bon-jova-root</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
     <name>Bon Jova Rockstar Compiler</name>
 
     <artifactId>bon-jova-rockstar-compiler</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
