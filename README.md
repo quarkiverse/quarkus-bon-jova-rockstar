@@ -28,7 +28,7 @@ mvn quarkus:dev
 
 ### IDE integration
 
-After cloning the repo, you will need to run `mvn compile` in the `bon-jova-implementation` folder to generate the Antlr
+After cloning the repo, you will need to run `mvn compile` in the `bon-jova-rockstar-compiler` folder to generate the Antlr
 Java classes, or your IDE will report compile failures and missing classes. (A top-level `mvn install` will also work.)
 The generated classes will appear in `target/generated-sources`, so you may also need to configure your IDE to treat
 that folder as a generated sources folder.
