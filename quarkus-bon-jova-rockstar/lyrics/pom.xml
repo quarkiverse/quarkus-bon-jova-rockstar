@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>io.quarkiverse.bonjova</groupId>
-        <artifactId>quarkus-bon-jova-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>quarkus-bon-jova-rockstar-parent</artifactId>
+        <version>0.2-SNAPSHOT</version>
     </parent>
     <name>Bon Jova Quarkus Extension - Lyrics</name>
     <artifactId>quarkus-bon-jova-lyrics</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

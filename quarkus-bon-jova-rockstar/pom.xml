@@ -10,15 +10,17 @@
         <version>15</version>
     </parent>
     <name>Bon Jova Quarkus Extension - Parent</name>
+
+    <groupId>io.quarkiverse.bonjova</groupId>
+    <artifactId>quarkus-bon-jova-rockstar-parent</artifactId>
+    <version>0.2-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
     <description>An implementation of Rockstar as a JVM language. Rockstar is an example of an “esoteric language,”
         designed to be interesting rather than intuitive, efficient or especially functional. Rockstar’s interesting
         feature is that its programs use the lyrical conventions of eighties rock ballads. Bon Jova is an implementation
         of Rockstar as a JVM language, and also a supporting Quarkus extension.
     </description>
-
-    <artifactId>quarkus-bon-jova-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
 
     <modules>
         <module>deployment</module>
@@ -84,6 +86,15 @@
                         <compilerArgs>
                             <arg>-parameters</arg>
                         </compilerArgs>
+                    </configuration>
+                </plugin>
+
+                <!-- Impsort does not yet work with Java 21, see https://github.com/revelc/impsort-maven-plugin/issues/79 -->
+                <plugin>
+                    <groupId>net.revelc.code</groupId>
+                    <artifactId>impsort-maven-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
                     </configuration>
                 </plugin>
             </plugins>
