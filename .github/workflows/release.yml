@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     name: release
     if: ${{github.event.pull_request.merged == true}}
+    defaults:
+      run:
+        working-directory: quarkus-bon-jova-rockstar
 
     steps:
       - uses: radcortez/project-metadata-action@main
