@@ -24,6 +24,17 @@ class WordCounterTest {
         Assertions.assertEquals(new TreeMap(expectedWordCounts()), new TreeMap(actualWordCounts));
     }
 
+    @Test
+    void printWordCounts() {
+        var allLyrics = LyricsReader.readAll();
+        var actualWordCounts = WordCounter.countWords(allLyrics)
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .toList();
+
+        System.out.println(actualWordCounts);
+    }
+
     private Song sweetChildOfMine() {
         var sweetChildOfMine = new Song(
                 "Sweet Child O' Mine",
