@@ -24,6 +24,7 @@ class WordCounterTest {
         Assertions.assertEquals(new TreeMap(expectedWordCounts()), new TreeMap(actualWordCounts));
     }
 
+    @Disabled("Only to be run manually")
     @Test
     void printWordCounts() {
         var allLyrics = LyricsReader.readAll();
