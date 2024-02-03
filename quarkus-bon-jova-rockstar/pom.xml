@@ -24,10 +24,10 @@
 
     <modules>
         <module>compiler</module>
-        <module>deployment</module>
-        <module>integration-tests</module>
-        <module>runtime</module>
         <module>lyrics</module>
+        <module>deployment</module>
+        <module>runtime</module>
+        <module>integration-tests</module>
         <module>docs</module>
     </modules>
 

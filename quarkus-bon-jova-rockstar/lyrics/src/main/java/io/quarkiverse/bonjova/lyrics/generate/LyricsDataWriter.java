@@ -5,24 +5,27 @@ import io.quarkiverse.bonjova.lyrics.LyricsRatingCalculator;
 import io.quarkiverse.bonjova.lyrics.LyricsReader;
 import io.quarkiverse.bonjova.lyrics.WordCounter;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Path;
 
 public class LyricsDataWriter {
-    public static final Path WORD_COUNTS_LOCATION = Path.of("lyrics/src/main/resources/word-counts.data");
-    public static final Path MAX_LYRICS_RATING_LOCATION = Path.of("lyrics/src/main/resources/max-lyrics-rating.data");
+    public static final String WORD_COUNTS_LOCATION = "src/main/resources/word-counts.data";
+    public static final String MAX_LYRICS_RATING_LOCATION = "src/main/resources/max-lyrics-rating.data";
 
     public static void main(String[] args) {
+        File workingDir = new File(args[0]);
+
         var allLyrics = LyricsReader.readAll();
 
         var wordCounts = WordCounter.countWords(allLyrics, false);
         var maxLyricsRating = new LyricsRatingCalculator(wordCounts).calculateMaxLyricsRating(allLyrics);
 
         try {
-            writeDataFile(WORD_COUNTS_LOCATION, wordCounts);
-            writeDataFile(MAX_LYRICS_RATING_LOCATION, maxLyricsRating);
+            writeDataFile(new File(workingDir, WORD_COUNTS_LOCATION).toPath(), wordCounts);
+            writeDataFile(new File(workingDir, MAX_LYRICS_RATING_LOCATION).toPath(), maxLyricsRating);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
