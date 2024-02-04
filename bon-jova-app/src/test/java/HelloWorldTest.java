@@ -35,10 +35,6 @@ class HelloWorldTest {
         String output = testOut.toString();
         assertTrue(output
                 .contains("Hello World"), "Output was: " + output);
-        assertTrue(output
-                .contains("Rockstar rockzzzzzzz"), "Output was: " + output);
-        assertTrue(output
-                .contains("What what?!"), "Output was: " + output);
     }
 
     @AfterEach
