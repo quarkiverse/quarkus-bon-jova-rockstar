@@ -22,7 +22,7 @@ class RockstarCompilationProviderTest {
     private static final Set<File> sourceFiles = Set.of(
             new File(sourceDirectory + "hello_world.rock"),
             new File(sourceDirectory + "hello_hanno_hello_holly.rock"),
-            // This isn't needed for this test, but the BonJovaQuarkusExtensionTest needs it to be compiled, and getting rid of the
+            // This isn't needed for this test, but the BonJovaQuarkusExtensionProcessorTest needs it to be compiled, and getting rid of the
             // cross-dependency is non-trivial
             new File(sourceDirectory + "leet_tommy.rock"));
     private static final Set<File> outputFiles = Set.of(
