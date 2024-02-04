@@ -92,6 +92,13 @@ public class IntegrationTests {
         assertEquals(expected, output);
     }
 
+    @Test
+    void shouldRunMamaTakingCharge() throws IOException, URISyntaxException {
+        String output = FileLauncher.compileAndLaunch("/concept-demo-6-mama-taking-charge.rock");
+        String expected = getFileContents("/expected-concept-demo-6-mama-taking-charge.output");
+        assertEquals(expected, output);
+    }
+
     private String getFileContents(String name) throws URISyntaxException, IOException {
         Path filePath = Path.of(this.getClass()
                 .getResource(name)

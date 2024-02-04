@@ -1,0 +1,8 @@
+Squared takes X
+Return X times X
+
+Rock array with 0, 1, 2, 3, 4, 5
+
+While array
+    Let number be pop array
+    Shout Squared taking number
