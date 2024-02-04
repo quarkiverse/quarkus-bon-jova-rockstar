@@ -19,7 +19,7 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
 
-public class BonJovaQuarkusExtensionTest {
+public class BonJovaQuarkusExtensionProcessorTest {
 
     private static final Set<File> outputFiles = Set.of(
             new File("target/classes/hello_world.class"), new File("hello_hanno_hello_holly.rock"));
@@ -39,7 +39,7 @@ public class BonJovaQuarkusExtensionTest {
 
                     .addAsResource(
                             asset,
-                            "src/main/java/hello_world.rock"));
+                            "src/main/rockstar/hello_world.rock"));
 
     /*
      * Ideally we wouldn't create any rockstar classes in target/classes, but I can't quite figure out how to change the output
@@ -52,7 +52,6 @@ public class BonJovaQuarkusExtensionTest {
     }
 
     @Test
-    @Disabled("not working in CI")
     void testRockstarEndpoint() {
         RestAssured.when()
                 .get("/rockstar/hello_world.rock")
