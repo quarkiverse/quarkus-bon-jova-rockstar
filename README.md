@@ -12,6 +12,13 @@ This is clearly (clearly!) a gap that needed fixing.
 This implementation uses the [Antlr grammar for Rockstar](https://github.com/ascheja/rockstar-antlr4/tree/master) by
 Andreas Scheja as a starting point.
 
+# Using the extension
+
+Create a Quarkus app, and add the extension to your pom; it will then compile `.rock` files from `src/main/rockstar` and
+any other `<sourceDirectory>` defined in the `pom.xml`.
+
+# Developing the extension
+
 ## Getting started
 
 In the top-level directory, run
@@ -28,7 +35,8 @@ mvn quarkus:dev
 
 ### IDE integration
 
-After cloning the repo, you will need to run `mvn compile` in the `bon-jova-rockstar-compiler` folder to generate the Antlr
+After cloning the repo, you will need to run `mvn compile` in the `bon-jova-rockstar-compiler` folder to generate the
+Antlr
 Java classes, or your IDE will report compile failures and missing classes. (A top-level `mvn install` will also work.)
 The generated classes will appear in `target/generated-sources`, so you may also need to configure your IDE to treat
 that folder as a generated sources folder.
