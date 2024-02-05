@@ -216,7 +216,15 @@ public class RemoteLyricsReader {
             var url = "https://api.lyrics.ovh/v1/{artist}/{title}";
             var ignorePattern = "Paroles de la chanson(.+) par (.+)\\r\\n";
 
-            String response = JsonPath.with(RestAssured.get(url, song.artist(), song.title()).asString()).get("lyrics");
+            String response;
+
+            try {
+                response = JsonPath.with(RestAssured.get(url, song.artist(), song.title()).asString()).get("lyrics");
+            } catch (NullPointerException npe) {
+                // JsonPath.with() intermittently throws an NPE whenever downloading of lyrics has failed.
+                // So we'll interpret it as such.
+                return Optional.empty();
+            }
 
             if (response == null) {
                 return Optional.empty();
