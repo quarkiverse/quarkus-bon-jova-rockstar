@@ -47,8 +47,8 @@ class BonJovaQuarkusExtensionProcessor {
      */
     @BuildStep
     void eagerlyCompileRockFiles(BuildProducer<AdditionalIndexedClassesBuildItem> producer,
-                                 CurateOutcomeBuildItem curateOutcomeBuildItem,
-                                 List<AdditionalClassLoaderResourcesBuildItem> additionalResources) {
+            CurateOutcomeBuildItem curateOutcomeBuildItem,
+            List<AdditionalClassLoaderResourcesBuildItem> additionalResources) {
         ApplicationModel model = curateOutcomeBuildItem.getApplicationModel();
 
         if (model.getAppArtifact()
