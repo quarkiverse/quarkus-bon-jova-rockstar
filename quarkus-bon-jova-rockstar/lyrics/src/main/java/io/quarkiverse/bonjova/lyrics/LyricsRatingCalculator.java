@@ -35,7 +35,7 @@ public class LyricsRatingCalculator {
             }
         }
 
-        return lyricsRating / words.length;
+        return words.length > 0 ? lyricsRating / words.length : 0;
     }
 
     public Integer calculateMaxLyricsRating(List<String> allLyrics) {
