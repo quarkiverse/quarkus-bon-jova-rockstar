@@ -16,7 +16,7 @@ See also the [slide-free-intro.md](slide-free-intro.md).
 
 Lots of rockstar declarations out there, including an interpreter in Java, but none that compiled to byte code.
 
-## Demo
+### Creating the first .rock file and compiling it
 
 We can compile on the command line
 
@@ -31,28 +31,20 @@ Then launch it with
 java -cp ~/Code/demos/rockstar/bon-jova/quarkus-bon-jova-rockstar/compiler/target/classes:~/.m2/repository/io/quarkus/gizmo/gizmo/1.7.0/gizmo-1.7.0.jar:~/.m2/repository/org/ow2/asm/asm/9.5/asm-9.5.jar:~/.m2/repository/org/ow2/asm/asm-util/9.5/asm-util-9.5.jar:~/.m2/repository/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar:~/.m2/repository/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar:~/.m2/repository/io/smallrye/jandex/3.1.3/jandex-3.1.3.jar:~/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar io.quarkiverse.bonjova.compiler.RockFileCompiler ~/hello.rock
 ```
 
+Then see a class file has been created, and launch it with java:
+
 ```shell
+ls -l ~/*class
 java -cp ~ hello
 ```
 
-(alternative: use jbang, less hardcoding of the path)
+Repeat this process for concept-demo 1 through 6.
 
-Then java the demo.class file
-Idea the demo..class file to see it decompiled
+For the beach one, ask people to guess the output.
+
+You can idea the demo..class file to see it decompiled
 
 Obviously, this is a very annoying way of running .rock files. No live coding.
-
-Show app, show extension in pom (for real demo, create it)
-Show unit test, change rock file, show it failing
-
-Visit http://localhost:8080, it will tell you about the endpoints
-Visit http://localhost:8080/rockstar/hello_world
-
-Change the text to something suitably rock and roll, re-load in the browser, it will be updated
-
-You can also open files in the `target/classes` file to see the decompiled code as you edit it.
-
-Next look at guess.rock, then ask people guess what it is, visit in browser
 
 # Quarkus extension
 
@@ -84,6 +76,17 @@ Create a directory `src/main/rockstar` and then create a file called hello.rock.
 Add in the hello world, `Say "hello world"`, the test should pass.
 Refactor to `Christine says hello world\nSay Christine`. The test should continue passing.
 
-### Exposing via the web
+### Dev UI, and exposing via the web
 
 What if I don't want to do TDD?
+
+Visit http://localhost:8080, it will tell you about the endpoints
+Visit http://localhost:8080/rockstar/hello_world and see the output
+
+Change the text to something suitably rock and roll, re-load in the browser, it will be updated
+
+You can also open files in the `target/classes` file to see the decompiled code as you edit it.
+
+Next look at guess.rock, then ask people guess what it is, visit in browser
+
+### Mandelbrot
