@@ -1,5 +1,7 @@
 package io.quarkiverse.bonjova.compiler;
 
+import io.quarkiverse.bonjova.support.RockstarArray;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,5 +1,6 @@
 package io.quarkiverse.bonjova.compiler;
 
+import io.quarkiverse.bonjova.support.RockstarArray;
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;

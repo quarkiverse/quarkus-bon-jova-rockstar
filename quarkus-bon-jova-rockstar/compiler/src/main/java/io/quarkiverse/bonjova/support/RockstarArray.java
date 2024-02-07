@@ -1,4 +1,4 @@
-package io.quarkiverse.bonjova.compiler;
+package io.quarkiverse.bonjova.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -19,7 +19,7 @@ class IntegrationTests {
     @ParameterizedTest
     @MethodSource("provideTestData")
     void runningRockstarProgramShouldYieldExpectedOutput(String inputFile, String rockstarFile,
-                                                         String expectedOutputFile) throws IOException, URISyntaxException {
+            String expectedOutputFile) throws IOException, URISyntaxException {
         String output;
 
         if (inputFile != null) {
@@ -45,14 +45,16 @@ class IntegrationTests {
                 Arguments.of(null, "/concept-demo-2-the-tide-is-low.rock", "/expected-concept-demo-2-the-tide-is-low.output"),
                 Arguments.of(null, "/concept-demo-2-boring.rock", "/expected-concept-demo-2-the-tide-is-low.output"),
                 Arguments.of("/concept-demo-3-open.input", "/concept-demo-3-open.rock", "/expected-concept-demo-3-open.output"),
-                Arguments.of("/concept-demo-3-open.input", "/concept-demo-3-boring.rock", "/expected-concept-demo-3-open.output"),
+                Arguments.of("/concept-demo-3-open.input", "/concept-demo-3-boring.rock",
+                        "/expected-concept-demo-3-open.output"),
                 Arguments.of(null, "/concept-demo-4-city-walls.rock", "/expected-concept-demo-4-city-walls.output"),
                 Arguments.of(null, "/concept-demo-4-boring.rock", "/expected-concept-demo-4-city-walls.output"),
-                Arguments.of(null, "/concept-demo-5-trustworthy-friend.rock", "/expected-concept-demo-5-trustworthy-friend.output"),
+                Arguments.of(null, "/concept-demo-5-trustworthy-friend.rock",
+                        "/expected-concept-demo-5-trustworthy-friend.output"),
                 Arguments.of(null, "/concept-demo-5-boring.rock", "/expected-concept-demo-5-trustworthy-friend.output"),
-                Arguments.of(null, "/concept-demo-6-mama-taking-charge.rock", "/expected-concept-demo-6-mama-taking-charge.output"),
-                Arguments.of(null, "/concept-demo-6-boring.rock", "/expected-concept-demo-6-mama-taking-charge.output")
-        );
+                Arguments.of(null, "/concept-demo-6-mama-taking-charge.rock",
+                        "/expected-concept-demo-6-mama-taking-charge.output"),
+                Arguments.of(null, "/concept-demo-6-boring.rock", "/expected-concept-demo-6-mama-taking-charge.output"));
     }
 
     private String getFileContents(String name) throws URISyntaxException, IOException {

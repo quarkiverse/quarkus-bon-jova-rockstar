@@ -1,4 +1,4 @@
-package io.quarkiverse.bonjova.compiler;
+package io.quarkiverse.bonjova.support;
 
 import org.junit.jupiter.api.Test;
 

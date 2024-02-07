@@ -1,6 +1,7 @@
 package io.quarkiverse.bonjova.compiler;
 
 import io.quarkiverse.bonjova.compiler.util.ParseHelper;
+import io.quarkiverse.bonjova.support.RockstarArray;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
