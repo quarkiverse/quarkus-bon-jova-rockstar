@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.quarkiverse.bonjova.compiler.RockFileCompiler.DOT_ROCK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -35,8 +36,12 @@ public class FileLauncher {
         return executable;
     }
 
+    public static File createTempClassFile(String filename) throws IOException {
+        return File.createTempFile(filename.replace(DOT_ROCK, ""), DOT_CLASS);
+    }
+
     public static File createTempClassFile() throws IOException {
-        return File.createTempFile(ROCK_PREFIX, DOT_CLASS);
+        return createTempClassFile(ROCK_PREFIX);
     }
 
     public static String launch(File file, String... args) throws IOException,
@@ -72,7 +77,7 @@ public class FileLauncher {
         InputStream stream = FileLauncher.class
                 .getResourceAsStream(filename);
         RockFileCompiler compiler = new RockFileCompiler();
-        File outFile = createTempClassFile();
+        File outFile = createTempClassFile(filename);
         try {
             compiler.compile(stream, outFile);
             return FileLauncher.launch(outFile, args);

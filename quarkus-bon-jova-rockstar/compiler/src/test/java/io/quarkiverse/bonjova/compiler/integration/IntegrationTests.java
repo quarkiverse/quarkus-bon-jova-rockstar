@@ -1,8 +1,6 @@
 package io.quarkiverse.bonjova.compiler.integration;
 
 import io.quarkiverse.bonjova.compiler.util.FileLauncher;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,7 +14,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class IntegrationTests {
-    @ParameterizedTest
+    @ParameterizedTest(name = "{1}")
     @MethodSource("provideTestData")
     void runningRockstarProgramShouldYieldExpectedOutput(String inputFile, String rockstarFile,
             String expectedOutputFile) throws IOException, URISyntaxException {
