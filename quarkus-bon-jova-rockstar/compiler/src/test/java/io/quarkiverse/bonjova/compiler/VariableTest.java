@@ -240,7 +240,7 @@ public class VariableTest {
         String className = "soundcheck";
         ResultHandle writtenValue = method.load(className);
         variable.write(method, creator, writtenValue);
-        ResultHandle readValue = variable.read(method);
+        ResultHandle readValue = variable.getResultHandle(method);
 
         // Ignore the number in our comparison
         readValue.setNo(0);
@@ -264,7 +264,7 @@ public class VariableTest {
         String className = "soundcheck";
         ResultHandle writtenValue = method.load(className);
         variable.write(method, creator, writtenValue);
-        ResultHandle readValue = variable.read(method);
+        ResultHandle readValue = variable.getResultHandle(method);
         assertTrue(readValue.toString().contains("type='Ljava/lang/String;'"), readValue.toString());
 
         Rockstar.VariableContext ctx2 = new ParseHelper().getVariable("johnny is 4");
@@ -273,7 +273,7 @@ public class VariableTest {
         assertEquals(double.class, variable2.getVariableClass());
         ResultHandle writtenValue2 = method.load(2d);
         variable2.write(method, creator, writtenValue2);
-        ResultHandle readValue2 = variable2.read(method);
+        ResultHandle readValue2 = variable2.getResultHandle(method);
 
         assertTrue(readValue2.toString().contains("type='D'"), readValue2.toString());
     }

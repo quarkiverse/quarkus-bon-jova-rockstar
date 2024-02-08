@@ -33,7 +33,7 @@ public class Rounding {
     }
 
     public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
-        ResultHandle variableContents = variable.read(method);
+        ResultHandle variableContents = variable.getResultHandle(method);
 
         ResultHandle answer = null;
 

@@ -2,6 +2,8 @@ package io.quarkiverse.bonjova.compiler;
 
 import io.quarkiverse.bonjova.support.RockstarArray;
 
+import io.quarkiverse.bonjova.support.Nothing;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,7 +36,13 @@ public class RockFileCompiler {
     public void compile(InputStream stream, File outFile) throws IOException {
         // Copy across supporting classes
         // TODO check if it exists first rather than always copying
-        Class c = RockstarArray.class;
+        copyClass(outFile, RockstarArray.class);
+        copyClass(outFile, Nothing.class);
+        ClassFileWriter cl = new ClassFileWriter(outFile);
+        new BytecodeGenerator().generateBytecode(stream, getBasename(outFile), cl);
+    }
+
+    private static void copyClass(File outFile, Class c) throws IOException {
         String className = c.getName();
         String classAsPath = className.replace('.', '/') + ".class";
         try (InputStream arrayStream = c.getClassLoader().getResourceAsStream(classAsPath)) {
@@ -46,8 +54,5 @@ public class RockFileCompiler {
                     targetFile.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
         }
-
-        ClassFileWriter cl = new ClassFileWriter(outFile);
-        new BytecodeGenerator().generateBytecode(stream, getBasename(outFile), cl);
     }
 }

@@ -1,12 +1,14 @@
 package io.quarkiverse.bonjova.compiler;
 
 import io.quarkiverse.bonjova.compiler.grammar.PoeticNumberLiteral;
+import io.quarkiverse.bonjova.support.Nothing;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ClassCreator;
+import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
 
-import static io.quarkiverse.bonjova.compiler.Constant.NOTHING;
+import static io.quarkiverse.bonjova.support.Nothing.NOTHING;
 
 public class Assignment {
     private final String originalName;
@@ -94,7 +96,7 @@ public class Assignment {
         } else if (arrayAccess != null) {
             rh = arrayAccess.pop(method, creator);
         } else {
-            // This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
+            // TODO it's now really big This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
             Object value = getValue();
 
             if (String.class.equals(variableClass)) {
@@ -103,14 +105,17 @@ public class Assignment {
                 rh = method.load((double) value);
             } else if (boolean.class.equals(variableClass)) {
                 rh = method.load((boolean) value);
-            } else if (value == NOTHING) { // We can't check the type, because Nothings are stored as objects in case they get coerced
-                rh = method.loadNull();
+            } else if (value == NOTHING) { // We can't coerce here, because we have nothing to use as a reference type
+                // TODO at what point should we coerce? is it here, or do we pass nothing around?
+                rh = method.readStaticField(FieldDescriptor.of(Nothing.class, "NOTHING", Nothing.class));
             } else if (value instanceof String) {
                 rh = method.load((String) value);
             } else if (value instanceof Double) {
                 rh = method.load((double) value);
             } else if (value instanceof Boolean) {
                 rh = method.load((Boolean) value);
+            } else if (value == null) {
+                rh = method.loadNull();
             } else {
                 throw new RuntimeException("Internal error: unknown type " + variableClass + " for " + value
                         + " used in assigment '" + text + "'");

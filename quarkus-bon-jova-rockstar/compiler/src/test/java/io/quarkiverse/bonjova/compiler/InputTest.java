@@ -75,7 +75,7 @@ public class InputTest {
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
             Variable v = a.toCode(creator, method, method);
-            ResultHandle rh = v.read(method);
+            ResultHandle rh = v.getResultHandle(method);
             method.returnValue(rh);
         }
 

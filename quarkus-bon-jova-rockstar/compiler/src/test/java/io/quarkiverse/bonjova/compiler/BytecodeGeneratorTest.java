@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytecodeGeneratorTest {
@@ -148,25 +149,110 @@ public class BytecodeGeneratorTest {
         assertEquals("764\n", output);
     }
 
-    @Test
-    public void shouldHandleNothingInAVariable() {
-        String program = """
-                My world is nothing
-                Shout my world
-                                            """;
-        String output = compileAndLaunch(program);
+    @Nested
+    @DisplayName("Nothing and mysterious support")
+    class NothingAndMysterious {
 
-        assertEquals("\n", output);
-    }
+        @Test
+        public void shouldHandleNothingInAVariable() {
+            String program = """
+                    My world is nothing
+                    Shout my world
+                                                """;
+            String output = compileAndLaunch(program);
 
-    @Test
-    public void shouldHandleNothingInALiteral() {
-        String program = """
-                Shout nothing
-                                            """;
-        String output = compileAndLaunch(program);
+            assertEquals("\n", output);
+        }
 
-        assertEquals("\n", output);
+        @Test
+        public void shouldHandleNothingInALiteral() {
+            String program = """
+                    Shout nothing
+                                                """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("\n", output);
+        }
+
+        @Test
+        public void shouldHandleNothingInAVariableAdditionToStrings() {
+            String program = """
+                    My world is nothing
+                    Shout my world + " points"
+                                                """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("null points\n", output);
+        }
+
+        @Test
+        public void shouldHandleNothingInALiteralAdditionToStrings() {
+            String program = """
+                    Shout nothing + " points"
+                                                """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("null points\n", output);
+        }
+
+        @Test
+        public void shouldHandleNothingWhenAddingToAnArray() {
+            String program = """
+                    Rock arr with 1, 2, 3
+                    Tommy is nothing
+                    Say arr + Tommy
+                    """;
+            ;
+            String output = compileAndLaunch(program);
+
+            // Unclear if this is implemented as a 3 + "" or a 3 + 0 in Satriani, but the behaviour is the same
+            assertEquals("3\n", output);
+        }
+
+        /*
+         * The spec is ambiguous, so this is based on experimentation with Satriani.
+         */
+        @Test
+        public void shouldCoerceNothingToZeroIfInDoubt() {
+            String program = """
+                    jane is nothing
+                    joe is nothing
+                    shout jane times joe
+                    """;
+            assertEquals("0\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldOutputMysteriousForMysterious() {
+            String program = """
+                    Shout mysterious
+                                                """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("mysterious\n", output);
+        }
+
+        @Test
+        public void shouldKeepMysteriousAsFalseyThroughVariableAssignment() {
+            String program = """
+                    Jane is mysterious
+                    Let Joe be Jane
+                    if Joe
+                    say Joe
+                    """;
+            assertEquals("", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldNotAllowIncrementingMysterious() {
+            String program = """
+                    my world is mysterious
+                    build my world up
+                    say my world
+                                        """;
+            // Satriani does this, but we can live with NaN     assertEquals("NaN", compileAndLaunch(program));
+            assertThrows(RuntimeException.class, () -> compileAndLaunch(program));
+        }
     }
 
     @Test
@@ -701,6 +787,19 @@ public class BytecodeGeneratorTest {
     }
 
     @Test
+    public void shouldFailOnDecrementStartingWithMysterious() {
+        String program = """
+                Desire is large
+                My world is mysterious
+                Until my world is Desire,
+                Build my world up
+                shout my world
+                                """;
+        // TODO check Satriani
+        assertThrows(Throwable.class, () -> compileAndLaunch(program));
+    }
+
+    @Test
     public void shouldHandleDecrementStartingWithNull() {
         String program = """
                 Desire is -5
@@ -710,6 +809,19 @@ public class BytecodeGeneratorTest {
                 shout my world
                 """;
         assertEquals("-1\n-2\n-3\n-4\n-5\n", compileAndLaunch(program));
+    }
+
+    @Test
+    public void shouldFailOnIncrementStartingWithMysterious() {
+        String program = """
+                Desire is -5
+                My world is mysterious
+                Until my world is Desire,
+                Knock my world down
+                shout my world
+                """;
+        // TODO check Satriani
+        assertThrows(Throwable.class, () -> compileAndLaunch(program));
     }
 
     // No need for decrement for a string, it's NaN in Satriani
@@ -826,6 +938,21 @@ public class BytecodeGeneratorTest {
         String output = compileAndLaunch(program);
 
         assertEquals("false\n", output);
+    }
+
+    @Nested
+    @DisplayName("Type conversions")
+    class TypeConversions {
+        @Test
+        public void shouldConvertBooleansToNumbersOnAddition() {
+            // Addition needs numbers, so convert to a number, even though the docs say ...
+            // Number <op> Boolean => Convert number to boolean by “truthiness”
+            String program = """
+                    shout true plus 10
+                    """;
+
+            assertEquals("11\n", compileAndLaunch(program));
+        }
     }
 
     @Nested
@@ -1576,6 +1703,7 @@ public class BytecodeGeneratorTest {
 
         @Test
         public void shouldHandleFunctionInvocationsMixedWithOtherExpressionsInAddition() {
+            // Number <op> Boolean => Convert number to boolean by “truthiness”
             String program = """
                     Midnight takes your heart and your soul
                     Give back your heart
@@ -1738,6 +1866,22 @@ public class BytecodeGeneratorTest {
 
             // Satriani says '2', but I think 1 is more correct
             assertEquals("0\n\n1\n", output);
+        }
+
+        @Test
+        public void shouldInitialiseAnArrayWithRockIfArrayHadBeenSetToSomethingElse() {
+            String program = """
+                    Rock the array
+                    Say the array
+                    Let the array be "not an array"
+                    Say the array
+                    Rock "hi" into the array
+                    Say the array
+                    """;
+            String output = compileAndLaunch(program);
+
+            // Satriani says '2', but I think 1 is more correct
+            assertEquals("0\nnot an array\n1\n", output);
         }
 
         @Test
@@ -1929,7 +2073,6 @@ public class BytecodeGeneratorTest {
             assertTrue(output.startsWith("1\n4\n8\n"), output);
         }
 
-        @Disabled("Needs better mysterious support")
         @Test
         public void shouldAccessFirstElementOfTheArrayUsingPopAndOutputMysterious() {
             String program = """

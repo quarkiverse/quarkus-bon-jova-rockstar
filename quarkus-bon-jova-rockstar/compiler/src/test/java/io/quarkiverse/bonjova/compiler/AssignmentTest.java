@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
 
-import static io.quarkiverse.bonjova.compiler.Constant.NOTHING;
+import static io.quarkiverse.bonjova.support.Nothing.NOTHING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -297,7 +297,7 @@ public class AssignmentTest {
         // awfully close to just writing the code down twice, so just be happy if we get here without explosions
     }
 
-    private static void toCode(Assignment a) {
+    private void toCode(Assignment a) {
         ClassCreator creator = ClassCreator.builder()
                 .className("holder")
                 .build();
