@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Variable {
+public class Variable implements ValueHolder {
     private static final Map<String, FieldDescriptor> variables = new HashMap<>();
     // Because this is static, we could get cross-talk between programs, but that's a relatively low risk; we manage it by explicitly
     // clearing statics
@@ -90,9 +90,13 @@ public class Variable {
         }
     }
 
-    public ResultHandle read(BytecodeCreator method) {
+    public ResultHandle getResultHandle(BytecodeCreator method) {
         FieldDescriptor field = getField();
         return method.readStaticField(field);
+    }
+
+    public ResultHandle getResultHandle(BytecodeCreator method, Expression.Context context) {
+        return getResultHandle(method);
     }
 
     public void write(BytecodeCreator method, ClassCreator creator, ResultHandle value) {

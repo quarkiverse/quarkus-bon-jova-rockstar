@@ -15,7 +15,7 @@ import rock.Rockstar;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static io.quarkiverse.bonjova.compiler.Constant.NOTHING;
+import static io.quarkiverse.bonjova.support.Nothing.NOTHING;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
@@ -137,9 +137,9 @@ public class ExpressionTest {
         a = new Expression(ctx);
         assertEquals(NOTHING, a.getValue());
 
-        // The value of nothing is context-dependent, but on its own it should stay null, so that other higher-level expressions and
+        // The value of nothing is context-dependent, but on its own it should stay as the nothing object, so that other higher-level expressions and
         // output statements can do the right thing
-        assertEquals(null, execute(a));
+        assertEquals(NOTHING, execute(a));
 
     }
 
@@ -154,11 +154,19 @@ public class ExpressionTest {
         }
 
         @Test
-        public void shouldReturnFalseForNothing() {
+        public void shouldReturnFalseForNothingInBooleanContext() {
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say nothing");
             Expression a = new Expression(ctx);
 
             assertEquals(false, execute(a, Expression.Context.BOOLEAN));
+        }
+
+        @Test
+        public void shouldReturnFalseForNothingInScalarContext() {
+            Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say nothing");
+            Expression a = new Expression(ctx);
+
+            assertEquals(0d, execute(a, Expression.Context.SCALAR));
         }
 
         @Test
@@ -284,7 +292,6 @@ public class ExpressionTest {
         }
 
         @Test
-        @Disabled("type chaos and also mysterious support")
         public void shouldHandleStringAdditionWithMysterious() {
             // String <plus> Mysterious => Convert the mysterious to "mysterious"
             Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("shout mysterious plus \" ways\"", 0);
@@ -671,7 +678,16 @@ public class ExpressionTest {
         Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say wrong ain't nothing", 0);
         assertFalse((boolean) execute(new Expression(ctx)));
 
-        ctx = new ParseHelper().getExpression("say right ain't nothing", 0);
+        ctx = new ParseHelper().getExpression("say nothing ain't wrong", 0);
+        assertFalse((boolean) execute(new Expression(ctx)));
+    }
+
+    @Test
+    public void shouldTreatNothingAsNotEqualToTrue() {
+        Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say right ain't nothing", 0);
+        assertTrue((boolean) execute(new Expression(ctx)));
+
+        ctx = new ParseHelper().getExpression("say nothing ain't right", 0);
         assertTrue((boolean) execute(new Expression(ctx)));
     }
 
@@ -687,8 +703,22 @@ public class ExpressionTest {
         assertTrue((boolean) execute(new Expression(ctx)));
     }
 
+    @Test
+    public void shouldPassBackNothingObjectForNothing() {
+        Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say nothing", 0);
+
+        Expression expr = new Expression(ctx);
+        assertNotNull(execute(expr));
+        assertEquals(NOTHING, execute(expr));
+    }
+
+    @Test
+    public void shouldPassBackNullObjectForMysterious() {
+        Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say mysterious", 0);
+        assertNull(execute(new Expression(ctx)));
+    }
+
     // The spec is a bit vague on this, so this is based on observation in Satriani
-    @Disabled("Unspecified in spec, hard to implement")
     @Test
     public void shouldTreatNothingAsEqualToEmptyStringForComparisons() {
         Rockstar.ExpressionContext ctx = new ParseHelper().getExpression("say \"\" ain't nothing", 0);
@@ -842,7 +872,7 @@ public class ExpressionTest {
     }
 
     private Object execute(Expression a, Expression.Context context) {
-        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
+        TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
         try (ClassCreator creator = ClassCreator.builder()

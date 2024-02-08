@@ -26,16 +26,37 @@ import java.util.stream.Stream;
 import static io.quarkiverse.bonjova.compiler.BytecodeGeneratingListener.isBoolean;
 import static io.quarkiverse.bonjova.compiler.BytecodeGeneratingListener.isNumber;
 import static io.quarkiverse.bonjova.compiler.BytecodeGeneratingListener.isObject;
-import static io.quarkiverse.bonjova.compiler.Constant.NOTHING;
 import static io.quarkiverse.bonjova.compiler.Constant.coerceMysteriousIntoType;
 import static io.quarkiverse.bonjova.compiler.Constant.coerceNothingIntoType;
+import static io.quarkiverse.bonjova.support.Nothing.NOTHING;
 
 public class Expression {
 
+    public static final MethodDescriptor DECIMAL_FORMAT_METHOD = MethodDescriptor.ofMethod(DecimalFormat.class, "format",
+            String.class, double.class);
+
+    private static final MethodDescriptor BOOLEAN_VALUE_OF_METHOD = MethodDescriptor.ofMethod(Boolean.class, "booleanValue",
+            boolean.class);
+    private static final MethodDescriptor CONCAT_METHOD = MethodDescriptor.ofMethod(String.class, "concat", String.class,
+            String.class);
+    private static final MethodDescriptor COMPARE_TO_METHOD = MethodDescriptor.ofMethod(Comparable.class, "compareTo", "I",
+            Object.class);
+    private static final MethodDescriptor EQUALITY_METHOD = MethodDescriptor.ofMethod(Object.class, "equals", "Z",
+            Object.class);
+    private static final MethodDescriptor DOUBLE_CREATOR = MethodDescriptor.ofConstructor(Double.class, double.class);
+    private static final MethodDescriptor constructor = MethodDescriptor.ofConstructor(BigDecimal.class, double.class);
+    private static final MethodDescriptor divide = MethodDescriptor.ofMethod(BigDecimal.class, "divide", BigDecimal.class,
+            BigDecimal.class, MathContext.class);
+    private static final MethodDescriptor toDouble = MethodDescriptor.ofMethod(BigDecimal.class, "doubleValue", double.class);
+
+    FieldDescriptor mathContext = FieldDescriptor.of(MathContext.class, "DECIMAL32", MathContext.class);
     private final String text;
     private String function;
     private Class<?> valueClass;
     private Object value;
+
+    private ValueHolder valueHolder;
+    // TODO can we get rid of this field?
     private Variable variable;
     private Array arrayAccess;
     private Expression arrayAccessIndex;
@@ -50,23 +71,12 @@ public class Expression {
     private Operation operation;
 
     private UnaryOperation unaryOperation;
-    private static final MethodDescriptor CONCAT_METHOD = MethodDescriptor.ofMethod(String.class, "concat", String.class,
-            String.class);
-    private static final MethodDescriptor COMPARE_TO_METHOD = MethodDescriptor.ofMethod(Comparable.class, "compareTo", "I",
-            Object.class);
-    private static final MethodDescriptor EQUALITY_METHOD = MethodDescriptor.ofMethod(Object.class, "equals", "Z",
-            Object.class);
-    private static final MethodDescriptor DOUBLE_CREATOR = MethodDescriptor.ofConstructor(Double.class, double.class);
-    private static final MethodDescriptor constructor = MethodDescriptor.ofConstructor(BigDecimal.class, double.class);
-    private static final MethodDescriptor divide = MethodDescriptor.ofMethod(BigDecimal.class, "divide", BigDecimal.class,
-            BigDecimal.class, MathContext.class);
-    private static final MethodDescriptor toDouble = MethodDescriptor.ofMethod(BigDecimal.class, "doubleValue", double.class);
-
-    FieldDescriptor mathContext = FieldDescriptor.of(MathContext.class, "DECIMAL32", MathContext.class);
 
     enum Context {
         SCALAR,
         BOOLEAN,
+        STRING,
+        NOT_OBJECT,
         NORMAL
     }
 
@@ -75,6 +85,7 @@ public class Expression {
         variable = new Variable(ctx);
         value = variable.getVariableName();
         valueClass = variable.getVariableClass();
+        valueHolder = variable;
     }
 
     public Expression(Rockstar.LiteralContext ctx) {
@@ -82,6 +93,7 @@ public class Expression {
         Literal l = new Literal(ctx);
         value = l.getValue();
         valueClass = l.getValueClass();
+        valueHolder = l;
     }
 
     public Expression(Rockstar.ConstantContext ctx) {
@@ -89,6 +101,7 @@ public class Expression {
         Constant c = new Constant(ctx);
         value = c.getValue();
         valueClass = c.getValueClass();
+        valueHolder = c;
     }
 
     public Expression(Rockstar.ExpressionContext ctx) {
@@ -221,25 +234,26 @@ public class Expression {
             Literal l = new Literal(literal);
             value = l.getValue();
             valueClass = l.getValueClass();
+            valueHolder = l;
         } else if (constant != null) {
             Constant c = new Constant(constant);
             value = c.getValue();
             valueClass = c.getValueClass();
+            valueHolder = c;
         } else if (variableContext != null) {
             variable = new Variable(variableContext);
             value = variable.getVariableName();
             valueClass = variable.getVariableClass();
+            valueHolder = variable;
         }
     }
 
-    private static AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
-            ResultHandle lrh, ResultHandle rrh) {
+    private AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
+            ResultHandle lrh, ResultHandle rrh, ClassCreator classCreator) {
 
         ResultHandle safeLrh = coerceAwayNothing(method, lrh, rrh);
-        safeLrh = coerceAwayNothing(method, safeLrh, rrh);
 
         ResultHandle safeRrh = coerceAwayNothing(method, rrh, lrh);
-        safeRrh = coerceAwayNothing(method, safeRrh, lrh);
 
         ResultHandle equalityCheck = method.invokeInterfaceMethod(
                 COMPARE_TO_METHOD,
@@ -266,6 +280,7 @@ public class Expression {
     }
 
     public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator, Context context) {
+
         ResultHandle handle;
         if (function != null) {
             handle = getHandleForFunction(method, classCreator);
@@ -278,20 +293,36 @@ public class Expression {
         } else if (variable != null) {
             handle = getHandleForVariable(method, context);
         } else {
-            // This is a literal
-            handle = getHandleForLiteral(method);
+            // This is a literal or constant
+            handle = getHandleForValueHolder(method, context);
         }
 
         // Now do an extra check if the context was boolean
         if (context == Context.BOOLEAN && !isBoolean(handle)) {
             AssignableResultHandle bool = method.createVariable(boolean.class);
             method.assign(bool, method.load(1));
+
+            // This could still be a boolean, so check
+            BytecodeCreator notBoolean;
+            if (!isNumber(handle)) {
+                ResultHandle isBoolean = method.instanceOf(handle, Boolean.class);
+                BranchResult branchResult = method.ifTrue(isBoolean);
+                BytecodeCreator booleanB = branchResult.trueBranch();
+                // The boxing is needed to avoid verify errors
+                booleanB.assign(bool,
+                        booleanB.invokeVirtualMethod(BOOLEAN_VALUE_OF_METHOD, booleanB.checkCast(handle, Boolean.class)));
+
+                // If not, check if this is 0, which we should convert to false
+                notBoolean = branchResult.falseBranch();
+            } else {
+                notBoolean = method;
+            }
+
             ResultHandle falsey = method.load(0);
-            BranchResult nullCheck = method.ifNull(handle);
+            BranchResult nullCheck = notBoolean.ifNull(handle);
             nullCheck.trueBranch().assign(bool, falsey);
             BytecodeCreator notNull = nullCheck.falseBranch();
             ResultHandle doub = notNull.newInstance(DOUBLE_CREATOR, notNull.load(0d));
-            // Be lazy and do a comparison so we don't have to cast
             BytecodeCreator isZero = notNull.ifTrue(
                     notNull.invokeVirtualMethod(EQUALITY_METHOD, doub, handle)).trueBranch();
             isZero.assign(bool, falsey);
@@ -303,30 +334,12 @@ public class Expression {
 
     }
 
-    private ResultHandle getHandleForLiteral(BytecodeCreator method) {
-        ResultHandle answer;
-        if (String.class.equals(valueClass)) {
-            answer = method.load((String) value);
-        } else if (double.class.equals(valueClass)) {
-            answer = method.load((double) value);
-        } else if (boolean.class.equals(valueClass)) {
-            answer = method.load((boolean) value);
-        } else if (valueClass == null) {
-            answer = method.loadNull();
-        } else if (value == NOTHING) {
-            answer = method.loadNull();
-        } else if (value == null) {
-            answer = method.loadNull();
-        } else if (value instanceof String) {
-            answer = method.load((String) value);
-        } else if (value instanceof Double) {
-            answer = method.load((double) value);
-        } else if (value instanceof Boolean) {
-            answer = method.load((Boolean) value);
-        } else {
-            throw new RuntimeException("Confused expression: Could not interpret type " + valueClass + " with value " + value);
-        }
-        return answer;
+    private ResultHandle getHandleForValueHolder(BytecodeCreator method) {
+        return valueHolder.getResultHandle(method);
+    }
+
+    private ResultHandle getHandleForValueHolder(BytecodeCreator method, Context context) {
+        return valueHolder.getResultHandle(method, context);
     }
 
     private ResultHandle getHandleForArray(BytecodeCreator method, ClassCreator creator) {
@@ -339,10 +352,15 @@ public class Expression {
     }
 
     private ResultHandle getHandleForVariable(BytecodeCreator method, Context context) {
-        ResultHandle rh = variable.read(method);
+        ResultHandle rh = variable.getResultHandle(method);
         if (context == Context.NORMAL) {
             return rh;
         } else {
+            if (context == Context.BOOLEAN) {
+                // Coerce nothings in a boolean context
+                rh = coerceNothingIntoType(method, rh, Context.BOOLEAN);
+            }
+
             // For boolean contexts, we also want arrays to go to a number length
             BranchResult arrayCheck = method.ifTrue(method.instanceOf(rh, RockstarArray.class));
             AssignableResultHandle answer = method.createVariable(Object.class);
@@ -351,6 +369,7 @@ public class Expression {
             BytecodeCreator isNotArray = arrayCheck.falseBranch();
             isNotArray.assign(answer, rh);
             return answer;
+
         }
     }
 
@@ -361,7 +380,7 @@ public class Expression {
         // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
 
         // TODO this may not be needed since we passed a boolean context
-        rrh = coerceFalsyTypes(method, rhe, rrh);
+        rrh = coerceFalsyTypes(method, rhe, rrh, classCreator);
 
         switch (unaryOperation) {
             case NEGATION -> {
@@ -375,63 +394,48 @@ public class Expression {
     }
 
     private ResultHandle getHandleForOperation(BytecodeCreator method, ClassCreator classCreator) {
-        ResultHandle lrh = lhe.getResultHandle(method, classCreator, Context.SCALAR);
-        ResultHandle rrh = rhe.getResultHandle(method, classCreator, Context.SCALAR);
+        // This context isn't scalar, exactly, it's not-object - it could be boolean or string or number
+        ResultHandle lrh = lhe.getResultHandle(method, classCreator, Context.NOT_OBJECT);
+        ResultHandle rrh = rhe.getResultHandle(method, classCreator, Context.NOT_OBJECT);
 
         // Do type coercion of rockstar nulls (which are a special type, not null)
-        // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
-        if (lhe.isNothing()) {
-            lrh = coerceNothingIntoType(method, rrh);
-        }
-        if (rhe.isNothing()) {
-            rrh = coerceNothingIntoType(method, lrh);
-        }
 
-        if (lhe.isMysterious()) {
-            lrh = coerceMysteriousIntoType(method, rrh);
-        }
-        if (rhe.isMysterious()) {
-            rrh = coerceMysteriousIntoType(method, lrh);
-        }
+        lrh = coerceNothingIntoType(method, lrh, rrh, operation);
+        rrh = coerceNothingIntoType(method, rrh, lrh, operation);
 
         switch (operation) {
             case ADD -> {
 
                 BytecodeInvoker numericOperation = BytecodeCreator::add;
-                BytecodeInvoker stringOperation = (bc, a, b) -> {
-                    ResultHandle lsrh = stringify(bc, a);
-                    ResultHandle rsrh = stringify(bc, b);
-                    return bc.invokeVirtualMethod(
-                            CONCAT_METHOD,
-                            lsrh, rsrh);
-                };
-                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
+                BytecodeInvoker stringOperation = (bc, a, b) -> bc.invokeVirtualMethod(
+                        CONCAT_METHOD,
+                        a, b);
+                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation, classCreator);
                 for (Expression extra : extraRhes) {
                     // This could be a fancy reduce with streams, but for works well enough
                     ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh);
+                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
 
-                    answer = doOperation(method, answer, erh, numericOperation, stringOperation);
+                    answer = doOperation(method, answer, erh, numericOperation, stringOperation, classCreator);
                 }
                 return answer;
             }
             case SUBTRACT -> {
-
                 BytecodeInvoker numericOperation = (bc, a, b) -> {
                     // Handle subtraction by multiplying by -1 and adding
                     ResultHandle negativeRightSide = bc.multiply(bc.load(-1d), b);
                     return bc.add(a, negativeRightSide);
                 };
                 BytecodeInvoker stringOperation = unsupportedOperation("Subtraction of strings is not possible.");
-                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
+                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation, classCreator);
 
                 for (Expression extra : extraRhes) {
                     ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh);
+                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
 
-                    answer = doOperation(method, answer, erh, numericOperation, stringOperation);
+                    answer = doOperation(method, answer, erh, numericOperation, stringOperation, classCreator);
                 }
                 return answer;
 
@@ -439,13 +443,13 @@ public class Expression {
             case MULTIPLY -> {
                 BytecodeInvoker numericOperation = BytecodeCreator::multiply;
                 BytecodeInvoker stringOperation = unsupportedOperation("Multiplication of strings not yet implemented.");
-                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation);
+                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation, classCreator);
                 for (Expression extra : extraRhes) {
                     ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh);
+                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
 
-                    answer = doOperation(method, answer, erh, numericOperation, stringOperation);
+                    answer = doOperation(method, answer, erh, numericOperation, stringOperation, classCreator);
                 }
                 return answer;
             }
@@ -462,7 +466,7 @@ public class Expression {
                 for (Expression extra : extraRhes) {
                     ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh);
+                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
 
                     answer = divide(method, answer, erh);
                 }
@@ -514,19 +518,19 @@ public class Expression {
             }
             case GREATER_THAN_CHECK -> {
                 return doComparison(method, method::ifGreaterThanZero,
-                        lrh, rrh);
+                        lrh, rrh, classCreator);
             }
             case LESS_THAN_CHECK -> {
                 return doComparison(method, method::ifLessThanZero,
-                        lrh, rrh);
+                        lrh, rrh, classCreator);
             }
             case GREATER_OR_EQUAL_THAN_CHECK -> {
                 return doComparison(method, method::ifGreaterEqualZero,
-                        lrh, rrh);
+                        lrh, rrh, classCreator);
             }
             case LESS_OR_EQUAL_THAN_CHECK -> {
                 return doComparison(method, method::ifLessEqualZero,
-                        lrh, rrh);
+                        lrh, rrh, classCreator);
             }
             default -> throw new RuntimeException("Unsupported operation " + operation);
         }
@@ -547,9 +551,11 @@ public class Expression {
         };
     }
 
-    private static ResultHandle coerceFalsyTypes(BytecodeCreator method, Expression extra, ResultHandle erh) {
+    private ResultHandle coerceFalsyTypes(BytecodeCreator method, Expression extra, ResultHandle erh,
+            ClassCreator creator) {
+        // TODO consolidate this with the other coerce method, do not call different ones on different paths
         if (extra.isNothing()) {
-            erh = coerceNothingIntoType(method, erh);
+            erh = coerceNothingIntoType(method, extra.getResultHandle(method, creator), erh, operation);
         }
 
         if (extra.isMysterious()) {
@@ -566,7 +572,7 @@ public class Expression {
         Arrays.fill(paramClasses, Object.class);
 
         MethodDescriptor methodDescriptor = MethodDescriptor.ofMethod(classCreator.getClassName(), function,
-                "Ljava/lang/Object;",
+                Object.class,
                 paramClasses);
         ResultHandle[] rhs = args.toArray(new ResultHandle[] {});
         return method.invokeStaticMethod(
@@ -580,7 +586,7 @@ public class Expression {
 
     private ResultHandle doOperation(BytecodeCreator method, ResultHandle unsafelrh, ResultHandle unsaferrh,
             BytecodeInvoker numberCaseOp,
-            BytecodeInvoker stringCaseOp) {
+            BytecodeInvoker stringCaseOp, ClassCreator classCreator) {
         // If we know we're working with numbers, do the simplest thing
         if (isNumber(unsafelrh) && isNumber(unsaferrh)) {
             return numberCaseOp.invoke(method, unsafelrh, unsaferrh);
@@ -592,38 +598,65 @@ public class Expression {
         ResultHandle rrh = coerceAwayNothing(method, unsaferrh, unsafelrh);
 
         AssignableResultHandle answer = method.createVariable(Object.class);
-        TryBlock tryBlock = method.tryBlock();
-        ResultHandle castlrh = tryBlock.checkCast(lrh, Double.class);
-        ResultHandle castrrh = tryBlock.checkCast(rrh, Double.class);
 
-        MethodDescriptor toDouble = MethodDescriptor.ofMethod("java/lang/Double", "doubleValue", double.class);
-        ResultHandle dlrh = tryBlock.invokeVirtualMethod(toDouble, castlrh);
-        ResultHandle drrh = tryBlock.invokeVirtualMethod(toDouble, castrrh);
+        // Do some more checking for primitive types before trying to cast
+        // Use 0 as equivalent to false
+        ResultHandle lrhIsString = isBoolean(lrh) || isNumber(lrh) ? method.load(0) : method.instanceOf(lrh, String.class);
 
-        ResultHandle added = numberCaseOp.invoke(tryBlock, dlrh, drrh);
+        ResultHandle rrhIsString = isBoolean(rrh) || isNumber(rrh) ? method.load(0) : method.instanceOf(rrh, String.class);
+        ResultHandle someString = method.bitwiseOr(lrhIsString, rrhIsString);
 
-        tryBlock.assign(answer, added);
+        BranchResult br = method.ifTrue(someString);
+        BytecodeCreator stringCase = br.trueBranch();
+        ResultHandle lsrh = stringify(stringCase, lrh);
+        ResultHandle rsrh = stringify(stringCase, rrh);
+        ResultHandle thing = stringCaseOp.invoke(stringCase, lsrh, rsrh);
+        stringCase.assign(answer, thing);
 
-        CatchBlockCreator catchBlock = tryBlock.addCatch(ClassCastException.class);
-        ResultHandle lsrh = stringify(catchBlock, lrh);
-        ResultHandle rsrh = stringify(catchBlock, rrh);
-        ResultHandle thing = stringCaseOp.invoke(catchBlock, lsrh, rsrh);
-        catchBlock.assign(answer, thing);
+        BytecodeCreator otherCase = br.falseBranch();
+        // Which way we go with the conversions depends on the operation - here we know it's a numeric or string context
+        // TODO bring this logic and the logic to convert arrays to numbers from getHandleForVariable into the same place, maybe a general coerce method
+
+        ResultHandle dlrh = coerceBooleanIntoNumber(otherCase, lrh);
+        ResultHandle drrh = coerceBooleanIntoNumber(otherCase, rrh);
+
+        ResultHandle added = numberCaseOp.invoke(otherCase, dlrh, drrh);
+        otherCase.assign(answer, added);
 
         return answer;
     }
 
-    static ResultHandle coerceAwayNothing(BytecodeCreator method, ResultHandle handle, ResultHandle referenceHandle) {
-        // TODO this feels like a good opportunity for contexts?
-        AssignableResultHandle answer = method.createVariable(Object.class);
-        BranchResult nullCheck = method.ifNull(handle);
-        BytecodeCreator trueBranch = nullCheck.trueBranch();
-        BytecodeCreator falseBranch = nullCheck.falseBranch();
-        // TODO this will still fail if both sides are null, but that's maybe fair enough (although Satriani coerces to zero in that case)
-        trueBranch.assign(answer, coerceNothingIntoType(trueBranch, referenceHandle));
-        falseBranch.assign(answer, handle);
+    // This is barely needed, since boolean in bytecode is represented as an integer, but Boolean will need attention
+    private ResultHandle coerceBooleanIntoNumber(BytecodeCreator method, ResultHandle rh) {
+        AssignableResultHandle answer = method.createVariable(double.class);
+        if (isNumber(rh)) {
+            return rh;
+        } else {
+            if (isBoolean(rh)) {
+                BranchResult booleanTest = method.ifTrue(rh);
+                booleanTest.trueBranch().assign(answer, method.load(1d));
+                booleanTest.falseBranch().assign(answer, method.load(0d));
+                return answer;
+            } else {
+                ResultHandle isBoolean = method.instanceOf(rh, Boolean.class);
+                BranchResult br = method.ifTrue(isBoolean);
+                BytecodeCreator falseBranch = br.falseBranch();
+                falseBranch.assign(answer, rh); // Nothing to see here, move along
 
-        return answer;
+                BytecodeCreator booleanCase = br.trueBranch();
+                BranchResult booleanTest = booleanCase.ifTrue(rh);
+                booleanTest.trueBranch().assign(answer, method.load(1d));
+                booleanTest.falseBranch().assign(answer, method.load(0d));
+
+                return answer;
+
+            }
+        }
+    }
+
+    ResultHandle coerceAwayNothing(BytecodeCreator method, ResultHandle handle, ResultHandle referenceHandle) {
+        // TODO call the method in Constant instead
+        return Constant.coerceNothingIntoType(method, handle, referenceHandle, operation);
     }
 
     private ResultHandle stringify(BytecodeCreator method, ResultHandle rh) {
@@ -636,19 +669,25 @@ public class Expression {
                     method.load("#.#########"));
             toStringed = method
                     .invokeVirtualMethod(
-                            MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
+                            DECIMAL_FORMAT_METHOD,
                             formatterHandle, rh);
 
         } else if (isObject(rh)) {
             // If we really don't know, try and see if the thing is a number
             AssignableResultHandle answer = method.createVariable(String.class);
-            TryBlock tryBlock = method.tryBlock();
+            BranchResult br = method.ifNull(rh);
+            BytecodeCreator isNull = br.trueBranch();
+
+            isNull.assign(answer, coerceMysteriousIntoType(isNull, Context.STRING));
+            BytecodeCreator isNotNull = br.falseBranch();
+
+            TryBlock tryBlock = isNotNull.tryBlock();
             ResultHandle formatterHandle = tryBlock.newInstance(
                     MethodDescriptor.ofConstructor(DecimalFormat.class, String.class),
                     tryBlock.load("#.#########"));
             tryBlock.assign(answer, tryBlock
                     .invokeVirtualMethod(
-                            MethodDescriptor.ofMethod(DecimalFormat.class, "format", String.class, double.class),
+                            DECIMAL_FORMAT_METHOD,
                             formatterHandle, rh));
             CatchBlockCreator catchBlockCreator = tryBlock.addCatch(Throwable.class);
             catchBlockCreator.assign(answer, Gizmo.toString(catchBlockCreator, rh));
@@ -662,11 +701,12 @@ public class Expression {
     }
 
     private ResultHandle doEqualityCheck(BytecodeCreator method, ResultHandle lrh, ResultHandle rrh) {
-        AssignableResultHandle answer = method.createVariable("Z");
+        AssignableResultHandle answer = method.createVariable(boolean.class);
+        method.assign(answer, method.load(true));
         BranchResult nullCheck = method.ifNull(lrh);
         BytecodeCreator isNull = nullCheck.trueBranch();
 
-        // If the left hand side is null, only return true if the right side is null
+        // If the left hand side is null (ie mysterious), only return true if the right side is null
         BranchResult br = isNull.ifReferencesEqual(lrh, rrh);
         BytecodeCreator trueBranch = br.trueBranch();
         trueBranch
@@ -677,22 +717,23 @@ public class Expression {
 
         BytecodeCreator isNotNull = nullCheck.falseBranch();
 
+        // Now do a check for nothing - we treat it as an empty string, NOT null, if the other side is a string
+
         isNotNull.assign(answer, isNotNull.invokeVirtualMethod(
                 EQUALITY_METHOD,
                 lrh, rrh));
-
         return answer;
     }
 
     public boolean isNothing() {
-        return value == Constant.NOTHING;
+        return value == NOTHING;
     }
 
     public boolean isMysterious() {
         return valueClass == null;
     }
 
-    private enum Operation {
+    enum Operation {
         ADD,
         SUBTRACT,
         MULTIPLY,

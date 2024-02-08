@@ -136,11 +136,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         for (int i = 0; i < count; i++) {
 
             Variable variable = new Variable(ctx.variable());
-            ResultHandle value = variable.read(currentCreator);
+            ResultHandle value = variable.getResultHandle(currentCreator);
+            value = Constant.coerceNothingIntoType(currentCreator, value, Expression.Context.SCALAR);
 
             // This intermediate variable is useful to give a bit of flexibility about types
             AssignableResultHandle incremented = currentCreator.createVariable(Object.class);
-            // TODO have this be a method on the Nothing object and store nulls as Nothings
+
             // TODO on mysterious, this will pass when it should fail
 
             // See if we can assign the value to a Double - if we can, it is either a number, or null
@@ -156,30 +157,18 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 variable.write(tryBlock, creator, incremented);
             }
 
-            // Casting a null to a Double works, casting to a double gives an NPE
-            CatchBlockCreator nullCase = tryBlock.addCatch(NullPointerException.class);
+            // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
+            CatchBlockCreator stringCase = tryBlock.addCatch(ClassCastException.class);
             {
-                AssignableResultHandle coerced = currentCreator.createVariable(double.class);
-                //  We could call   nullCase.assign(coerced, coerceNothingIntoType(nullCase, one)); but it is barely necessary, we know we're going to end up with 1.0
-                nullCase.assign(coerced, nullCase.load(0d));
-                ResultHandle addedCoerced = nullCase.add(coerced, one);
-                nullCase.assign(incremented, addedCoerced);
-            }
-
-            if (!isNumber(value)) {
-                // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
-                CatchBlockCreator stringCase = tryBlock.addCatch(ClassCastException.class);
-                {
-                    // This must be a string
-                    // TODO unless it is a boolean ...
-                    ResultHandle constant = stringCase.load("1");
-                    AssignableResultHandle castToString = stringCase.createVariable(String.class);
-                    stringCase.assign(castToString, stringCase.checkCast(value, String.class));
-                    ResultHandle concat = stringCase.invokeVirtualMethod(
-                            STRING_CONCAT, castToString,
-                            constant);
-                    stringCase.assign(incremented, concat);
-                }
+                // This must be a string
+                // TODO unless it is a boolean ...
+                ResultHandle constant = stringCase.load("1");
+                AssignableResultHandle castToString = stringCase.createVariable(String.class);
+                stringCase.assign(castToString, stringCase.checkCast(value, String.class));
+                ResultHandle concat = stringCase.invokeVirtualMethod(
+                        STRING_CONCAT, castToString,
+                        constant);
+                stringCase.assign(incremented, concat);
             }
 
             variable.write(currentCreator, creator, incremented);
@@ -198,12 +187,11 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         for (int i = 0; i < count; i++) {
 
             Variable variable = new Variable(ctx.variable());
-            ResultHandle value = variable.read(currentCreator);
+            ResultHandle value = variable.getResultHandle(currentCreator);
 
             // This intermediate variable is useful to give a bit of flexibility about types
             AssignableResultHandle incremented = currentCreator.createVariable(Object.class);
-            // TODO have this be a method on the Nothing object and store nulls as Nothings
-            // TODO on mysterious, this will pass when it should fail
+            value = Constant.coerceNothingIntoType(currentCreator, value, minusOne, Expression.Operation.ADD);
 
             // See if we can assign the value to a Double - if we can, it is either a number, or null
             TryBlock tryBlock = currentCreator.tryBlock();
@@ -218,25 +206,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 variable.write(tryBlock, creator, incremented);
             }
 
-            // Casting a null to a Double works, casting to a double gives an NPE
-            CatchBlockCreator nullCase = tryBlock.addCatch(NullPointerException.class);
+            // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
+            CatchBlockCreator stringCase = tryBlock.addCatch(ClassCastException.class);
             {
-                AssignableResultHandle coerced = currentCreator.createVariable(double.class);
-                //  We could call   nullCase.assign(coerced, coerceNothingIntoType(nullCase, one)); but it is barely necessary, we know we're going to end up with 1.0
-                nullCase.assign(coerced, nullCase.load(0d));
-                ResultHandle addedCoerced = nullCase.add(coerced, minusOne);
-                nullCase.assign(incremented, addedCoerced);
-            }
-
-            if (!isNumber(value)) {
-                // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
-                CatchBlockCreator stringCase = tryBlock.addCatch(ClassCastException.class);
-                {
-                    // This must be a string
-                    // TODO unless it is a boolean ...
-                    // We can't decrement a string, and the types go a bit weird, so just use a string NaN
-                    stringCase.assign(incremented, stringCase.load("NaN"));
-                }
+                // This must be a string
+                // TODO unless it is a boolean ...
+                // We can't decrement a string, and the types go a bit weird, so just use a string NaN
+                stringCase.assign(incremented, stringCase.load("NaN"));
             }
 
             variable.write(currentCreator, creator, incremented);
@@ -258,7 +234,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
         Expression expression = new Expression(ctx.expression());
-        ResultHandle value = expression.getResultHandle(currentCreator, creator, Expression.Context.SCALAR);
+        ResultHandle value = expression.getResultHandle(currentCreator, creator, Expression.Context.NOT_OBJECT);
 
         // TODO refactor this conditional formatting into a class-level method?
         // We want to do a special toString on numbers, to avoid tacking decimals onto integers
@@ -277,9 +253,9 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         ResultHandle toStringed = Gizmo.toString(catchBlock, value);
         Gizmo.systemOutPrintln(catchBlock, toStringed);
 
-        // When printed on its own, null is ""
+        // When printed on its own, null is "mysterious"
         CatchBlockCreator nullCatchBlock = tryBlock.addCatch(NullPointerException.class);
-        Gizmo.systemOutPrintln(nullCatchBlock, nullCatchBlock.load(""));
+        Gizmo.systemOutPrintln(nullCatchBlock, nullCatchBlock.load("mysterious"));
     }
 
     @Override

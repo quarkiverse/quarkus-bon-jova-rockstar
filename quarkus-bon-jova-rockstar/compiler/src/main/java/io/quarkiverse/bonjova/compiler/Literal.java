@@ -1,11 +1,11 @@
 package io.quarkiverse.bonjova.compiler;
 
-import io.quarkus.gizmo.MethodCreator;
+import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.ResultHandle;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import rock.Rockstar;
 
-public class Literal {
+public class Literal implements ValueHolder {
     private Class<?> valueClass;
     private Object value;
 
@@ -43,24 +43,38 @@ public class Literal {
         return valueClass;
     }
 
-    public ResultHandle getResultHandle(MethodCreator method) {
-        // This code is duplicated in Expression and assignment; we should check if it can be consolidated
-        Object value = getValue();
+    public ResultHandle getResultHandle(BytecodeCreator method) {
+        return getResultHandle(method, value, valueClass);
+    }
 
+    public ResultHandle getResultHandle(BytecodeCreator method, Expression.Context content) {
+        // No context makes a difference to things we can define as literals
+        return getResultHandle(method);
+    }
+
+    static ResultHandle getResultHandle(BytecodeCreator method, Object value, Class<?> valueClass) {
+        ResultHandle answer;
+        // We do not need to handle nothing
+        // TODO do we need to handle mysterious? I don't think so?
         if (String.class.equals(valueClass)) {
-            return method.load((String) value);
+            answer = method.load((String) value);
         } else if (double.class.equals(valueClass)) {
-            return method.load((double) value);
+            answer = method.load((double) value);
         } else if (boolean.class.equals(valueClass)) {
-            return method.load((boolean) value);
+            answer = method.load((boolean) value);
+        } else if (valueClass == null) {
+            answer = method.loadNull();
+        } else if (value == null) {
+            answer = method.loadNull(); // TODO is this needed?
         } else if (value instanceof String) {
-            return method.load((String) value);
+            answer = method.load((String) value);
         } else if (value instanceof Double) {
-            return method.load((double) value);
+            answer = method.load((double) value);
         } else if (value instanceof Boolean) {
-            return method.load((Boolean) value);
+            answer = method.load((Boolean) value);
         } else {
-            throw new RuntimeException("Internal error: unknown type " + valueClass + " for " + value);
+            throw new RuntimeException("Confused expression: Could not interpret type " + valueClass + " with value " + value);
         }
+        return answer;
     }
 }

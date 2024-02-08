@@ -59,7 +59,7 @@ public class Array {
 
     public static void join(Rockstar.JoinStmtContext ctx, BytecodeCreator currentCreator, ClassCreator creator) {
         Variable oldVar = new Variable(ctx.variable().get(0));
-        ResultHandle oldVal = oldVar.read(currentCreator);
+        ResultHandle oldVal = oldVar.getResultHandle(currentCreator);
 
         // Tolerate casting things that aren't strings
         ResultHandle isString = currentCreator.instanceOf(oldVal, TYPE_CLASS);
@@ -88,21 +88,25 @@ public class Array {
     }
 
     public static ResultHandle toScalarContext(Variable variable, BytecodeCreator method) {
-        ResultHandle arr = variable.read(method);
-        return method.invokeVirtualMethod(LENGTH_METHOD, arr);
+        ResultHandle arr = variable.getResultHandle(method);
+        return toScalarContext(arr, method);
+    }
+
+    public static ResultHandle toScalarContext(ResultHandle rh, BytecodeCreator method) {
+        return method.invokeVirtualMethod(LENGTH_METHOD, rh);
     }
 
     public ResultHandle read(Expression arrayAccessIndex, BytecodeCreator method, ClassCreator creator) {
         ResultHandle index;
-        if (arrayAccessIndex.isNothing()) {
-            index = coerceNothingIntoType(method, method.load(0d));
+        if (arrayAccessIndex.isNothing()) { // TODO this check is not needed? or perhaps we need two, one for when we know the value, the other for an expression
+            index = coerceNothingIntoType(method, arrayAccessIndex.getResultHandle(method, creator), Expression.Context.SCALAR);
         } else {
             index = arrayAccessIndex.getResultHandle(method, creator);
             // This could still be a null, so do another check
-            index = Expression.coerceAwayNothing(method, index, method.load(0d));
+            index = Constant.coerceNothingIntoType(method, index, Expression.Context.SCALAR);
         }
         // Short circuit this logic if we know we are dealing with a number
-        ResultHandle rh = variable.read(method);
+        ResultHandle rh = variable.getResultHandle(method);
         if (isNumber(index)) {
             return method.invokeVirtualMethod(GET_METHOD, rh, index);
         } else {
@@ -116,13 +120,15 @@ public class Array {
         AssignableResultHandle rh = method.createVariable(TYPE_CLASS);
 
         if (variable.isAlreadyWritten()) {
-            method.assign(rh, variable.read(method));
+            ResultHandle currentValue = variable.getResultHandle(method);
 
-            // it could exist, but have been set to null, so do a null check
-
-            BytecodeCreator isNull = method.ifNull(rh).trueBranch();
-            isNull.assign(rh, isNull.newInstance(CONSTRUCTOR));
-            variable.write(method, creator, rh);
+            // it could exist, but have been set to null, or a string, or anything else, so do a type check
+            BranchResult instanceCheck = method.ifFalse(method.instanceOf(currentValue, RockstarArray.class));
+            BytecodeCreator isNotAnArray = instanceCheck.trueBranch();
+            isNotAnArray.assign(rh, isNotAnArray.newInstance(CONSTRUCTOR));
+            variable.write(isNotAnArray, creator, rh);
+            BytecodeCreator isAnArray = instanceCheck.falseBranch();
+            isAnArray.assign(rh, currentValue);
         } else {
             // TODO it would be nice to specify the initial capacity, even if creating a collection to initialise it with is too tricky
             method.assign(rh, method.newInstance(CONSTRUCTOR));
@@ -152,7 +158,7 @@ public class Array {
     }
 
     public ResultHandle pop(BytecodeCreator method, ClassCreator creator) {
-        ResultHandle arr = variable.read(method);
+        ResultHandle arr = variable.getResultHandle(method);
         return method.invokeVirtualMethod(REMOVE_METHOD, arr);
     }
 }
