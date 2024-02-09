@@ -2,53 +2,55 @@
 
 See also the [slide-free-intro.md](slide-free-intro.md).
 
-### Important elements of rockstar syntax
-
-- Some elements just map in a fairly obvious way, eg
-    - ‘shout’ or ‘say’ for println
-    - ‘Take it to the top’ for continue
-- Variables are dynamically typed, don’t need to be declared before first use, initialised with ‘is’, can have several
-  words in the same name
-- Literal declaration is where it gets head-melty
-    - Poetic string literals don’t need quotes if declared with ‘says’
-    - Poetic number literals each word represents a digit, the number is the letter count, module 10. Full stops are
-      decimals.
-
-Lots of rockstar declarations out there, including an interpreter in Java, but none that compiled to byte code.
+🎵 indicates things which should be sung.
 
 ### Creating the first .rock file and compiling it
 
-We can compile on the command line
+#### Work out the classpath
 
-mvn dependency:build-classpath to get the classpath of the implementation, then put it on a java classpath with
-target/classes
+We can compile on the command line, but it needs a complex classpath. If the one below doesn't work, use these steps to
+figure it out. Use
+
+```shell
+
+mvn dependency:build-classpath
+ ```
+
+to get the classpath of the implementation, then put it on a java classpath with `target/classes` of the Bon Jova
+compiler project.
 
 Use vi to make a `hello.rock` file in `~`
 
-Then launch it with
+Enter the following
+
+```shell
+Christine says hello world
+Shout Christine
+```
+
+This is using the poetic string syntax. Then launch it with
 
 ```
-java -cp ~/Code/demos/rockstar/bon-jova/quarkus-bon-jova-rockstar/compiler/target/classes:~/.m2/repository/io/quarkus/gizmo/gizmo/1.7.0/gizmo-1.7.0.jar:~/.m2/repository/org/ow2/asm/asm/9.5/asm-9.5.jar:~/.m2/repository/org/ow2/asm/asm-util/9.5/asm-util-9.5.jar:~/.m2/repository/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar:~/.m2/repository/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar:~/.m2/repository/io/smallrye/jandex/3.1.3/jandex-3.1.3.jar:~/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar io.quarkiverse.bonjova.compiler.RockFileCompiler ~/hello.rock
+🎵 java -cp ~/Code/demos/rockstar/bon-jova/quarkus-bon-jova-rockstar/compiler/target/classes:~/.m2/repository/io/quarkus/gizmo/gizmo/1.7.0/gizmo-1.7.0.jar:~/.m2/repository/org/ow2/asm/asm/9.5/asm-9.5.jar:~/.m2/repository/org/ow2/asm/asm-util/9.5/asm-util-9.5.jar:~/.m2/repository/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar:~/.m2/repository/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar:~/.m2/repository/io/smallrye/jandex/3.1.3/jandex-3.1.3.jar:~/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar io.quarkiverse.bonjova.compiler.RockFileCompiler ~/hello.rock
 ```
 
-Then see a class file has been created, and launch it with java:
+Point out that a class file has been created, and launch it with java:
 
 ```shell
 ls -l ~/*class
 java -cp ~ hello
 ```
 
-Repeat this process for concept-demo 1 through 6.
+Repeat this process for concept-demo 1 through 6. Sing the code 🎵.
 
-For the beach one, ask people to guess the output.
+For the beach one, ask people to guess the output. Explain the syntax concepts involved in the code.
 
-You can idea the demo..class file to see it decompiled
+Obviously, this is a very annoying way of running .rock files. There's no live coding, there's two steps to launch, the
+classpath is long ... we need help!
 
-Obviously, this is a very annoying way of running .rock files. No live coding.
+### Quarkus extension
 
-# Quarkus extension
-
-## Setting up an application
+#### Setting up an application
 
 Show http://quarkus.io/extensions and filter for alt-languages to show the extension is in the marketplace.
 
@@ -83,10 +85,15 @@ What if I don't want to do TDD?
 Visit http://localhost:8080, it will tell you about the endpoints
 Visit http://localhost:8080/rockstar/hello_world and see the output
 
-Change the text to something suitably rock and roll, re-load in the browser, it will be updated
+Change the text to something suitably rock and roll, re-load in the browser, and it will be updated.
 
 You can also open files in the `target/classes` file to see the decompiled code as you edit it.
 
-Next look at guess.rock, then ask people guess what it is, visit in browser
+#### Rock score
+
+Show how the rock score changes when code is swapped from an 'clear' version to an idiomatic one.
 
 ### Mandelbrot
+
+Use the `mw` live template to fill in the mandelbrot code in a file called `mandelbrot.rock.` Visit it
+at http://localhost:8080/rockstar/mandelbrot to see the calculated Mandelbrot set.

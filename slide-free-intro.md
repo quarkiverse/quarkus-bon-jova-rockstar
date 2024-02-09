@@ -51,4 +51,21 @@ Scroll down to Brainfuck and Chicken. Rockstar is a lot more readable than these
 It’s also a great fit with Quarkus iconography.
 
 [github tab]
-So here’s the extension.
+Why another implementation? There are lots of rockstar implementations out there, including an interpreter in Java, but
+none that compiled to byte code.
+Being able to run Rockstar as a JVM language has a number of possible advantages, such as integration to performance
+profilers, native compilation, interaction with Java libraries, and so on.
+As well as a compiler, we wrote a Quarkus extension to allow live reload, and also a Dev UI to support writing programs.
+
+### Important elements of rockstar syntax
+
+- Some elements just map in a fairly obvious way, eg
+    - ‘shout’ or ‘say’ for println
+    - ‘Take it to the top’ for continue
+- Variables are dynamically typed, don’t need to be declared before first use, initialised with ‘is’, can have several
+  words in the same name
+- Literal declaration is where it gets head-melty
+    - Poetic string literals don’t need quotes if declared with ‘says’
+    - Poetic number literals each word represents a digit, the number is the letter count, module 10. Full stops are
+      decimals.
+
