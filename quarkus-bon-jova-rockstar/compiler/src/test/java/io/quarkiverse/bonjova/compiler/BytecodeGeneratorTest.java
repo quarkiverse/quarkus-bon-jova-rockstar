@@ -1945,6 +1945,75 @@ public class BytecodeGeneratorTest {
             assertEquals("6\n11\n", output);
         }
 
+        // In a boolean context, such as an if or while statement, using the array should give the length of the array, which then gets treated as true/false
+        @Test
+        public void shouldUseLengthOfArrayInABooleanContext() {
+            // Use an if, rather than a while, so it does not loop infinitely when things go wrong
+            String program = """
+                    Rock array with 3, 4, 5
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+                    Else
+                        Shout "should not be here"
+
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+                    Else
+                        Shout "is done"
+
+                    Shout "got to the end"
+                                                            """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("got 3\n" +
+                    "got 4\n" +
+                    "got 5\n" +
+                    "is done\n" +
+                    "got to the end\n", output);
+        }
+
+        @Disabled("Flow control issues - the missing 'else' causes this test to fail")
+        @Test
+        public void shouldUseLengthOfArrayInABooleanContextWithSimpleFlowControl() {
+            // Use an if, rather than a while, so it does not loop infinitely when things go wrong
+            String program = """
+                    Rock array with 3, 4, 5
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+
+                    If array
+                        Let number be pop array
+                        Shout "got " + number
+
+                    Shout "got to the end"
+                                                            """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("got 3\n" +
+                    "got 4\n" +
+                    "got 5\n" +
+                    "got to the end\n", output);
+        }
+
         @Test
         public void shouldIncreaseLengthWhenAppendingToArray() {
             String program = """
