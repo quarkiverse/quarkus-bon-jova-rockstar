@@ -1249,6 +1249,27 @@ public class BytecodeGeneratorTest {
             assertEquals("first\nsecond\n", compileAndLaunch(program));
         }
 
+        @Disabled("Reproducer for #154")
+        @Test
+        public void shouldCountReturnsAsTheEndOfALoop() {
+            // This needs a newline before 'give the answer', which is not right
+            String program = """
+                    Eddy wants your dedication               
+                    Let the expectations be 6
+                    Let the goal be 20
+                    If the expectations are weaker than the goal
+                    Let the answer be "hello",
+                    Else let the answer be "!"                                        
+                    Give the answer
+                                         
+                    Let peace be Eddy taking nothing
+                    Shout peace
+                                        """;
+
+            assertEquals("hello\n", compileAndLaunch(program));
+
+        }
+
         @Test
         public void shouldHandleUntilLoops() {
             String program = """
@@ -2579,6 +2600,11 @@ public class BytecodeGeneratorTest {
         PrintStream originalOut = System.out;
         String className = "rock.soundcheck";
 
+        // Capture stderr right from when we attempt the compilation
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errorStream));
+
         TestClassLoader loader = new TestClassLoader(this.getClass().getClassLoader());
 
         try {
@@ -2596,6 +2622,8 @@ public class BytecodeGeneratorTest {
             // We need to wrap the String[] in an Object[] because it's nested varargs
             main.invoke(null, new Object[]{args});
 
+            assertEquals("", errorStream.toString(), "Unexpected error output during compilation");
+
             // Get the captured output as a string
             return outputStream.toString();
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
@@ -2604,6 +2632,7 @@ public class BytecodeGeneratorTest {
         } finally {
             // Restore the original System.out
             System.setOut(originalOut);
+            System.setErr(originalErr);
         }
     }
 }
