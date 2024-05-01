@@ -43,16 +43,17 @@ public class Literal implements ValueHolder {
         return valueClass;
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method) {
-        return getResultHandle(method, value, valueClass);
+    public ResultHandle getResultHandle(Block block) {
+        return getResultHandle(block, value, valueClass);
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method, Expression.Context content) {
+    public ResultHandle getResultHandle(Block block, Expression.Context content) {
         // No context makes a difference to things we can define as literals
-        return getResultHandle(method);
+        return getResultHandle(block);
     }
 
-    static ResultHandle getResultHandle(BytecodeCreator method, Object value, Class<?> valueClass) {
+    static ResultHandle getResultHandle(Block block, Object value, Class<?> valueClass) {
+        BytecodeCreator method = block.method();
         ResultHandle answer;
         // We do not need to handle nothing
         // TODO do we need to handle mysterious? I don't think so?

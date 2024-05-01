@@ -73,9 +73,11 @@ public class InputTest {
 
             MethodCreator method = creator.getMethodCreator(methodName, Object.class, String[].class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+            // Cheat and pass null for the context and hope it doesn't blow up
+            Block block = new Block(null, method, creator, new VariableScope(), null);
 
-            Variable v = a.toCode(creator, method, method);
-            ResultHandle rh = v.getResultHandle(method);
+            Variable v = a.toCode(block, method);
+            ResultHandle rh = v.getResultHandle(block);
             method.returnValue(rh);
         }
 

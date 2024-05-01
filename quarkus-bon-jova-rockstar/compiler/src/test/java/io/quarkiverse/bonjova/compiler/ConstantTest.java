@@ -5,6 +5,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
@@ -114,7 +115,7 @@ public class ConstantTest {
     public void shouldTreatNothingAsNothingInBytecode() {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("thing is nothing");
         Constant a = new Constant(ctx);
-        assertEquals(NOTHING, execute(a));
+        assertEquals(NOTHING, execute(ctx, a));
     }
 
     @Test
@@ -122,7 +123,7 @@ public class ConstantTest {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("say nothing");
         Constant a = new Constant(ctx);
 
-        assertEquals(false, execute(a, Expression.Context.BOOLEAN));
+        assertEquals(false, execute(ctx, a, Expression.Context.BOOLEAN));
     }
 
     @Test
@@ -130,7 +131,7 @@ public class ConstantTest {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("say nothing");
         Constant a = new Constant(ctx);
 
-        assertEquals(0d, execute(a, Expression.Context.SCALAR));
+        assertEquals(0d, execute(ctx, a, Expression.Context.SCALAR));
     }
 
     @Disabled("No string context yet")
@@ -139,38 +140,38 @@ public class ConstantTest {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("say nothing");
         Constant a = new Constant(ctx);
 
-        assertEquals("null", execute(a, Expression.Context.SCALAR));
+        assertEquals("null", execute(ctx, a, Expression.Context.SCALAR));
     }
 
     @Test
     public void shouldTreatMysteriousAsNullInBytecode() {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("thing is mysterious");
         Constant a = new Constant(ctx);
-        assertNull(execute(a));
+        assertNull(execute(ctx, a));
     }
 
     @Test
     public void shouldReturnCorrectBytecodeForEmpty() {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("thing is empty");
         Constant a = new Constant(ctx);
-        assertEquals("", execute(a));
+        assertEquals("", execute(ctx, a));
     }
 
     @Test
     public void shouldReturnCorrectBytecodeForFalse() {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("thing is lies");
         Constant a = new Constant(ctx);
-        assertFalse((Boolean) execute(a));
+        assertFalse((Boolean) execute(ctx, a));
     }
 
     @Test
     public void shouldReturnCorrectBytecodeForTrue() {
         Rockstar.ConstantContext ctx = new ParseHelper().getConstant("thing is ok");
         Constant a = new Constant(ctx);
-        assertTrue((Boolean) execute(a));
+        assertTrue((Boolean) execute(ctx, a));
     }
 
-    private Object execute(Constant a) {
+    private Object execute(ParserRuleContext ctx, Constant a) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
@@ -181,7 +182,9 @@ public class ConstantTest {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.getResultHandle(method);
+            Block block = new Block(ctx, method, creator, new VariableScope(), null);
+
+            ResultHandle rh = a.getResultHandle(block);
             method.returnValue(rh);
         }
 
@@ -195,7 +198,7 @@ public class ConstantTest {
         }
     }
 
-    private Object execute(Constant a, Expression.Context context) {
+    private Object execute(ParserRuleContext ctx, Constant a, Expression.Context context) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
@@ -206,7 +209,8 @@ public class ConstantTest {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.getResultHandle(method, context);
+            Block block = new Block(ctx, method, creator, new VariableScope(), null);
+            ResultHandle rh = a.getResultHandle(block, context);
             method.returnValue(rh);
         }
 

@@ -95,8 +95,9 @@ public class Constant implements ValueHolder {
 
     }
 
-    public static ResultHandle coerceNothingIntoType(BytecodeCreator method, ResultHandle original,
+    public static ResultHandle coerceNothingIntoType(Block block, ResultHandle original,
             Expression.Context context) {
+        BytecodeCreator method = block.method();
         AssignableResultHandle answer = method.createVariable(Object.class);
         // Don't do instanceof checks on a primitive
         if (isNumber(original) || isBoolean(original)) {
@@ -153,11 +154,12 @@ public class Constant implements ValueHolder {
         return valueClass;
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method) {
-        return getResultHandle(method, Expression.Context.NORMAL);
+    public ResultHandle getResultHandle(Block block) {
+        return getResultHandle(block, Expression.Context.NORMAL);
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method, Expression.Context context) {
+    public ResultHandle getResultHandle(Block block, Expression.Context context) {
+        BytecodeCreator method = block.method();
         // The only options are true or false, empty string, nothing, or null
         ResultHandle answer;
         if (value == TRUE || value == FALSE) {

@@ -6,6 +6,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
@@ -42,7 +43,7 @@ public class StringSplitTest {
     @Test
     public void shouldCreateAnArrayOnSimpleSplit() {
         Rockstar.StringStmtContext ctx = new ParseHelper().getStringSplit("Cut \"\" into pieces");
-        assertDeepEquals(new RockstarArray(), execute(new StringSplit(ctx)));
+        assertDeepEquals(new RockstarArray(), execute(ctx, new StringSplit(ctx)));
     }
 
     @Test
@@ -50,7 +51,7 @@ public class StringSplitTest {
         RockstarArray expected = new RockstarArray();
         expected.addAll(Arrays.asList("h", "e", "l", "l", "o"));
         Rockstar.StringStmtContext ctx = new ParseHelper().getStringSplit("Cut \"hello\" into pieces");
-        assertDeepEquals(expected, execute(new StringSplit(ctx)));
+        assertDeepEquals(expected, execute(ctx, new StringSplit(ctx)));
     }
 
     @Test
@@ -58,7 +59,7 @@ public class StringSplitTest {
         RockstarArray expected = new RockstarArray();
         expected.addAll(Arrays.asList("first", "second"));
         Rockstar.StringStmtContext ctx = new ParseHelper().getStringSplit("Cut \"first, second\" into pieces with \", \"");
-        assertDeepEquals(expected, execute(new StringSplit(ctx)));
+        assertDeepEquals(expected, execute(ctx, new StringSplit(ctx)));
     }
 
     private static void assertDeepEquals(RockstarArray a, RockstarArray b) {
@@ -66,7 +67,7 @@ public class StringSplitTest {
         assertEquals(Arrays.toString(a.list.toArray()), Arrays.toString(b.list.toArray()));
     }
 
-    private RockstarArray execute(StringSplit a) {
+    private RockstarArray execute(ParserRuleContext ctx, StringSplit a) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
@@ -79,7 +80,9 @@ public class StringSplitTest {
 
             MethodCreator method = creator.getMethodCreator(methodName, Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.toCode(method, creator);
+            Block block = new Block(ctx, method, creator, new VariableScope(), null);
+
+            ResultHandle rh = a.toCode(block);
             method.returnValue(rh);
         }
 

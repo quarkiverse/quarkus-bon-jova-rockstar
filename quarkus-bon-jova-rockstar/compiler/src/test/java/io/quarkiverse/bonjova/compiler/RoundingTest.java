@@ -9,6 +9,7 @@ import io.quarkus.gizmo.TestClassLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
+import rock.Rockstar;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -63,16 +64,17 @@ public class RoundingTest {
 
     private Object getExecutionResult(String program) throws IOException {
         RoundingAndAssignmentPair bug = new ParseHelper().getRounding(program);
-        Assignment a = new Assignment(bug.assignmentStmtContext());
+        Rockstar.AssignmentStmtContext ctx = bug.assignmentStmtContext();
+        Assignment a = new Assignment(ctx);
         Rounding r = new Rounding(bug.roundingStmtContext());
-        return execute(a, r);
+        return execute(ctx, a, r);
     }
 
-    private Object execute(Assignment a, Rounding r) {
+    private Object execute(Rockstar.AssignmentStmtContext ctx, Assignment a, Rounding r) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
 
         // The auto-close on this triggers the write
-        String className = "com.RoundingTest";
+        String className = "com.RoundingTestGeneratedCode";
         String methodName = "method";
         try (ClassCreator creator = ClassCreator.builder()
                 .classOutput(cl)
@@ -82,8 +84,10 @@ public class RoundingTest {
             MethodCreator method = creator.getMethodCreator(methodName, Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
-            a.toCode(creator, method);
-            ResultHandle rh = r.toCode(method, creator);
+            Block block = new Block(ctx, method, creator, new VariableScope(), null);
+
+            a.toCode(block);
+            ResultHandle rh = r.toCode(block);
             method.returnValue(rh);
         }
 

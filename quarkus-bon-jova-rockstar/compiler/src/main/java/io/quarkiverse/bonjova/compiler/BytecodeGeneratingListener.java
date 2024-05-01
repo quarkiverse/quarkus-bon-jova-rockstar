@@ -33,20 +33,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     private final ClassCreator creator;
     private final FieldDescriptor formatter;
     private final Stack<Block> blocks = new Stack<>();
-    // For some constructs, we may want to create a scope but not switch to it until the next statement list; this stack is a convenient
+    // For some constructs, we may want to create a method but not switch to it until the next statement list; this stack is a convenient
     // place to store them
     private final Stack<BytecodeCreator> controlScopes = new Stack<>();
     private static final MethodDescriptor STRING_CONCAT = MethodDescriptor.ofMethod("java/lang/String", "concat", String.class,
             String.class);
-    private static final MethodDescriptor BOOLEAN_VALUE = MethodDescriptor.ofMethod(Boolean.class, "booleanValue",
-            boolean.class);
-    private BytecodeCreator currentCreator;
+    private Block currentBlock;
     // For things like loops, break and continue need to jump to the top of the loop, which may include several intermediary scopes
     private BytecodeCreator targetScopeForJumps;
-
-    // Not strictly necessary, but very useful for debugging
-    record Block(ParserRuleContext ctx, BytecodeCreator scope) {
-    }
 
     public BytecodeGeneratingListener(ClassCreator creator) {
         super();
@@ -71,14 +65,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         main = creator.getMethodCreator("main", void.class, String[].class);
         main.setModifiers(ACC_PUBLIC + ACC_STATIC);
 
-        enterBlock(main, ctx);
+        enterBlock(new Block(ctx, main, creator, new VariableScope(), null), ctx);
     }
 
     @Override
     public void exitProgram(Rockstar.ProgramContext ctx) {
         while (!blocks.isEmpty()) {
-            currentCreator.returnVoid();
-            currentCreator = blocks.pop().scope;
+            currentBlock.method().returnVoid();
+            currentBlock = blocks.pop();
         }
     }
 
@@ -121,7 +115,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     public void enterAssignmentStmt(Rockstar.AssignmentStmtContext ctx) {
 
         Assignment assignment = new Assignment(ctx);
-        assignment.toCode(creator, currentCreator);
+        assignment.toCode(currentBlock);
     }
 
     @Override
@@ -131,21 +125,21 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .KW_UP()
                 .size();
 
-        ResultHandle one = currentCreator.load(1d);
+        ResultHandle one = currentBlock.method().load(1d);
 
         for (int i = 0; i < count; i++) {
 
             Variable variable = new Variable(ctx.variable());
-            ResultHandle value = variable.getResultHandle(currentCreator);
-            value = Constant.coerceNothingIntoType(currentCreator, value, Expression.Context.SCALAR);
+            ResultHandle value = variable.getResultHandle(currentBlock);
+            value = Constant.coerceNothingIntoType(currentBlock, value, Expression.Context.SCALAR);
 
             // This intermediate variable is useful to give a bit of flexibility about types
-            AssignableResultHandle incremented = currentCreator.createVariable(Object.class);
+            AssignableResultHandle incremented = currentBlock.method().createVariable(Object.class);
 
             // TODO on mysterious, this will pass when it should fail
 
             // See if we can assign the value to a Double - if we can, it is either a number, or null
-            TryBlock tryBlock = currentCreator.tryBlock();
+            TryBlock tryBlock = currentBlock.method().tryBlock();
             {
                 AssignableResultHandle casted = tryBlock.createVariable(Double.class);
                 tryBlock.assign(casted, tryBlock.checkCast(value, Double.class));
@@ -154,7 +148,8 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
                 ResultHandle added = tryBlock.add(primitive, one);
                 tryBlock.assign(incremented, added);
-                variable.write(tryBlock, creator, incremented);
+                variable.write(new Block(null, tryBlock, currentBlock.creator(), currentBlock.variables(), currentBlock),
+                        incremented);
             }
 
             // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
@@ -171,7 +166,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 stringCase.assign(incremented, concat);
             }
 
-            variable.write(currentCreator, creator, incremented);
+            variable.write(currentBlock, incremented);
         }
     }
 
@@ -182,12 +177,14 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 .KW_DOWN()
                 .size();
 
+        BytecodeCreator currentCreator = currentBlock.method();
+
         ResultHandle minusOne = currentCreator.load(-1d);
 
         for (int i = 0; i < count; i++) {
 
             Variable variable = new Variable(ctx.variable());
-            ResultHandle value = variable.getResultHandle(currentCreator);
+            ResultHandle value = variable.getResultHandle(currentBlock);
 
             // This intermediate variable is useful to give a bit of flexibility about types
             AssignableResultHandle incremented = currentCreator.createVariable(Object.class);
@@ -203,7 +200,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
                 ResultHandle added = tryBlock.add(primitive, minusOne);
                 tryBlock.assign(incremented, added);
-                variable.write(tryBlock, creator, incremented);
+                variable.write(currentBlock, incremented);
             }
 
             // If not, do the string case; having bytecode that does string manipulations on variables the compiler knows are numbers upsets the verifier
@@ -215,30 +212,30 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
                 stringCase.assign(incremented, stringCase.load("NaN"));
             }
 
-            variable.write(currentCreator, creator, incremented);
+            variable.write(currentBlock, incremented);
         }
     }
 
     @Override
     public void enterRoundingStmt(Rockstar.RoundingStmtContext ctx) {
         Rounding rounding = new Rounding(ctx);
-        rounding.toCode(currentCreator, creator);
+        rounding.toCode(currentBlock);
     }
 
     @Override
     public void enterArrayStmt(Rockstar.ArrayStmtContext ctx) {
         Array a = new Array(ctx);
-        a.toCode(currentCreator, creator);
+        a.toCode(currentBlock);
     }
 
     @Override
     public void enterOutputStmt(Rockstar.OutputStmtContext ctx) {
         Expression expression = new Expression(ctx.expression());
-        ResultHandle value = expression.getResultHandle(currentCreator, creator, Expression.Context.NOT_OBJECT);
+        ResultHandle value = expression.getResultHandle(currentBlock, Expression.Context.NOT_OBJECT);
 
         // TODO refactor this conditional formatting into a class-level method?
         // We want to do a special toString on numbers, to avoid tacking decimals onto integers
-        TryBlock tryBlock = currentCreator.tryBlock();
+        TryBlock tryBlock = currentBlock.method().tryBlock();
         ResultHandle castToDouble = tryBlock.checkCast(value, Double.class);
 
         ResultHandle df = tryBlock.readStaticField(formatter);
@@ -261,26 +258,26 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterInputStmt(Rockstar.InputStmtContext ctx) {
         Input input = new Input(ctx);
-        input.toCode(creator, currentCreator, main);
+        input.toCode(currentBlock, main);
 
     }
 
     @Override
     public void enterBreakStmt(Rockstar.BreakStmtContext ctx) {
         if (targetScopeForJumps != null) {
-            currentCreator.breakScope(targetScopeForJumps);
+            currentBlock.method().breakScope(targetScopeForJumps);
         } else {
-            currentCreator.breakScope();
+            currentBlock.method().breakScope();
         }
     }
 
     @Override
     public void enterContinueStmt(Rockstar.ContinueStmtContext ctx) {
         if (targetScopeForJumps != null) {
-            currentCreator.continueScope(targetScopeForJumps);
+            currentBlock.method().continueScope(targetScopeForJumps);
         } else {
-            // This is rather dodgy, but if we don't have an enclosing loop-y scope, then a continue behaves like a break
-            currentCreator.breakScope();
+            // This is rather dodgy, but if we don't have an enclosing loop-y method, then a continue behaves like a break
+            currentBlock.method().breakScope();
         }
     }
 
@@ -291,12 +288,16 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
         final Function<BytecodeCreator, BranchResult> fun;
 
-        targetScopeForJumps = currentCreator.createScope();
-        enterBlock(targetScopeForJumps, ctx);
+        targetScopeForJumps = currentBlock.method().createScope();
+        // TODO new variable scope?
+        enterBlock(new Block(ctx, targetScopeForJumps, creator, currentBlock.variables(), currentBlock), ctx);
 
         if (ctx.KW_WHILE() != null) {
             fun = (BytecodeCreator method) -> {
-                ResultHandle evaluated = expression.getResultHandle(method, creator, Expression.Context.BOOLEAN);
+                // TODO here is where we would make a new scope?
+                ResultHandle evaluated = expression.getResultHandle(
+                        new Block(ctx, method, creator, currentBlock.variables(), currentBlock),
+                        Expression.Context.BOOLEAN);
                 // TODO delete this comment Convoluted code! We can't return a boolean from the expression, or we sometimes get java.lang.NoClassDefFoundError: boolean
                 // But the Boolean in ifTrue gets cast to Int, so we need to turn our Boolean into a boolean
                 //  return method.ifTrue(method.invokeVirtualMethod(BOOLEAN_VALUE, evaluated));
@@ -305,15 +306,17 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         } else if (ctx.KW_UNTIL() != null) {
             fun = (BytecodeCreator method) -> {
                 // See above - same convolution
-                ResultHandle evaluated = expression.getResultHandle(method, creator, Expression.Context.BOOLEAN);
+                ResultHandle evaluated = expression.getResultHandle(
+                        new Block(ctx, method, creator, currentBlock.variables(), currentBlock),
+                        Expression.Context.BOOLEAN);
                 return method.ifFalse(evaluated);
             };
         } else {
             throw new RuntimeException("Could not understand loop " + ctx.getText());
         }
-        BytecodeCreator loop = currentCreator.whileLoop(fun)
+        BytecodeCreator loop = currentBlock.method().whileLoop(fun)
                 .block();
-        enterBlock(loop, ctx);
+        enterBlock(new Block(ctx, loop, creator, currentBlock.variables(), currentBlock), ctx);
     }
 
     @Override
@@ -327,12 +330,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterIfStmt(Rockstar.IfStmtContext ctx) {
         Condition condition = new Condition(ctx);
-        BranchResult code = condition.toCode(currentCreator, creator);
+        BranchResult code = condition.toCode(currentBlock);
         if (condition.hasElse()) {
             controlScopes.push(code.falseBranch());
         }
         controlScopes.push(code.trueBranch());
-        enterBlock(currentCreator, ctx);
+        enterBlock(currentBlock, ctx);
     }
 
     @Override
@@ -342,16 +345,19 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     @Override
     public void enterStringStmt(Rockstar.StringStmtContext ctx) {
-        new StringSplit(ctx).toCode(currentCreator, creator);
+        new StringSplit(ctx).toCode(currentBlock);
     }
 
     @Override
     public void enterFunctionDeclaration(Rockstar.FunctionDeclarationContext ctx) {
         // A function creator in Gizmo is like a lambda, which is not really what we want, so use methods
-        // TODO the scope of these should be local, not global
         List<Rockstar.VariableContext> variableContexts = ctx.paramList()
                 .variable();
         final MethodCreator fun;
+
+        //  If a variable is defined inside of a function, it is in local method. Local method variables are available from their initialization until the end of the function they are defined in.
+        //
+        //While within a function, if you write to a variable that has been defined in global method, you write to that variable; you do not define a new local variable.
 
         // The spec says all functions must take at least one argument
         // In this case passing a class array to the creator confuses it and doesn't get counted as the varargs
@@ -364,20 +370,21 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
             fun = creator.getMethodCreator(functionName, Object.class, paramClasses);
         }
         fun.setModifiers(ACC_PUBLIC + ACC_STATIC);
-        enterBlock(fun, ctx);
+        // New variable scope, since this is a function
+        Block block = new Block(ctx, fun, creator, new VariableScope(), currentBlock);
+        enterBlock(block, ctx);
 
-        List<Variable> variables = variableContexts.stream()
-                .map(vctx -> new Variable(vctx, Object.class))
+        List<Parameter> parameters = variableContexts.stream()
+                .map(vctx -> new Parameter(vctx, Object.class))
                 .toList();
 
-        fun.setParameterNames(variables.stream()
+        fun.setParameterNames(parameters.stream()
                 .map(Variable::getVariableName)
                 .toList()
                 .toArray(new String[] {}));
         int i = 0;
-        for (Variable v : variables) {
-            // TODO this is all wrong, should be a scoped thing, not a global var
-            v.write(fun, creator, fun.getMethodParam(i));
+        for (Parameter p : parameters) {
+            p.write(block, fun.getMethodParam(i));
             i++;
         }
     }
@@ -390,31 +397,33 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
     @Override
     public void enterCastStmt(Rockstar.CastStmtContext ctx) {
         Cast cast = new Cast(ctx);
-        cast.toCode(currentCreator, creator);
+        cast.toCode(currentBlock);
     }
 
     @Override
     public void enterJoinStmt(Rockstar.JoinStmtContext ctx) {
-        Array.join(ctx, currentCreator, creator);
+        Array.join(ctx, currentBlock);
     }
 
     @Override
     public void exitReturnStmt(Rockstar.ReturnStmtContext ctx) {
         Expression e = new Expression(ctx.expression());
-        ResultHandle rh = e.getResultHandle(currentCreator, creator);
+        ResultHandle rh = e.getResultHandle(currentBlock);
 
-        currentCreator.returnValue(rh);
+        currentBlock.method().returnValue(rh);
     }
 
     @Override
     public void enterStatementList(Rockstar.StatementListContext ctx) {
         BytecodeCreator scope;
         if (controlScopes.isEmpty()) {
-            scope = currentCreator.createScope();
+            scope = currentBlock.method().createScope();
         } else {
             scope = controlScopes.pop();
         }
-        enterBlock(scope, ctx);
+        // TODO would we make a new variable scope here?
+
+        enterBlock(new Block(ctx, scope, creator, currentBlock.variables(), currentBlock), ctx);
     }
 
     @Override
@@ -426,12 +435,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     private void exitBlock() {
         blocks.pop();
-        currentCreator = blocks.peek().scope;
+        currentBlock = blocks.peek();
     }
 
-    private void enterBlock(BytecodeCreator blockCreator, ParserRuleContext ctx) {
-        currentCreator = blockCreator;
-        blocks.push(new Block(ctx, blockCreator));
+    private void enterBlock(Block block, ParserRuleContext ctx) {
+        currentBlock = block;
+        blocks.push(block);
     }
 
 }
