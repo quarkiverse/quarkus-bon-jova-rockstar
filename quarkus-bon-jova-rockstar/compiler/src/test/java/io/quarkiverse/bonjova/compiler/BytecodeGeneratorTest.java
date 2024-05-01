@@ -1723,6 +1723,26 @@ public class BytecodeGeneratorTest {
             assertEquals("niceless nicefrizzy\n", output);
         }
 
+        @Disabled("Reproducer for #110")
+        @Test
+        public void shouldHandleInitialisingArrayInLoop() {
+            String program = """
+                                                afun takes somevar
+                                                Let i be 0
+                                                (Rock arr this initialisation is needed to make the test pass, and should not be)
+                                                While i is lower than somevar
+                                                Rock 1 into arr
+                                                Build i up
+
+                                                Give back arr
+
+                                                let myvar be afun taking 5
+                                                shout myvar
+                    """;
+
+            assertEquals("5\n", compileAndLaunch(program));
+        }
+
         @Test
         public void shouldHandleFunctionInvocationsMixedWithOtherExpressionsInAddition() {
             // Number <op> Boolean => Convert number to boolean by “truthiness”
