@@ -1227,6 +1227,28 @@ public class BytecodeGeneratorTest {
             assertEquals("0\n2420\n", compileAndLaunch(program));
         }
 
+        @Disabled("See #159")
+        @Test
+        public void shouldNotNeedAFollowOnLoopForLineBreaksToBehaveAsExpected() {
+            // Weirdly, the only way to get the first loop to behave as expected (a single shout) is to add a second loop ... and that second loop then doesn't behave as expected
+            // Unlike shouldHandleConsecutiveLoops(), this test does also fail when run as an integration test
+            String program = """
+                                            let i be 0
+                                            While i is lower than 5
+                                                build i up
+
+                                            shout "first"
+
+                                           let thing be "should"
+                                            let j be 0
+                                            While j is lower than 5
+                                                build j up
+
+                                            shout "second"
+                    """;
+            assertEquals("first\nsecond\n", compileAndLaunch(program));
+        }
+
         @Test
         public void shouldHandleUntilLoops() {
             String program = """
@@ -2439,12 +2461,12 @@ public class BytecodeGeneratorTest {
             System.setOut(printStream);
 
             // We need to wrap the String[] in an Object[] because it's nested varargs
-            main.invoke(null, new Object[] { args });
+            main.invoke(null, new Object[]{args});
 
             // Get the captured output as a string
             return outputStream.toString();
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
-                | IOException e) {
+                 | IOException e) {
             throw new RuntimeException(e);
         } finally {
             // Restore the original System.out
