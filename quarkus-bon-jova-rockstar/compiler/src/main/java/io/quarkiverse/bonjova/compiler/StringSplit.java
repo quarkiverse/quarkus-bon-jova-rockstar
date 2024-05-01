@@ -2,7 +2,6 @@ package io.quarkiverse.bonjova.compiler;
 
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.WhileLoop;
@@ -57,13 +56,14 @@ public class StringSplit {
         return variable.getVariableName();
     }
 
-    public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
+    public ResultHandle toCode(Block inBlock) {
 
-        ResultHandle toSplit = source.getResultHandle(method, creator);
+        BytecodeCreator method = inBlock.method();
+        ResultHandle toSplit = source.getResultHandle(inBlock);
         ResultHandle answer = method.newInstance(Array.CONSTRUCTOR);
 
         if (delimiter != null) {
-            ResultHandle delimiterHandle = delimiter.getResultHandle(method, creator);
+            ResultHandle delimiterHandle = delimiter.getResultHandle(inBlock);
             ResultHandle splitArray = method.invokeVirtualMethod(SPLIT_METHOD, toSplit, delimiterHandle);
             ResultHandle splitList = method.invokeStaticMethod(ASLIST_METHOD, splitArray);
             method.invokeVirtualMethod(ADD_ALL_METHOD, answer, splitList);
@@ -83,7 +83,7 @@ public class StringSplit {
             block.assign(index, block.increment(index));
         }
 
-        variable.write(method, creator, answer);
+        variable.write(inBlock, answer);
 
         // Return the result handle for ease of testing
         return answer;

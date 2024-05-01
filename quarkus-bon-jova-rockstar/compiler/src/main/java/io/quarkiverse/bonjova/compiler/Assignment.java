@@ -3,7 +3,6 @@ package io.quarkiverse.bonjova.compiler;
 import io.quarkiverse.bonjova.compiler.grammar.PoeticNumberLiteral;
 import io.quarkiverse.bonjova.support.Nothing;
 import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
@@ -87,17 +86,19 @@ public class Assignment {
     }
 
     // TODO make argument order consistent across related classes
-    public void toCode(ClassCreator creator, BytecodeCreator method) {
+    public void toCode(Block block) {
 
         ResultHandle rh;
 
         if (expression != null) {
-            rh = expression.getResultHandle(method, creator);
+            rh = expression.getResultHandle(block);
         } else if (arrayAccess != null) {
-            rh = arrayAccess.pop(method, creator);
+            rh = arrayAccess.pop(block);
         } else {
             // TODO it's now really big This code is duplicated in Expression, but it's probably a bit too small to be worth extracting
             Object value = getValue();
+
+            BytecodeCreator method = block.method();
 
             if (String.class.equals(variableClass)) {
                 rh = method.load((String) value);
@@ -122,7 +123,7 @@ public class Assignment {
             }
         }
 
-        variable.write(method, creator, rh);
+        variable.write(block, rh);
 
     }
 }

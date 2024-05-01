@@ -1,7 +1,5 @@
 package io.quarkiverse.bonjova.compiler;
 
-import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -9,16 +7,12 @@ import org.objectweb.asm.Opcodes;
 import rock.Rockstar;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Variable implements ValueHolder {
-    private static final Map<String, FieldDescriptor> variables = new HashMap<>();
-    // Because this is static, we could get cross-talk between programs, but that's a relatively low risk; we manage it by explicitly
-    // clearing statics
+
     private static String mostRecentVariableName = null;
-    private final String variableName;
-    private Class<?> variableClass;
+    protected final String variableName;
+    protected Class<?> variableClass;
 
     public Variable(Rockstar.VariableContext variable, Class<?> variableClass) {
         this(variable.getText(), variable.PRONOUNS(), variableClass);
@@ -40,7 +34,7 @@ public class Variable implements ValueHolder {
         this(variable.getText(), variable.PRONOUNS(), enforceType);
     }
 
-    private Variable(String text, TerminalNode pronouns, boolean enforceType) {
+    protected Variable(String text, TerminalNode pronouns, boolean enforceType) {
         // Work out the variable name
         // In principle trivial, in practice made a bit complicated by normalisation and more complicated by pronouns
         // TODO type chaos
@@ -69,7 +63,6 @@ public class Variable implements ValueHolder {
 
     public static void clearState() {
         mostRecentVariableName = null;
-        variables.clear();
     }
 
     public Class<?> getVariableClass() {
@@ -90,54 +83,63 @@ public class Variable implements ValueHolder {
         }
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method) {
-        FieldDescriptor field = getField();
-        return method.readStaticField(field);
+    public ResultHandle getResultHandle(Block block) {
+        FieldDescriptor field = getField(block);
+        return block.method().readStaticField(field);
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method, Expression.Context context) {
-        return getResultHandle(method);
+    public ResultHandle getResultHandle(Block block, Expression.Context context) {
+        return getResultHandle(block);
     }
 
-    public void write(BytecodeCreator method, ClassCreator creator, ResultHandle value) {
-        FieldDescriptor field = getOrCreateField(creator, method);
-        method.writeStaticField(field, value);
+    public void write(Block block, ResultHandle value) {
+        FieldDescriptor field = getOrCreateField(block);
+        block.method().writeStaticField(field, value);
     }
 
-    public boolean isAlreadyWritten() {
-        FieldDescriptor field = variables.get(variableName);
+    public boolean isAlreadyWritten(Block block) {
+        FieldDescriptor field = block.variables().get(variableName);
         return field != null;
     }
 
-    private FieldDescriptor getField() {
-        FieldDescriptor field;
-        if (isAlreadyWritten()) {
-            field = variables.get(variableName);
-
+    private FieldDescriptor getFieldRecursive(Block block) {
+        if (isAlreadyWritten(block)) {
+            return block.variables().get(variableName);
+        } else if (block.parent() != null) {
+            return getFieldRecursive(block.parent());
         } else {
+            return null;
+        }
+
+    }
+
+    protected FieldDescriptor getField(Block block) {
+        FieldDescriptor field = getFieldRecursive(block);
+
+        if (field == null) {
             // This is an internal error, not a program one
 
             throw new RuntimeException("Moral panic: Could not find variable called " + variableName
-                    + ". \nKnown variables are " + Arrays.toString(variables.keySet().toArray()));
+                    + ". \nKnown variables are " + Arrays.toString(block.variables().getAllKnownVariables()));
         }
 
         return field;
     }
 
-    private FieldDescriptor getOrCreateField(ClassCreator creator, BytecodeCreator method) {
+    protected FieldDescriptor getOrCreateField(Block block) {
         FieldDescriptor field;
-        if (!isAlreadyWritten()) {
-            // Variables are global in scope, so need to be stored at the class level (either as static or instance variables)
-            field = creator.getFieldCreator(variableName, variableClass)
+        if (!isAlreadyWritten(block)) {
+            // Variables are global in method, so need to be stored at the class level (either as static or instance variables)
+            field = block.creator().getFieldCreator(variableName, variableClass)
                     .setModifiers(Opcodes.ACC_STATIC + Opcodes.ACC_PRIVATE)
                     .getFieldDescriptor();
 
-            variables.put(variableName, field);
+            block.variables().put(variableName, field);
         } else {
-            field = getField();
-            if (!creator.getClassName().equals(field.getDeclaringClass())) {
+            field = getField(block);
+            if (!block.creator().getClassName().equals(field.getDeclaringClass())) {
                 throw new RuntimeException("Internal error: Attempting to use a field on class " + field.getDeclaringClass()
-                        + " from " + creator.getClassName());
+                        + " from " + block.creator().getClassName());
             }
         }
         return field;

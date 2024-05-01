@@ -41,7 +41,10 @@ public class Input {
         return variableClass;
     }
 
-    public Variable toCode(ClassCreator creator, BytecodeCreator method, MethodCreator main) {
+    public Variable toCode(Block block, MethodCreator main) {
+
+        BytecodeCreator method = block.method();
+        ClassCreator creator = block.creator();
 
         if (indexField == null) {
             indexField = creator.getFieldCreator("inputIndex", int.class)
@@ -58,7 +61,7 @@ public class Input {
         CatchBlockCreator catchBlock = tryBlock.addCatch(Throwable.class);
         catchBlock.assign(answer, catchBlock.loadNull());
 
-        variable.write(method, creator, answer);
+        variable.write(block, answer);
         method.writeStaticField(indexField, method.add(index, method.load(1)));
 
         return variable;

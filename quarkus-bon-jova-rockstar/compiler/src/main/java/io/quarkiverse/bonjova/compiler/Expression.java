@@ -5,7 +5,6 @@ import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
 import io.quarkus.gizmo.CatchBlockCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.FieldDescriptor;
 import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.MethodDescriptor;
@@ -248,8 +247,9 @@ public class Expression {
         }
     }
 
-    private AssignableResultHandle doComparison(BytecodeCreator method, Checker comparison,
-            ResultHandle lrh, ResultHandle rrh, ClassCreator classCreator) {
+    private AssignableResultHandle doComparison(Block block, Checker comparison,
+            ResultHandle lrh, ResultHandle rrh) {
+        BytecodeCreator method = block.method();
 
         ResultHandle safeLrh = coerceAwayNothing(method, lrh, rrh);
 
@@ -275,27 +275,29 @@ public class Expression {
         return valueClass;
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator) {
-        return getResultHandle(method, classCreator, Context.NORMAL);
+    public ResultHandle getResultHandle(Block block) {
+        return getResultHandle(block, Context.NORMAL);
     }
 
-    public ResultHandle getResultHandle(BytecodeCreator method, ClassCreator classCreator, Context context) {
+    public ResultHandle getResultHandle(Block block, Context context) {
 
         ResultHandle handle;
         if (function != null) {
-            handle = getHandleForFunction(method, classCreator);
+            handle = getHandleForFunction(block);
         } else if (operation != null) {
-            handle = getHandleForOperation(method, classCreator);
+            handle = getHandleForOperation(block);
         } else if (unaryOperation != null) {
-            handle = getHandleForUnaryOperation(method, classCreator);
+            handle = getHandleForUnaryOperation(block);
         } else if (arrayAccess != null) {
-            handle = getHandleForArray(method, classCreator);
+            handle = getHandleForArray(block);
         } else if (variable != null) {
-            handle = getHandleForVariable(method, context);
+            handle = getHandleForVariable(block, context);
         } else {
             // This is a literal or constant
-            handle = getHandleForValueHolder(method, context);
+            handle = getHandleForValueHolder(block, context);
         }
+
+        BytecodeCreator method = block.method();
 
         // Now do an extra check if the context was boolean
         if (context == Context.BOOLEAN && !isBoolean(handle)) {
@@ -334,38 +336,40 @@ public class Expression {
 
     }
 
-    private ResultHandle getHandleForValueHolder(BytecodeCreator method) {
-        return valueHolder.getResultHandle(method);
+    private ResultHandle getHandleForValueHolder(Block block) {
+        return valueHolder.getResultHandle(block);
     }
 
-    private ResultHandle getHandleForValueHolder(BytecodeCreator method, Context context) {
-        return valueHolder.getResultHandle(method, context);
+    private ResultHandle getHandleForValueHolder(Block block, Context context) {
+        return valueHolder.getResultHandle(block, context);
     }
 
-    private ResultHandle getHandleForArray(BytecodeCreator method, ClassCreator creator) {
+    private ResultHandle getHandleForArray(Block block) {
 
         if (!arrayPop) {
-            return arrayAccess.read(arrayAccessIndex, method, creator);
+            return arrayAccess.read(arrayAccessIndex, block);
         } else {
-            return arrayAccess.pop(method, creator);
+            return arrayAccess.pop(block);
         }
     }
 
-    private ResultHandle getHandleForVariable(BytecodeCreator method, Context context) {
-        ResultHandle rh = variable.getResultHandle(method);
+    private ResultHandle getHandleForVariable(Block block, Context context) {
+        ResultHandle rh = variable.getResultHandle(block);
         if (context == Context.NORMAL) {
             return rh;
         } else {
             if (context == Context.BOOLEAN) {
                 // Coerce nothings in a boolean context
-                rh = coerceNothingIntoType(method, rh, Context.BOOLEAN);
+                rh = coerceNothingIntoType(block, rh, Context.BOOLEAN);
             }
+            BytecodeCreator method = block.method();
 
             // For boolean contexts, we also want arrays to go to a number length
             BranchResult arrayCheck = method.ifTrue(method.instanceOf(rh, RockstarArray.class));
             AssignableResultHandle answer = method.createVariable(Object.class);
             BytecodeCreator isArray = arrayCheck.trueBranch();
-            isArray.assign(answer, Array.toScalarContext(variable, isArray));
+            isArray.assign(answer,
+                    Array.toScalarContext(variable, new Block(null, isArray, block.creator(), block.variables(), block)));
             BytecodeCreator isNotArray = arrayCheck.falseBranch();
             isNotArray.assign(answer, rh);
             return answer;
@@ -373,14 +377,15 @@ public class Expression {
         }
     }
 
-    private ResultHandle getHandleForUnaryOperation(BytecodeCreator method, ClassCreator classCreator) {
-        ResultHandle rrh = rhe.getResultHandle(method, classCreator, Context.BOOLEAN);
+    private ResultHandle getHandleForUnaryOperation(Block block) {
+        ResultHandle rrh = rhe.getResultHandle(block, Context.BOOLEAN);
 
+        BytecodeCreator method = block.method();
         // Do type coercion of rockstar nulls (which are a special type, not null)
         // We need to check the type *before* converting to bytecode, since bytecode does not have the right type
 
         // TODO this may not be needed since we passed a boolean context
-        rrh = coerceFalsyTypes(method, rhe, rrh, classCreator);
+        rrh = coerceFalsyTypes(block, rhe, rrh);
 
         switch (unaryOperation) {
             case NEGATION -> {
@@ -393,10 +398,12 @@ public class Expression {
         }
     }
 
-    private ResultHandle getHandleForOperation(BytecodeCreator method, ClassCreator classCreator) {
+    private ResultHandle getHandleForOperation(Block block) {
         // This context isn't scalar, exactly, it's not-object - it could be boolean or string or number
-        ResultHandle lrh = lhe.getResultHandle(method, classCreator, Context.NOT_OBJECT);
-        ResultHandle rrh = rhe.getResultHandle(method, classCreator, Context.NOT_OBJECT);
+        ResultHandle lrh = lhe.getResultHandle(block, Context.NOT_OBJECT);
+        ResultHandle rrh = rhe.getResultHandle(block, Context.NOT_OBJECT);
+
+        BytecodeCreator method = block.method();
 
         // Do type coercion of rockstar nulls (which are a special type, not null)
 
@@ -410,14 +417,14 @@ public class Expression {
                 BytecodeInvoker stringOperation = (bc, a, b) -> bc.invokeVirtualMethod(
                         CONCAT_METHOD,
                         a, b);
-                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation, classCreator);
+                ResultHandle answer = doOperation(block, lrh, rrh, numericOperation, stringOperation);
                 for (Expression extra : extraRhes) {
                     // This could be a fancy reduce with streams, but for works well enough
-                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+                    ResultHandle erh = extra.getResultHandle(block, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
+                    erh = coerceFalsyTypes(block, extra, erh);
 
-                    answer = doOperation(method, answer, erh, numericOperation, stringOperation, classCreator);
+                    answer = doOperation(block, answer, erh, numericOperation, stringOperation);
                 }
                 return answer;
             }
@@ -428,14 +435,14 @@ public class Expression {
                     return bc.add(a, negativeRightSide);
                 };
                 BytecodeInvoker stringOperation = unsupportedOperation("Subtraction of strings is not possible.");
-                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation, classCreator);
+                ResultHandle answer = doOperation(block, lrh, rrh, numericOperation, stringOperation);
 
                 for (Expression extra : extraRhes) {
-                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+                    ResultHandle erh = extra.getResultHandle(block, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
+                    erh = coerceFalsyTypes(block, extra, erh);
 
-                    answer = doOperation(method, answer, erh, numericOperation, stringOperation, classCreator);
+                    answer = doOperation(block, answer, erh, numericOperation, stringOperation);
                 }
                 return answer;
 
@@ -443,13 +450,13 @@ public class Expression {
             case MULTIPLY -> {
                 BytecodeInvoker numericOperation = BytecodeCreator::multiply;
                 BytecodeInvoker stringOperation = unsupportedOperation("Multiplication of strings not yet implemented.");
-                ResultHandle answer = doOperation(method, lrh, rrh, numericOperation, stringOperation, classCreator);
+                ResultHandle answer = doOperation(block, lrh, rrh, numericOperation, stringOperation);
                 for (Expression extra : extraRhes) {
-                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+                    ResultHandle erh = extra.getResultHandle(block, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
+                    erh = coerceFalsyTypes(block, extra, erh);
 
-                    answer = doOperation(method, answer, erh, numericOperation, stringOperation, classCreator);
+                    answer = doOperation(block, answer, erh, numericOperation, stringOperation);
                 }
                 return answer;
             }
@@ -464,9 +471,9 @@ public class Expression {
 
                 ResultHandle answer = divide(method, lrh, rrh);
                 for (Expression extra : extraRhes) {
-                    ResultHandle erh = extra.getResultHandle(method, classCreator, Context.SCALAR);
+                    ResultHandle erh = extra.getResultHandle(block, Context.SCALAR);
 
-                    erh = coerceFalsyTypes(method, extra, erh, classCreator);
+                    erh = coerceFalsyTypes(block, extra, erh);
 
                     answer = divide(method, answer, erh);
                 }
@@ -517,20 +524,20 @@ public class Expression {
                 return method.bitwiseXor(equalityCheck, method.load(true));
             }
             case GREATER_THAN_CHECK -> {
-                return doComparison(method, method::ifGreaterThanZero,
-                        lrh, rrh, classCreator);
+                return doComparison(block, method::ifGreaterThanZero,
+                        lrh, rrh);
             }
             case LESS_THAN_CHECK -> {
-                return doComparison(method, method::ifLessThanZero,
-                        lrh, rrh, classCreator);
+                return doComparison(block, method::ifLessThanZero,
+                        lrh, rrh);
             }
             case GREATER_OR_EQUAL_THAN_CHECK -> {
-                return doComparison(method, method::ifGreaterEqualZero,
-                        lrh, rrh, classCreator);
+                return doComparison(block, method::ifGreaterEqualZero,
+                        lrh, rrh);
             }
             case LESS_OR_EQUAL_THAN_CHECK -> {
-                return doComparison(method, method::ifLessEqualZero,
-                        lrh, rrh, classCreator);
+                return doComparison(block, method::ifLessEqualZero,
+                        lrh, rrh);
             }
             default -> throw new RuntimeException("Unsupported operation " + operation);
         }
@@ -551,11 +558,12 @@ public class Expression {
         };
     }
 
-    private ResultHandle coerceFalsyTypes(BytecodeCreator method, Expression extra, ResultHandle erh,
-            ClassCreator creator) {
+    private ResultHandle coerceFalsyTypes(Block block, Expression extra, ResultHandle erh) {
+        BytecodeCreator method = block.method();
+
         // TODO consolidate this with the other coerce method, do not call different ones on different paths
         if (extra.isNothing()) {
-            erh = coerceNothingIntoType(method, extra.getResultHandle(method, creator), erh, operation);
+            erh = coerceNothingIntoType(method, extra.getResultHandle(block), erh, operation);
         }
 
         if (extra.isMysterious()) {
@@ -564,18 +572,18 @@ public class Expression {
         return erh;
     }
 
-    private ResultHandle getHandleForFunction(BytecodeCreator method, ClassCreator classCreator) {
+    private ResultHandle getHandleForFunction(Block block) {
         List<ResultHandle> args = params.stream()
-                .map(v -> v.getResultHandle(method, classCreator))
+                .map(v -> v.getResultHandle(block))
                 .toList();
         Class[] paramClasses = new Class[params.size()];
         Arrays.fill(paramClasses, Object.class);
 
-        MethodDescriptor methodDescriptor = MethodDescriptor.ofMethod(classCreator.getClassName(), function,
+        MethodDescriptor methodDescriptor = MethodDescriptor.ofMethod(block.creator().getClassName(), function,
                 Object.class,
                 paramClasses);
         ResultHandle[] rhs = args.toArray(new ResultHandle[] {});
-        return method.invokeStaticMethod(
+        return block.method().invokeStaticMethod(
                 methodDescriptor,
                 rhs);
     }
@@ -584,9 +592,10 @@ public class Expression {
         ResultHandle invoke(BytecodeCreator bc, ResultHandle a, ResultHandle b);
     }
 
-    private ResultHandle doOperation(BytecodeCreator method, ResultHandle unsafelrh, ResultHandle unsaferrh,
+    private ResultHandle doOperation(Block block, ResultHandle unsafelrh, ResultHandle unsaferrh,
             BytecodeInvoker numberCaseOp,
-            BytecodeInvoker stringCaseOp, ClassCreator classCreator) {
+            BytecodeInvoker stringCaseOp) {
+        BytecodeCreator method = block.method();
         // If we know we're working with numbers, do the simplest thing
         if (isNumber(unsafelrh) && isNumber(unsaferrh)) {
             return numberCaseOp.invoke(method, unsafelrh, unsaferrh);

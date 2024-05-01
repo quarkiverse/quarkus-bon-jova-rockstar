@@ -1585,7 +1585,7 @@ public class BytecodeGeneratorTest {
                     """;
             String output = compileAndLaunch(program);
 
-            // Function multiplies arguments, 4*3 is 12
+            // Function adds arguments
             assertEquals("onetwo\n", output);
         }
 
@@ -1671,7 +1671,6 @@ public class BytecodeGeneratorTest {
                     """;
             String output = compileAndLaunch(program);
 
-            // Function multiplies arguments, 4*3 is 12
             assertEquals("1\n", output);
         }
 
@@ -1687,7 +1686,7 @@ public class BytecodeGeneratorTest {
                     """;
             String output = compileAndLaunch(program);
 
-            // Function multiplies arguments, 4*3 is 12
+            // Function adds arguments,  0 + 3 is 3
             assertEquals("3\n", output);
         }
 
@@ -1741,6 +1740,120 @@ public class BytecodeGeneratorTest {
                     """;
 
             assertEquals("5\n", compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldScopeParametersToTheFunction() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Midnight taking Carol, Bob
+                    Say your heart (should be an undefined variable, so either mysterious or a throw)
+                    Say your soul
+                    Say "done"
+                    """;
+
+            assertThrows(RuntimeException.class, () -> compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldScopeParametersToTheFunctionAndNotAnyOtherFunctions() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Give back your heart plus your soul
+
+                    Other takes something
+                    Say your heart
+
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Midnight taking Carol, Bob
+                    Say Other taking "whatever"
+                    """;
+
+            assertThrows(RuntimeException.class, () -> compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldScopeParametersToTheFunctionAndNotAnyChildFunctions() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Say Other taking "hi"
+                    Give back your heart plus your soul
+
+                    Other takes something
+                    Say your heart
+
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Midnight taking Carol, Bob
+                    """;
+
+            assertThrows(RuntimeException.class, () -> compileAndLaunch(program));
+        }
+
+        @Test
+        public void shouldUpdateVariablesDefinedOutsideTheFunction() {
+            String program = """
+                    Jane is 0
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Jane
+                    Say Midnight taking Carol, Bob
+                    Say Jane
+
+                    Midnight takes your heart and your soul
+                    Build Jane up
+                    Give back your heart plus your soul
+
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("0\n" +
+                    "niceless nice\n" +
+                    "1\n", output, "Output was " + output);
+        }
+
+        @Test
+        @Disabled("Our implementation is missing a bit of hoisting, as this works on Satriani")
+        public void shouldUpdateVariablesDefinedOutsideTheFunctionWhenFunctionIsDefinedFirst() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Build Jane up
+                    Give back your heart plus your soul
+
+                    Jane is 0
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Jane
+                    Say Midnight taking Carol, Bob
+                    Say Jane
+                    """;
+            String output = compileAndLaunch(program);
+
+            assertEquals("0\n" +
+                    "niceless nice\n" +
+                    "1\n", output, "Output was " + output);
+        }
+
+        @Test
+        public void shouldScopeVariablesDefinedInsideTheFunctionToTheFunction() {
+            String program = """
+                    Midnight takes your heart and your soul
+                    Jane is nothing
+                    Build Jane up
+                    Give back your heart plus your soul
+
+                    Carol is "nice"
+                    Bob is "less nice"
+                    Say Jane
+                    Say Midnight taking Carol, Bob
+                    Say Jane
+                    """;
+            assertThrows(RuntimeException.class, () -> compileAndLaunch(program));
         }
 
         @Test

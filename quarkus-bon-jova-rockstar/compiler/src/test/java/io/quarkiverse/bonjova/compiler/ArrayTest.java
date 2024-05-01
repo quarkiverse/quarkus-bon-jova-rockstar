@@ -6,6 +6,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
@@ -53,13 +54,13 @@ public class ArrayTest {
     @Test
     public void shouldCreateAnArrayOnInitialisationWithRock() {
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray("Rock the thing");
-        assertEquals(new ArrayList<Object>(), execute(new Array(ctx)).list);
+        assertEquals(new ArrayList<Object>(), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
     public void shouldCreateAnArrayOnInitialisationWithPush() {
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray("Push the thing");
-        assertEquals(new ArrayList<Object>(), execute(new Array(ctx)).list);
+        assertEquals(new ArrayList<Object>(), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -69,7 +70,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { 4d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
 
     }
 
@@ -80,7 +81,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { 1d, 2d, 3d, 4d, 8d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -90,7 +91,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { 5d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -100,7 +101,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { 1d, 2d, 3d, 4d, 8d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -110,7 +111,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { 9d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -120,7 +121,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { 2d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -130,7 +131,7 @@ public class ArrayTest {
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
         Object[] contents = { null, null, null, null, null, 2d };
-        assertEquals(Arrays.asList(contents), execute(new Array(ctx)).list);
+        assertEquals(Arrays.asList(contents), execute(ctx, new Array(ctx)).list);
     }
 
     @Test
@@ -139,7 +140,7 @@ public class ArrayTest {
                 Let arr at "hello" be 2
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
-        RockstarArray execute = execute(new Array(ctx));
+        RockstarArray execute = execute(ctx, new Array(ctx));
         assertEquals(2d, execute.get("hello"));
     }
 
@@ -149,13 +150,13 @@ public class ArrayTest {
                 Rock 1, 2 into arr
                 """;
         Rockstar.ArrayStmtContext ctx = new ParseHelper().getArray(program);
-        RockstarArray execute = execute(new Array(ctx));
+        RockstarArray execute = execute(ctx, new Array(ctx));
         assertEquals(null, execute.get(5));
     }
 
     // We can't test reading arrays because they're multi-line executions
 
-    private RockstarArray execute(Array a) {
+    private RockstarArray execute(ParserRuleContext ctx, Array a) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader());
 
         // The auto-close on this triggers the write
@@ -168,7 +169,8 @@ public class ArrayTest {
 
             MethodCreator method = creator.getMethodCreator(methodName, Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.toCode(method, creator);
+            Block block = new Block(ctx, method, creator, new VariableScope(), null);
+            ResultHandle rh = a.toCode(block);
             method.returnValue(rh);
         }
 

@@ -3,7 +3,6 @@ package io.quarkiverse.bonjova.compiler;
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
@@ -27,10 +26,12 @@ public class Cast {
         this.ctx = ctx;
     }
 
-    public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
+    public ResultHandle toCode(Block block) {
 
         Rockstar.ExpressionContext sourceExpression = ctx.expression().get(0);
-        ResultHandle oldVal = new Expression(sourceExpression).getResultHandle(method, creator);
+        ResultHandle oldVal = new Expression(sourceExpression).getResultHandle(block);
+
+        BytecodeCreator method = block.method();
 
         // Handle casting things that aren't strings
         ResultHandle isString = method.instanceOf(oldVal, String.class);
@@ -41,7 +42,7 @@ public class Cast {
         if (ctx.KW_WITH() != null) {
             //Satriani gives a NaN if the 'with' isn't 16, so this is doing better than it (although we ignore floating points because priorities)
             ResultHandle intRadix = isStringBranch.invokeVirtualMethod(INTVALUE_METHOD,
-                    new Expression(ctx.expression(1)).getResultHandle(method, creator));
+                    new Expression(ctx.expression(1)).getResultHandle(block));
             ResultHandle parsedInteger = isStringBranch.invokeStaticMethod(RADIX_VALUE_OF_METHOD, oldVal, intRadix);
             ResultHandle resultHandle = isStringBranch.invokeVirtualMethod(DOUBLE_FROM_INTEGER_METHOD, parsedInteger);
             isStringBranch.assign(newVal, resultHandle);
@@ -71,7 +72,7 @@ public class Cast {
                 newVar = oldVar;
             }
         }
-        newVar.write(method, creator, newVal);
+        newVar.write(block, newVal);
 
         return newVal;
     }

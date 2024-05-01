@@ -1,8 +1,6 @@
 package io.quarkiverse.bonjova.compiler;
 
 import io.quarkus.gizmo.BranchResult;
-import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
 
@@ -15,9 +13,9 @@ public class Condition {
         hasElse = ctx.KW_ELSE() != null;
     }
 
-    public BranchResult toCode(BytecodeCreator main, ClassCreator classCreator) {
-        ResultHandle evaluated = expression.getResultHandle(main, classCreator, Expression.Context.BOOLEAN);
-        BranchResult conditional = main.ifTrue(evaluated);
+    public BranchResult toCode(Block block) {
+        ResultHandle evaluated = expression.getResultHandle(block, Expression.Context.BOOLEAN);
+        BranchResult conditional = block.method().ifTrue(evaluated);
         return conditional;
     }
 

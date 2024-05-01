@@ -5,6 +5,7 @@ import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
 import io.quarkus.gizmo.ResultHandle;
 import io.quarkus.gizmo.TestClassLoader;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
@@ -63,24 +64,24 @@ public class LiteralTest {
         Rockstar.LiteralContext ctx = new ParseHelper().getLiteral("thing is \"Yes hello\"");
         Literal a = new Literal(ctx);
         assertEquals("Yes hello", a.getValue());
-        assertEquals("Yes hello", execute(a));
+        assertEquals("Yes hello", execute(ctx, a));
     }
 
     @Test
     public void shouldReturnCorrectBytecodeForStringLiterals() {
         Rockstar.LiteralContext ctx = new ParseHelper().getLiteral("thing is \"Yes hello\"");
         Literal a = new Literal(ctx);
-        assertEquals("Yes hello", execute(a));
+        assertEquals("Yes hello", execute(ctx, a));
     }
 
     @Test
     public void shouldReturnCorrectBytecodeForNumberLiterals() {
         Rockstar.LiteralContext ctx = new ParseHelper().getLiteral("thing is 61");
         Literal a = new Literal(ctx);
-        assertEquals(61d, execute(a));
+        assertEquals(61d, execute(ctx, a));
     }
 
-    private Object execute(Literal a) {
+    private Object execute(ParserRuleContext ctx, Literal a) {
         TestClassLoader cl = new TestClassLoader(this.getClass().getClassLoader().getParent());
 
         // The auto-close on this triggers the write
@@ -91,7 +92,9 @@ public class LiteralTest {
 
             MethodCreator method = creator.getMethodCreator("method", Object.class)
                     .setModifiers(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-            ResultHandle rh = a.getResultHandle(method);
+            Block block = new Block(ctx, method, creator, new VariableScope(), null);
+
+            ResultHandle rh = a.getResultHandle(block);
             method.returnValue(rh);
         }
 

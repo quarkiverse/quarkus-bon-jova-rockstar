@@ -4,7 +4,6 @@ import io.quarkiverse.bonjova.support.RockstarArray;
 import io.quarkus.gizmo.AssignableResultHandle;
 import io.quarkus.gizmo.BranchResult;
 import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
@@ -57,9 +56,10 @@ public class Array {
         variableClass = variable.getVariableClass();
     }
 
-    public static void join(Rockstar.JoinStmtContext ctx, BytecodeCreator currentCreator, ClassCreator creator) {
+    public static void join(Rockstar.JoinStmtContext ctx, Block block) {
         Variable oldVar = new Variable(ctx.variable().get(0));
-        ResultHandle oldVal = oldVar.getResultHandle(currentCreator);
+        BytecodeCreator currentCreator = block.method();
+        ResultHandle oldVal = oldVar.getResultHandle(block);
 
         // Tolerate casting things that aren't strings
         ResultHandle isString = currentCreator.instanceOf(oldVal, TYPE_CLASS);
@@ -67,7 +67,7 @@ public class Array {
         AssignableResultHandle newVal = currentCreator.createVariable(Object.class);
         BytecodeCreator isStringBranch = br.trueBranch();
         if (ctx.KW_WITH() != null) {
-            ResultHandle delimiter = new Expression(ctx.expression()).getResultHandle(currentCreator, creator);
+            ResultHandle delimiter = new Expression(ctx.expression()).getResultHandle(block);
             isStringBranch.assign(newVal, isStringBranch.invokeVirtualMethod(JOIN_WITH_DELIMITER_METHOD, oldVal, delimiter));
         } else {
             isStringBranch.assign(newVal, isStringBranch.invokeVirtualMethod(JOIN_METHOD, oldVal));
@@ -80,76 +80,78 @@ public class Array {
         } else {
             newVar = new Variable(ctx.variable().get(0), String.class);
         }
-        newVar.write(currentCreator, creator, newVal);
+        newVar.write(block, newVal);
     }
 
     public String getVariableName() {
         return variable.getVariableName();
     }
 
-    public static ResultHandle toScalarContext(Variable variable, BytecodeCreator method) {
-        ResultHandle arr = variable.getResultHandle(method);
-        return toScalarContext(arr, method);
+    public static ResultHandle toScalarContext(Variable variable, Block block) {
+        ResultHandle arr = variable.getResultHandle(block);
+        return toScalarContext(arr, block);
     }
 
-    public static ResultHandle toScalarContext(ResultHandle rh, BytecodeCreator method) {
-        return method.invokeVirtualMethod(LENGTH_METHOD, rh);
+    public static ResultHandle toScalarContext(ResultHandle rh, Block block) {
+        return block.method().invokeVirtualMethod(LENGTH_METHOD, rh);
     }
 
-    public ResultHandle read(Expression arrayAccessIndex, BytecodeCreator method, ClassCreator creator) {
+    public ResultHandle read(Expression arrayAccessIndex, Block block) {
         ResultHandle index;
         if (arrayAccessIndex.isNothing()) { // TODO this check is not needed? or perhaps we need two, one for when we know the value, the other for an expression
-            index = coerceNothingIntoType(method, arrayAccessIndex.getResultHandle(method, creator), Expression.Context.SCALAR);
+            index = coerceNothingIntoType(block, arrayAccessIndex.getResultHandle(block),
+                    Expression.Context.SCALAR);
         } else {
-            index = arrayAccessIndex.getResultHandle(method, creator);
+            index = arrayAccessIndex.getResultHandle(block);
             // This could still be a null, so do another check
-            index = Constant.coerceNothingIntoType(method, index, Expression.Context.SCALAR);
+            index = Constant.coerceNothingIntoType(block, index, Expression.Context.SCALAR);
         }
         // Short circuit this logic if we know we are dealing with a number
-        ResultHandle rh = variable.getResultHandle(method);
+        ResultHandle rh = variable.getResultHandle(block);
         if (isNumber(index)) {
-            return method.invokeVirtualMethod(GET_METHOD, rh, index);
+            return block.method().invokeVirtualMethod(GET_METHOD, rh, index);
         } else {
-            return method.invokeVirtualMethod(MAP_GET_METHOD, rh, index);
+            return block.method().invokeVirtualMethod(MAP_GET_METHOD, rh, index);
         }
     }
 
-    // This (badly-named) method covers initialisation and writing
-    public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
+    // This (badly-named) block.method() covers initialisation and writing
+    public ResultHandle toCode(Block block) {
 
-        AssignableResultHandle rh = method.createVariable(TYPE_CLASS);
+        AssignableResultHandle rh = block.method().createVariable(TYPE_CLASS);
 
-        if (variable.isAlreadyWritten()) {
-            ResultHandle currentValue = variable.getResultHandle(method);
+        if (variable.isAlreadyWritten(block)) {
+            ResultHandle currentValue = variable.getResultHandle(block);
 
             // it could exist, but have been set to null, or a string, or anything else, so do a type check
-            BranchResult instanceCheck = method.ifFalse(method.instanceOf(currentValue, RockstarArray.class));
-            BytecodeCreator isNotAnArray = instanceCheck.trueBranch();
-            isNotAnArray.assign(rh, isNotAnArray.newInstance(CONSTRUCTOR));
-            variable.write(isNotAnArray, creator, rh);
-            BytecodeCreator isAnArray = instanceCheck.falseBranch();
-            isAnArray.assign(rh, currentValue);
+            BranchResult instanceCheck = block.method().ifFalse(block.method().instanceOf(currentValue, RockstarArray.class));
+            Block isNotAnArray = new Block(null, instanceCheck.trueBranch(), block.creator(), block.variables(), block);
+
+            isNotAnArray.method().assign(rh, isNotAnArray.method().newInstance(CONSTRUCTOR));
+            variable.write(block, rh);
+            Block isAnArray = new Block(null, instanceCheck.falseBranch(), block.creator(), block.variables(), block);
+            isAnArray.method().assign(rh, currentValue);
         } else {
             // TODO it would be nice to specify the initial capacity, even if creating a collection to initialise it with is too tricky
-            method.assign(rh, method.newInstance(CONSTRUCTOR));
-            variable.write(method, creator, rh);
+            block.method().assign(rh, block.method().newInstance(CONSTRUCTOR));
+            variable.write(block, rh);
         }
 
         if (initialContents != null) {
             for (Expression c : initialContents) {
-                method.invokeVirtualMethod(ADD_METHOD, rh, c.getResultHandle(method, creator));
+                block.method().invokeVirtualMethod(ADD_METHOD, rh, c.getResultHandle(block));
             }
         }
 
         if (index != null) {
-            ResultHandle placedRh = placedValue.getResultHandle(method, creator);
+            ResultHandle placedRh = placedValue.getResultHandle(block);
 
             // Short circuit this logic if we know we are dealing with a number
-            ResultHandle indexRh = index.getResultHandle(method, creator);
+            ResultHandle indexRh = index.getResultHandle(block);
             if (isNumber(indexRh)) {
-                method.invokeVirtualMethod(ADD_AT_NUMERIC_INDEX_METHOD, rh, indexRh, placedRh);
+                block.method().invokeVirtualMethod(ADD_AT_NUMERIC_INDEX_METHOD, rh, indexRh, placedRh);
             } else {
-                method.invokeVirtualMethod(ADD_AT_INDEX_METHOD, rh, indexRh, placedRh);
+                block.method().invokeVirtualMethod(ADD_AT_INDEX_METHOD, rh, indexRh, placedRh);
             }
         }
 
@@ -157,8 +159,8 @@ public class Array {
         return rh;
     }
 
-    public ResultHandle pop(BytecodeCreator method, ClassCreator creator) {
-        ResultHandle arr = variable.getResultHandle(method);
-        return method.invokeVirtualMethod(REMOVE_METHOD, arr);
+    public ResultHandle pop(Block block) {
+        ResultHandle arr = variable.getResultHandle(block);
+        return block.method().invokeVirtualMethod(REMOVE_METHOD, arr);
     }
 }

@@ -1,7 +1,6 @@
 package io.quarkiverse.bonjova.compiler;
 
 import io.quarkus.gizmo.BytecodeCreator;
-import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodDescriptor;
 import io.quarkus.gizmo.ResultHandle;
 import rock.Rockstar;
@@ -32,8 +31,9 @@ public class Rounding {
         }
     }
 
-    public ResultHandle toCode(BytecodeCreator method, ClassCreator creator) {
-        ResultHandle variableContents = variable.getResultHandle(method);
+    public ResultHandle toCode(Block block) {
+        BytecodeCreator method = block.method();
+        ResultHandle variableContents = variable.getResultHandle(block);
 
         ResultHandle answer = null;
 
@@ -52,7 +52,7 @@ public class Rounding {
 
         // Write the update back to the variable
         if (variable != null) {
-            variable.write(method, creator, answer);
+            variable.write(block, answer);
         }
 
         // Also return the result handle, for ease of testing

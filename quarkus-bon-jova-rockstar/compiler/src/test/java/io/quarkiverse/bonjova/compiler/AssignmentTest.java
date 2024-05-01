@@ -3,6 +3,7 @@ package io.quarkiverse.bonjova.compiler;
 import io.quarkiverse.bonjova.compiler.util.ParseHelper;
 import io.quarkus.gizmo.ClassCreator;
 import io.quarkus.gizmo.MethodCreator;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import rock.Rockstar;
@@ -263,7 +264,7 @@ public class AssignmentTest {
         Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is nothing");
         Assignment a = new Assignment(ctx);
 
-        toCode(a);
+        toCode(ctx, a);
         // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's
         // awfully close to just writing the code down twice, so just be happy if we get here without explosions
     }
@@ -292,18 +293,20 @@ public class AssignmentTest {
     public void shouldWriteToClass() {
         Rockstar.AssignmentStmtContext ctx = new ParseHelper().getAssignment("My thing is \"hello\"\nEverything is my thing");
         Assignment a = new Assignment(ctx);
-        toCode(a);
+        toCode(ctx, a);
         // It's hard to make many sensible assertions without making a mock and asserting about to the calls, and that's
         // awfully close to just writing the code down twice, so just be happy if we get here without explosions
     }
 
-    private void toCode(Assignment a) {
+    private void toCode(ParserRuleContext ctx, Assignment a) {
         ClassCreator creator = ClassCreator.builder()
                 .className("holder")
                 .build();
         MethodCreator method = creator.getMethodCreator("main", void.class, String[].class);
 
-        a.toCode(creator, method);
+        Block block = new Block(ctx, method, creator, new VariableScope(), null);
+
+        a.toCode(block);
     }
 
 }
