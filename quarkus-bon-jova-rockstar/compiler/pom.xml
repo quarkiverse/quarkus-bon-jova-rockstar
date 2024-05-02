@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -30,6 +31,13 @@
             <artifactId>gizmo</artifactId>
             <type>test-jar</type>
             <version>${gizmo.version}</version>
+        </dependency>
+        <!-- Needed because the quarkiverse parent sets a logmanager in its surefire configuration, and we get annoying logger not found messages otherwise -->
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+            <version>3.0.5.Final</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
