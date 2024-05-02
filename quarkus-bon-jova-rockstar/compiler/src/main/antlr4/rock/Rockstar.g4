@@ -2,12 +2,14 @@ parser grammar Rockstar;
 
 options { tokenVocab=RockstarLexer; }
 
-program: (NL|ws)* (statementList | functionDeclaration)* ws*;
+program: (NL|ws)* terminatedStatementList* ws*;
 
+terminatedStatementList: (statementList | functionDeclaration)+ returnStmt?;
 statementList: statement+;
 
-statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | castStmt | joinStmt | continueStmt | breakStmt) (NL+?|EOF);
+returnStmt: ws* KW_GIVE (ws KW_BACK)? ws expression (ws KW_BACK)? (NL+?|EOF);
 
+statement: ws* (ifStmt | inputStmt | outputStmt | assignmentStmt | roundingStmt | incrementStmt | decrementStmt | loopStmt | arrayStmt | stringStmt | castStmt | joinStmt | continueStmt | breakStmt ) (NL+?|EOF)?;
 
 expression: functionCall
           | lhe=expression ws op=(KW_MULTIPLY|KW_DIVIDE) ws rhe=expression extraExpressions?
@@ -44,7 +46,7 @@ functionCall: functionName=variable WS KW_TAKING WS argList;
 // the second set of entries here isn't just an expression, to try and force the shortest match, rather than the longest match
 argList: (expression) ((WS KW_AND|COMMA|WS AMPERSAND|WS APOSTROPHED_N) WS (literal|variable|constant|expression))*;
 
-functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statementList? ws* returnStmt (NL+?|EOF);
+functionDeclaration: functionName=variable WS KW_TAKES WS paramList NL statementList?;
 
 paramList: variable ((COMMA? WS* KW_AND WS | WS COMMA WS | WS AMPERSAND WS | WS APOSTROPHED_N WS) variable)*;
 
@@ -88,8 +90,6 @@ castStmt: KW_CAST ws expression (ws KW_INTO ws variable)? ws KW_WITH ws expressi
 ;
 
 joinStmt: KW_JOIN ws variable (ws KW_INTO ws variable)? (ws KW_WITH ws expression)?;
-
-returnStmt: KW_GIVE (ws KW_BACK)? ws expression (ws KW_BACK)?;
 
 continueStmt: KW_CONTINUE;
 

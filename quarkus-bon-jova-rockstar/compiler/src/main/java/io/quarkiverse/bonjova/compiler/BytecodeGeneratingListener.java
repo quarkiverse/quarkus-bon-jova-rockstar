@@ -391,7 +391,7 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     @Override
     public void exitFunctionDeclaration(Rockstar.FunctionDeclarationContext ctx) {
-        exitBlock();
+        // Do nothing, as the return statement handles exiting the block (the return is not part of the function declaration)
     }
 
     @Override
@@ -411,6 +411,12 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
         ResultHandle rh = e.getResultHandle(currentBlock);
 
         currentBlock.method().returnValue(rh);
+
+        // We could have repeated returns, so check we have a block before exiting
+        if (isSafeToExitBlock()) {
+            exitBlock();
+        }
+
     }
 
     @Override
@@ -428,9 +434,13 @@ public class BytecodeGeneratingListener extends RockstarBaseListener {
 
     @Override
     public void exitStatementList(Rockstar.StatementListContext ctx) {
-        if (blocks.size() > 1) {
+        if (isSafeToExitBlock()) {
             exitBlock();
         }
+    }
+
+    private boolean isSafeToExitBlock() {
+        return blocks.size() > 1;
     }
 
     private void exitBlock() {
