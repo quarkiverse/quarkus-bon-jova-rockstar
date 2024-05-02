@@ -5,14 +5,16 @@ import '@vaadin/grid';
 import '@vaadin/grid/vaadin-grid-sort-column.js';
 import '@vaadin/details';
 import 'echarts-gauge-grade';
-import 'qui-code-block';
+import '@quarkus-webcomponents/codeblock';
 import 'qui-ide-link';
 import 'qui-badge';
+import {observeState} from "./lit-state";
+import {themeState} from "./theme-state";
 
 /**
  * This component shows the Rockstar endpoints.
  */
-export class QwcBonJovaRockstarEndpoints extends LitElement {
+export class QwcBonJovaRockstarEndpoints extends observeState(LitElement) {
     static styles = css`
         .bonjova {
             height: 100%;
@@ -23,7 +25,7 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
             color: var(--lumo-primary-text-color);
             text-decoration: none;
         }
-        
+
         .cardGrid {
             display: flex;
             flex-wrap: wrap;
@@ -32,7 +34,7 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
             padding-left: 5px;
             padding-right: 10px;
         }
-        
+
         .detailCard {
             min-width: 400px;
         }
@@ -44,7 +46,7 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
             padding-right: 10px;
             min-height: 300px;
         }
-        
+
         .rockScoreChart {
             height: 300px;
         }
@@ -130,7 +132,7 @@ export class QwcBonJovaRockstarEndpoints extends LitElement {
                     <div slot="content">
                         <div class="codeBlock">
                             <qui-code-block mode="java"
-                                            content="${rockFile.contents}">
+                                            content="${rockFile.contents}" theme="${themeState.theme.name}">
                             </qui-code-block>
                         </div>
                     </div>

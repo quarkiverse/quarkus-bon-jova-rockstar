@@ -60,7 +60,7 @@ class RockstarCompilationProviderTest {
                 null,
                 null,
                 null,
-                null);
+                null, null, null, null);
     }
 
     @AfterAll
