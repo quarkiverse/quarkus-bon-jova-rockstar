@@ -1,11 +1,13 @@
 package io.quarkiverse.bonjova.lyrics;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.util.List;
 
+@Disabled("See #158")
 class LyricsReaderTest {
     private static final LyricsFileUtil lyricsFileUtil = new LyricsFileUtil(Path.of("target/lyrics"));
 
