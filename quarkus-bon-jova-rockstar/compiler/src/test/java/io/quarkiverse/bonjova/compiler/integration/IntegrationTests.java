@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class IntegrationTests {
     @ParameterizedTest(name = "{1}")
     @MethodSource("provideTestData")
-    void runningRockstarProgramShouldYieldExpectedOutput(String inputFile, String rockstarFile,
-            String expectedOutputFile) throws IOException, URISyntaxException {
+    void runningRockstarProgramShouldYieldExpectedOutput(String inputFile, String rockstarFile, String expectedOutputFile)
+            throws IOException, URISyntaxException {
         String output;
 
         if (inputFile != null) {

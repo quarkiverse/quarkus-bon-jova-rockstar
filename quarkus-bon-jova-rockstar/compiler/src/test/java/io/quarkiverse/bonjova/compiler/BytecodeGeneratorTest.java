@@ -1233,41 +1233,110 @@ public class BytecodeGeneratorTest {
             // Weirdly, the only way to get the first loop to behave as expected (a single shout) is to add a second loop ... and that second loop then doesn't behave as expected
             // Unlike shouldHandleConsecutiveLoops(), this test does also fail when run as an integration test
             String program = """
-                                            let i be 0
-                                            While i is lower than 5
-                                                build i up
+                     let i be 0
+                     While i is lower than 5
+                         build i up
 
-                                            shout "first"
+                     shout "first"
 
-                                           let thing be "should"
-                                            let j be 0
-                                            While j is lower than 5
-                                                build j up
+                    let thing be "should"
+                     let j be 0
+                     While j is lower than 5
+                         build j up
 
-                                            shout "second"
-                    """;
+                     shout "second"
+                             """;
             assertEquals("first\nsecond\n", compileAndLaunch(program));
         }
 
-        @Disabled("Reproducer for #154")
         @Test
         public void shouldCountReturnsAsTheEndOfALoop() {
             // This needs a newline before 'give the answer', which is not right
             String program = """
-                    Eddy wants your dedication               
+                    Eddy wants your dedication
                     Let the expectations be 6
                     Let the goal be 20
                     If the expectations are weaker than the goal
                     Let the answer be "hello",
-                    Else let the answer be "!"                                        
+                    Else let the answer be "!"
                     Give the answer
-                                         
+
                     Let peace be Eddy taking nothing
                     Shout peace
                                         """;
 
             assertEquals("hello\n", compileAndLaunch(program));
 
+        }
+
+        @Test
+        public void shouldCountReturnsAsTheEndOfAConditional() {
+            // In early implementations, this needed a newline before 'give the answer', which is not right
+            String program = """
+                    Eddy wants your dedication
+                    Let the expectations be 6
+                    Let the goal be 9
+                    While the expectations are weaker than the goal
+                    Build the expectations up
+                    Shout the expectations
+                    Let the answer be the expectations
+                    Give the answer
+
+                    Let peace be Eddy taking nothing
+                    Shout peace
+                    """;
+
+            // This doesn't actually work in Satriani, it returns an empty string unless there is a blank line before the return statement, but it seems plausible behaviour to me
+            assertEquals("7\n" +
+                    "8\n" +
+                    "9\n" +
+                    "9\n", compileAndLaunch(program));
+
+        }
+
+        // The spec is a bit vague on this, but Satriani tolerates it
+        @Test
+        public void shouldAllowReturnsMidFlow() {
+            // This needs a newline before 'give the answer', which is not right
+            String program = """
+                    Eddy wants your dedication
+                    Let the expectations be 6
+                    Let the goal be 20
+                    If the expectations are weaker than the goal
+                    Let the answer be "hello",
+                    Else let the answer be "!"
+                    Give the answer
+
+                    Let peace be Eddy taking nothing
+                    Shout peace
+                    Give peace
+                    Shout peace
+                    """;
+
+            assertEquals("hello\n", compileAndLaunch(program));
+
+        }
+
+        // The spec is a bit vague on this
+        @Test
+        public void shouldAllowMultipleReturnsFollowingTheEndOfAFunction() {
+            String program = """
+                    Eddy wants your dedication
+                    Let the expectations be 6
+                    Let the goal be 20
+                    If the expectations are weaker than the goal
+                    Let the answer be "hello",
+                    Else let the answer be "!"
+                    Give the answer
+                    Give the answer
+                    Give the answer
+
+                    Let peace be Eddy taking nothing
+                    Shout peace
+                    """;
+
+            // Note: Satriani also tolerates this code, but prints 'hello'. To me, multiple returns mean execution should end, so I'm going to count the existing behaviour as correct.
+            assertEquals("", compileAndLaunch(program));
         }
 
         @Test
@@ -2620,14 +2689,14 @@ public class BytecodeGeneratorTest {
             System.setOut(printStream);
 
             // We need to wrap the String[] in an Object[] because it's nested varargs
-            main.invoke(null, new Object[]{args});
+            main.invoke(null, new Object[] { args });
 
             assertEquals("", errorStream.toString(), "Unexpected error output during compilation");
 
             // Get the captured output as a string
             return outputStream.toString();
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException
-                 | IOException e) {
+                | IOException e) {
             throw new RuntimeException(e);
         } finally {
             // Restore the original System.out
