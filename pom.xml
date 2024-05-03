@@ -10,7 +10,7 @@
     <name>Bon Jova</name>
     <modules>
         <module>quarkus-bon-jova-rockstar</module>
-        <module>bon-jova-app</module>
+        <module>samples</module>
     </modules>
 
     <scm>
@@ -23,7 +23,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-   
+
     <build>
         <plugins>
             <plugin>
