@@ -13,12 +13,13 @@ figure it out. Use
 
 ```shell
 
-mvn dependency:build-classpath
+mvn dependency:build-classpath -DincludeScope=compile
  ```
 
 to get the classpath of the implementation, then put it on a java classpath with `target/classes` of the Bon Jova
-compiler project.
+compiler project (use an absolute path).
 
+Make to a scratch directory, say `~/devoxx`. Open it in your IDE, for example `idea devoxx`.
 Use vi to make a `hello.rock` file in `~`
 
 Enter the following
@@ -38,7 +39,7 @@ Point out that a class file has been created, and launch it with java:
 
 ```shell
 ls -l ~/*class
-java -cp ~ hello
+java -cp . hello
 ```
 
 Repeat this process for concept-demo 1 through 6. Sing the code 🎵.
