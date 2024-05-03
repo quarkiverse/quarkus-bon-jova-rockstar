@@ -8,8 +8,8 @@ import 'echarts-gauge-grade';
 import '@quarkus-webcomponents/codeblock';
 import 'qui-ide-link';
 import 'qui-badge';
-import {observeState} from "./lit-state";
-import {themeState} from "./theme-state";
+import {observeState} from "lit-element-state";
+import {themeState} from "theme-state";
 
 /**
  * This component shows the Rockstar endpoints.
@@ -28,8 +28,7 @@ export class QwcBonJovaRockstarEndpoints extends observeState(LitElement) {
 
         .cardGrid {
             display: flex;
-            flex-wrap: wrap;
-            align-items: stretch;
+            justify-content: space-between;
             gap: 20px;
             padding-left: 5px;
             padding-right: 10px;
@@ -128,7 +127,8 @@ export class QwcBonJovaRockstarEndpoints extends observeState(LitElement) {
         let level = this._getLevel(rockFile.rockScore);
         return html`
             <div class="cardGrid">
-                <qui-card class="detailCard" title="Program Contents">
+                <qui-card class="detailCard" title="Program Contents"
+                          style="width:100%">
                     <div slot="content">
                         <div class="codeBlock">
                             <qui-code-block mode="java"
