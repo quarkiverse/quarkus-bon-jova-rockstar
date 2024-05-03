@@ -33,6 +33,8 @@ cd bon-jova-app
 mvn quarkus:dev
 ```
 
+(To test out your local extension changes, make sure to change the extension version in the app pom to `-SNAPSHOT`.)
+
 ### IDE integration
 
 After cloning the repo, you will need to run `mvn compile` in the `bon-jova-rockstar-compiler` folder to generate the
