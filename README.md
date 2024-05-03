@@ -29,7 +29,7 @@ This will build the Rockstar parser, the Quarkus extension, and the sample app.
 You can then run the sample app with
 
 ```
-cd bon-jova-app
+cd samples
 mvn quarkus:dev
 ```
 
