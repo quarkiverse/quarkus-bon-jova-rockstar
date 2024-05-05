@@ -4,6 +4,10 @@ See also the [slide-free-intro.md](slide-free-intro.md).
 
 🎵 indicates things which should be sung.
 
+### Enable Dictation
+
+First, [enable Dictation](https://support.apple.com/en-gb/guide/mac-help/mh40584/mac) on your MacBook.
+
 ### Creating the first .rock file and compiling it
 
 #### Work out the classpath
@@ -22,7 +26,10 @@ compiler project (use an absolute path).
 Make to a scratch directory, say `~/devoxx`. Open it in your IDE, for example `idea devoxx`.
 Use vi to make a `hello.rock` file in `~`
 
-Enter the following
+Enter the following, or use the Dictation feature by pressing the F5/🎙️key. 
+
+> A microphone overlay will appear while Dictation is active.
+> Press the same key again to stop dictation.
 
 ```shell
 Christine says hello world
