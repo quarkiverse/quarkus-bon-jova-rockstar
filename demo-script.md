@@ -26,7 +26,7 @@ compiler project (use an absolute path).
 Make to a scratch directory, say `~/devoxx`. Open it in your IDE, for example `idea devoxx`.
 Use vi to make a `hello.rock` file in `~`
 
-Enter the following, or use the Dictation feature by pressing the F5/🎙️key. 
+Enter the following, or use the Dictation feature by pressing the F5/🎙️key.
 
 > A microphone overlay will appear while Dictation is active.
 > Press the same key again to stop dictation.
@@ -50,6 +50,7 @@ java -cp . hello
 ```
 
 Repeat this process for concept-demo 1 through 6. Sing the code 🎵.
+You may wish to jump ahead to the Quarkus extension and live code some of the concepts.
 
 For the beach one, ask people to guess the output. Explain the syntax concepts involved in the code.
 
