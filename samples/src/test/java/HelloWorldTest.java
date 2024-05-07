@@ -8,7 +8,7 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 class HelloWorldTest {
@@ -21,20 +21,19 @@ class HelloWorldTest {
     }
 
     @Test
-    void helloWorldDotRockShouldOutputHelloWorld() throws ClassNotFoundException, InvocationTargetException, IllegalAccessException,
+    void shouldOutputHelloWorld() throws ClassNotFoundException, InvocationTargetException, IllegalAccessException,
             NoSuchMethodException {
 
         // Find the class using reflection, since the test will not have it at compile-time
-        Class clazz = this.getClass()
+        Class<?> clazz = this.getClass()
                 .getClassLoader()
                 .loadClass("hello_world");
 
         Method meth = clazz.getMethod("main", String[].class);
         meth.invoke(null, (Object) null);
 
-        String output = testOut.toString();
-        assertTrue(output
-                .contains("Hello World"), "Output was: " + output);
+        String output = testOut.toString().trim();
+        assertEquals("Hello World", output, "\uD83C\uDFB8");
     }
 
     @AfterEach

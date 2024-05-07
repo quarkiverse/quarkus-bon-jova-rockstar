@@ -63,6 +63,16 @@ idea .
 
 ### TDD with Quarkus
 
+Add a source directory, so that Quarkus can monitor our rockstar files. Normally, this wouldn't be necessary to do it
+manually, but maven does not know about rockstar. In the pom, in the `<build>` section, add
+
+```xml
+
+<sourceDirectory>src/main/rockstar</sourceDirectory>
+```
+
+(A `sourcedir` live template can help.)
+
 In the idea terminal, bring up a terminal and run
 
 ```sh
@@ -77,6 +87,8 @@ The test should fail.
 Create a directory `src/main/rockstar` and then create a file called hello.rock.
 
 Add in the hello world, `Say "hello world"`, the test should pass.
+(If live reload doesn't work, check you added the `<sourceDirectory>` in the pom.)
+
 Refactor to `Christine says hello world\nSay Christine`. The test should continue passing.
 
 ### Dev UI, and exposing via the web
