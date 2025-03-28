@@ -15,7 +15,7 @@ class RockScoreCalculatorTest {
         var expectedRockScore = 100;
 
         // We see some volatility in this test, since it depends on an external service, so allow a fudge factor
-        var tolerance = 3.2;
+        var tolerance = 4.2;
 
         var rockScoreCalculator = new RockScoreCalculator();
         var actualRockScore = rockScoreCalculator.calculateRockScore(
