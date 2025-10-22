@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.quarkiverse.bonjova</groupId>
         <artifactId>quarkus-bon-jova-rockstar-parent</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
+        <version>0.9.0</version>
     </parent>
     <artifactId>quarkus-bon-jova-integration-tests</artifactId>
     <name>Bon Jova Extension - Integration Tests</name>
