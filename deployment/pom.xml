@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.quarkiverse.bonjova</groupId>
         <artifactId>quarkus-bon-jova-rockstar-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>quarkus-bon-jova-deployment</artifactId>
     <name>Bon Jova Quarkus Extension - Deployment</name>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>io.quarkiverse.bonjova</groupId>
             <artifactId>bon-jova-rockstar-compiler</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
