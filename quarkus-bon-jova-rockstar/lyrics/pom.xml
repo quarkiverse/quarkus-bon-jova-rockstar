@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.github.jagrosh</groupId>
             <artifactId>JLyrics</artifactId>
-            <version>13f2d55bf6</version>
+            <version>8c2b920b35</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>

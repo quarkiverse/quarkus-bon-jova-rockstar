@@ -39,11 +39,16 @@
             <artifactId>quarkus-resteasy-reactive-deployment</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkiverse.bonjova</groupId>
-            <artifactId>quarkus-bon-jova-lyrics</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.quarkiverse.bonjova</groupId>-->
+<!--            <artifactId>quarkus-bon-jova-lyrics</artifactId>-->
+<!--            <version>0.8.0-SNAPSHOT</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

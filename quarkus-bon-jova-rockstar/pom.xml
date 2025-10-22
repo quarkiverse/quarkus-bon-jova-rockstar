@@ -23,7 +23,8 @@
 
     <modules>
         <module>compiler</module>
-        <module>lyrics</module>
+        <!-- Disabled because it cannot be downloaded from jitpack -->
+<!--        <module>lyrics</module>-->
         <module>deployment</module>
         <module>runtime</module>
         <module>integration-tests</module>
