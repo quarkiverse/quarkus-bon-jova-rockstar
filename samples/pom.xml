@@ -9,6 +9,7 @@
     <groupId>io.quarkiverse.bonjova</groupId>
     <artifactId>bon-jova-app</artifactId>
     <version>1.1.0-SNAPSHOT</version>
+    <name>Sample Application showing how to use the Bon Jova Quarkus Extension</name>
     <properties>
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
         <maven.compiler.release>21</maven.compiler.release>
